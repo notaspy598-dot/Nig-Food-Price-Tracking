@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nigeria Food Price Forecast 2025–2026 | AI Insights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --blue-900: #1E3A8A;
+    --blue-800: #1E40AF;
+    --blue-600: #2563EB;
+    --blue-400: #60A5FA;
+    --blue-100: #DBEAFE;
+    --blue-50: #EFF6FF;
+    --amber-500: #F59E0B;
+    --amber-400: #FBBF24;
+    --amber-100: #FEF3C7;
+    --slate-900: #0F172A;
+    --slate-700: #334155;
+    --slate-500: #64748B;
+    --slate-300: #CBD5E1;
+    --slate-100: #F1F5F9;
+    --bg: #F8FAFC;
+    --white: #FFFFFF;
+    --green-500: #22C55E;
+    --green-100: #DCFCE7;
+    --red-500: #EF4444;
+    --red-100: #FEE2E2;
+    --orange-500: #F97316;
+    --purple-500: #A855F7;
+    --teal-500: #14B8A6;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Fira Sans', sans-serif;
+    font-weight: 400;
+    background: var(--bg);
+    color: var(--slate-700);
+    line-height: 1.7;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .mono {
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── Progress bar ── */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--blue-800), var(--amber-500));
+    z-index: 9999;
+    transition: width 0.1s ease;
+  }
+
+  /* ── Sticky nav ── */
+  nav {
+    position: fixed;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--slate-300);
+    border-radius: 40px;
+    padding: 10px 28px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    z-index: 1000;
+    box-shadow: 0 4px 24px rgba(30,64,175,0.10);
+  }
+
+  .nav-brand {
+    font-family: 'Fira Code', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--blue-800);
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-500);
+    text-decoration: none;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+
+  .nav-links a:hover { color: var(--blue-800); }
+
+  /* ── Container ── */
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── Sections ── */
+  section {
+    padding: 80px 0;
+  }
+
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-100);
+    color: var(--blue-800);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Fira Code', monospace;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 700;
+    color: var(--blue-900);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .section-lead {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--slate-500);
+    max-width: 620px;
+    margin-bottom: 48px;
+  }
+
+  /* ── Hero ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #1E40AF 100%);
+    position: relative;
+    overflow: hidden;
+    padding-top: 100px;
+  }
+
+  #hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(59,130,246,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 10% 80%, rgba(245,158,11,0.12) 0%, transparent 50%);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    color: var(--amber-400);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  .hero-title {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  .hero-title .accent { color: var(--amber-400); }
+
+  .hero-desc {
+    font-size: 17px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.7;
+    margin-bottom: 36px;
+    max-width: 480px;
+  }
+
+  .hero-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 40px;
+  }
+
+  .hero-stat {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .hero-stat-number {
+    font-family: 'Fira Code', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--amber-400);
+    line-height: 1;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .hero-stat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Hero panel */
+  .hero-panel {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px;
+    padding: 32px;
+    backdrop-filter: blur(8px);
+  }
+
+  .panel-title {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--amber-400);
+    margin-bottom: 20px;
+  }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .price-row:last-child { border-bottom: none; }
+
+  .price-row-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .price-row-change {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+
+  .up { background: rgba(239,68,68,0.18); color: #FCA5A5; }
+  .up-mild { background: rgba(249,115,22,0.18); color: #FED7AA; }
+  .stable { background: rgba(34,197,94,0.15); color: #86EFAC; }
+
+  /* ── Why it matters ── */
+  #why {
+    background: var(--white);
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .why-card {
+    background: var(--bg);
+    border: 1px solid var(--slate-300);
+    border-radius: 16px;
+    padding: 28px;
+    transition: box-shadow 0.25s, border-color 0.25s, transform 0.25s;
+    cursor: default;
+  }
+
+  .why-card:hover {
+    box-shadow: 0 8px 32px rgba(30,64,175,0.10);
+    border-color: var(--blue-400);
+    transform: translateY(-3px);
+  }
+
+  .why-icon {
+    width: 44px; height: 44px;
+    background: var(--blue-100);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .why-icon svg { width: 22px; height: 22px; color: var(--blue-800); }
+
+  .why-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--blue-900);
+    margin-bottom: 8px;
+  }
+
+  .why-card p {
+    font-size: 14px;
+    color: var(--slate-500);
+    line-height: 1.65;
+  }
+
+  /* ── Models ── */
+  #models {
+    background: linear-gradient(180deg, var(--bg) 0%, var(--blue-50) 100%);
+  }
+
+  .models-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 48px;
+  }
+
+  .model-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 36px;
+    border: 1px solid var(--slate-300);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .model-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+
+  .model-prophet::before { background: linear-gradient(90deg, var(--blue-800), var(--blue-400)); }
+  .model-lgb::before { background: linear-gradient(90deg, var(--amber-500), #F97316); }
+
+  .model-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Fira Code', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+
+  .badge-prophet { background: var(--blue-100); color: var(--blue-800); }
+  .badge-lgb { background: var(--amber-100); color: #92400E; }
+
+  .model-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 6px;
+  }
+
+  .model-subtitle {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-500);
+    margin-bottom: 20px;
+  }
+
+  .model-analogy {
+    background: var(--slate-100);
+    border-left: 3px solid var(--blue-800);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--slate-700);
+    line-height: 1.6;
+  }
+
+  .model-analogy.amber-border { border-left-color: var(--amber-500); }
+
+  .model-desc {
+    font-size: 14px;
+    color: var(--slate-500);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .model-traits {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .model-trait {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--slate-700);
+  }
+
+  .trait-icon {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px;
+  }
+
+  .trait-pro { background: var(--green-100); }
+  .trait-con { background: var(--red-100); }
+  .trait-pro svg { color: var(--green-500); }
+  .trait-con svg { color: var(--red-500); }
+
+  /* ── Accuracy ── */
+  #accuracy {
+    background: var(--white);
+  }
+
+  .accuracy-callout {
+    background: linear-gradient(135deg, var(--blue-800) 0%, #2563EB 100%);
+    border-radius: 20px;
+    padding: 36px 40px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 48px;
+    color: white;
+  }
+
+  .callout-big {
+    font-family: 'Fira Code', monospace;
+    font-size: 64px;
+    font-weight: 700;
+    color: var(--amber-400);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .callout-text h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .callout-text p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.65;
+  }
+
+  .accuracy-table-wrap {
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--slate-300);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead {
+    background: var(--slate-100);
+  }
+
+  th {
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--slate-500);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 13px 16px;
+    border-top: 1px solid var(--slate-100);
+    color: var(--slate-700);
+  }
+
+  tr:hover td { background: var(--blue-50); }
+
+  .mape-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mape-bar {
+    height: 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    transition: width 0.4s ease;
+  }
+
+  .bar-prophet { background: var(--blue-600); }
+  .bar-lgb { background: var(--amber-500); }
+
+  .winner-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Fira Code', monospace;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--green-100);
+    color: #166534;
+  }
+
+  /* ── Charts ── */
+  #forecasts {
+    background: linear-gradient(180deg, var(--bg) 0%, #EFF6FF 100%);
+  }
+
+  .chart-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .chart-tab {
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--slate-300);
+    background: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-500);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Fira Code', monospace;
+  }
+
+  .chart-tab:hover { border-color: var(--blue-600); color: var(--blue-800); }
+  .chart-tab.active {
+    background: var(--blue-800);
+    border-color: var(--blue-800);
+    color: white;
+  }
+
+  .chart-container {
+    background: var(--white);
+    border: 1px solid var(--slate-300);
+    border-radius: 20px;
+    padding: 32px;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .chart-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--blue-900);
+    margin-bottom: 4px;
+  }
+
+  .chart-desc {
+    font-size: 13px;
+    color: var(--slate-500);
+    max-width: 480px;
+  }
+
+  .legend-row {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate-700);
+  }
+
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-line {
+    width: 24px; height: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .legend-band {
+    width: 24px; height: 12px;
+    border-radius: 3px;
+    opacity: 0.35;
+    flex-shrink: 0;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    height: 320px;
+  }
+
+  .chart-panel { display: none; }
+  .chart-panel.active { display: block; }
+
+  /* Legend explainer */
+  .legend-explainer {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: var(--blue-50);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--slate-600);
+    line-height: 1.65;
+  }
+
+  /* ── Top items ── */
+  #watchlist {
+    background: var(--white);
+  }
+
+  .watchlist-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 48px;
+  }
+
+  .watch-card {
+    background: var(--bg);
+    border: 1px solid var(--slate-300);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: all 0.25s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .watch-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red-500), var(--orange-500));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .watch-card:hover {
+    box-shadow: 0 8px 24px rgba(239,68,68,0.12);
+    border-color: #FCA5A5;
+    transform: translateY(-3px);
+  }
+
+  .watch-card:hover::after { opacity: 1; }
+
+  .watch-rank {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--slate-500);
+    margin-bottom: 12px;
+  }
+
+  .watch-icon {
+    width: 48px; height: 48px;
+    background: var(--red-100);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+  }
+
+  .watch-icon svg { color: var(--red-500); width: 24px; height: 24px; }
+
+  .watch-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .watch-pct {
+    font-family: 'Fira Code', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--red-500);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .watch-label {
+    font-size: 11px;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Seasonal calendar ── */
+  #seasonal {
+    background: linear-gradient(180deg, var(--bg) 0%, #F0FDF4 100%);
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: 200px repeat(12, 1fr);
+    gap: 2px;
+    background: var(--slate-300);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 48px;
+    font-size: 12px;
+  }
+
+  .cal-header {
+    background: var(--blue-900);
+    color: white;
+    padding: 10px 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+
+  .cal-header-item {
+    background: var(--blue-900);
+    color: white;
+    padding: 10px 14px;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .cal-cell {
+    background: var(--white);
+    padding: 8px 4px;
+    text-align: center;
+    transition: filter 0.15s;
+    position: relative;
+  }
+
+  .cal-item {
+    background: var(--white);
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-700);
+    white-space: nowrap;
+  }
+
+  .cal-lowest {
+    background: #DCFCE7;
+  }
+
+  .cal-mid {
+    background: #FEF3C7;
+  }
+
+  .cal-peak {
+    background: #FEE2E2;
+  }
+
+  .cal-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .cal-legend {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--slate-600);
+  }
+
+  .cal-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cal-swatch {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── Action plan ── */
+  #action {
+    background: var(--white);
+  }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .action-card {
+    border-radius: 16px;
+    padding: 28px;
+    border: 1px solid transparent;
+    transition: all 0.25s;
+    cursor: default;
+  }
+
+  .action-household {
+    background: var(--blue-50);
+    border-color: var(--blue-100);
+  }
+
+  .action-business {
+    background: var(--amber-100);
+    border-color: #FDE68A;
+  }
+
+  .action-policy {
+    background: var(--green-100);
+    border-color: #BBF7D0;
+  }
+
+  .action-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+
+  .action-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Fira Code', monospace;
+    margin-bottom: 12px;
+  }
+
+  .tag-household { color: var(--blue-800); }
+  .tag-business { color: #92400E; }
+  .tag-policy { color: #166534; }
+
+  .action-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 16px;
+  }
+
+  .action-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--slate-700);
+    line-height: 1.5;
+  }
+
+  .action-bullet {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+
+  .bullet-blue { background: var(--blue-800); color: white; }
+  .bullet-amber { background: var(--amber-500); color: white; }
+  .bullet-green { background: var(--green-500); color: white; }
+
+  /* ── Methodology note ── */
+  #methodology {
+    background: var(--slate-900);
+    color: white;
+  }
+
+  .method-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .method-left p {
+    color: rgba(255,255,255,0.65);
+    font-size: 15px;
+    line-height: 1.75;
+    margin-bottom: 16px;
+  }
+
+  .method-code {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 20px;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .code-key { color: var(--blue-400); }
+  .code-val { color: var(--amber-400); }
+  .code-comment { color: rgba(255,255,255,0.35); }
+
+  /* ── Footer ── */
+  footer {
+    background: var(--slate-900);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 32px 0;
+    text-align: center;
+  }
+
+  footer p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── Utility ── */
+  .divider {
+    width: 48px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue-800), var(--blue-400));
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  .text-amber { color: var(--amber-500); }
+  .text-blue { color: var(--blue-800); }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .watchlist-grid { grid-template-columns: repeat(3, 1fr); }
+    nav { display: none; }
+  }
+
+  @media (max-width: 768px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-panel { display: none; }
+    .models-grid { grid-template-columns: 1fr; }
+    .why-grid { grid-template-columns: 1fr; }
+    .action-grid { grid-template-columns: 1fr; }
+    .method-grid { grid-template-columns: 1fr; }
+    .accuracy-callout { flex-direction: column; gap: 16px; }
+    .callout-big { font-size: 48px; }
+    .hero-stat-row { grid-template-columns: repeat(3, 1fr); }
+    .watchlist-grid { grid-template-columns: repeat(2, 1fr); }
+    section { padding: 56px 0; }
+    .calendar-grid { font-size: 10px; grid-template-columns: 120px repeat(12, 1fr); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in { opacity: 1; transform: none; transition: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav>
+  <span class="nav-brand">NFPT · Forecast 2025–26</span>
+  <ul class="nav-links">
+    <li><a href="#why">Context</a></li>
+    <li><a href="#models">The Models</a></li>
+    <li><a href="#accuracy">Accuracy</a></li>
+    <li><a href="#forecasts">Forecasts</a></li>
+    <li><a href="#watchlist">Watch List</a></li>
+    <li><a href="#seasonal">Seasons</a></li>
+    <li><a href="#action">Action Plan</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <!-- Left text -->
+      <div>
+        <div class="hero-eyebrow">
+          <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+          Nigeria Food Price Tracker — AI Report
+        </div>
+        <h1 class="hero-title">
+          What Will Your<br/>
+          Food Bill Look Like<br/>
+          in <span class="accent">2026</span>?
+        </h1>
+        <p class="hero-desc">
+          We tracked prices of 44 food items across Nigeria's 36 states for 10 years — then asked two AI models to forecast what comes next. Here is what the data reveals, explained without jargon.
+        </p>
+
+        <div class="hero-stat-row">
+          <div class="hero-stat">
+            <span class="hero-stat-number" data-target="44" data-suffix="">0</span>
+            <span class="hero-stat-label">Food Items<br/>Tracked</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-number" data-target="10" data-suffix=" yrs">0</span>
+            <span class="hero-stat-label">Years of<br/>Price Data</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-number" data-target="2" data-suffix=" AI">0</span>
+            <span class="hero-stat-label">Forecast<br/>Models</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right panel -->
+      <div class="hero-panel">
+        <div class="panel-title">// LGB Forecast — Biggest Price Rises by Dec 2026</div>
+        <div class="price-row">
+          <span class="price-row-name">Agric Eggs (per crate)</span>
+          <span class="price-row-change up">+127%</span>
+        </div>
+        <div class="price-row">
+          <span class="price-row-name">Beans Brown (per kg)</span>
+          <span class="price-row-change up">+99%</span>
+        </div>
+        <div class="price-row">
+          <span class="price-row-name">Imported Rice (per cup)</span>
+          <span class="price-row-change up">+90%</span>
+        </div>
+        <div class="price-row">
+          <span class="price-row-name">Dried Fish Sardine</span>
+          <span class="price-row-change up">+83%</span>
+        </div>
+        <div class="price-row">
+          <span class="price-row-name">Catfish (Obokun) Fresh</span>
+          <span class="price-row-change up-mild">+73%</span>
+        </div>
+        <div class="price-row">
+          <span class="price-row-name">Catfish Smoked</span>
+          <span class="price-row-change up-mild">+70%</span>
+        </div>
+        <div class="price-row">
+          <span class="price-row-name">Palm Oil (1 bottle)</span>
+          <span class="price-row-change up-mild">+55%</span>
+        </div>
+        <div class="price-row">
+          <span class="price-row-name">Plantain (ripe)</span>
+          <span class="price-row-change stable">+12%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ WHY IT MATTERS ═══════════════ -->
+<section id="why">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-tag">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01"/><circle cx="12" cy="12" r="10"/></svg>
+        Why This Report
+      </span>
+      <div class="divider"></div>
+      <h2 class="section-title">Food Prices Are Rising — But Not Equally</h2>
+      <p class="section-lead">
+        Over the past decade, prices for staple foods in Nigeria have risen between <strong>153% and 746%</strong>. Understanding where prices are heading helps families, traders, and policymakers make smarter decisions.
+      </p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card fade-in">
+        <div class="why-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>For Households</h3>
+        <p>Know which foods will surge so you can stock up in cheaper months (typically January). A ₦5,000 saving per week adds up to ₦260,000 a year — enough to pay school fees.</p>
+      </div>
+      <div class="why-card fade-in">
+        <div class="why-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>For Traders &amp; Businesses</h3>
+        <p>Spot seasonal buy-low windows and price spikes before they happen. Importing rice or sourcing beans at the right time can mean the difference between profit and loss.</p>
+      </div>
+      <div class="why-card fade-in">
+        <div class="why-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>For Policymakers</h3>
+        <p>Identify which food corridors are most volatile and which states suffer most. Targeted buffer stock programmes and subsidy timing can be evidence-driven rather than reactive.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ THE MODELS ═══════════════ -->
+<section id="models">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-tag">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Meet the AI Models
+      </span>
+      <div class="divider"></div>
+      <h2 class="section-title">Two Different Brains,<br/>One Question: What Comes Next?</h2>
+      <p class="section-lead">
+        We used two well-tested forecasting methods. Each has its own style of "thinking". Understanding the difference helps you trust — or question — the numbers.
+      </p>
+    </div>
+
+    <div class="models-grid">
+      <!-- Prophet -->
+      <div class="model-card model-prophet fade-in">
+        <div class="model-badge badge-prophet">Model 01 · Meta</div>
+        <h3 class="model-title">Prophet</h3>
+        <p class="model-subtitle">The Calendar-Aware Analyst</p>
+        <div class="model-analogy">
+          "Think of Prophet as a highly experienced market analyst who has worked for 10 years and learned every seasonal pattern. He knows that beans always spike in October because of demand before the dry season, and that prices dip in January after the harvest. He reads long-term trends and seasonal rhythms with calm confidence."
+        </div>
+        <p class="model-desc">
+          Prophet is a statistical model developed by Meta (Facebook). It <strong>decomposes</strong> price history into three layers: the <em>long-term trend</em> (are prices generally rising?), <em>yearly seasonality</em> (how do months compare to each other?), and <em>special events</em>. It then projects these patterns forward in time.
+        </p>
+        <ul class="model-traits">
+          <li class="model-trait">
+            <div class="trait-icon trait-pro">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Excellent at capturing seasonal cycles (e.g., harvest rhythms)</span>
+          </li>
+          <li class="model-trait">
+            <div class="trait-icon trait-pro">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Provides confidence bands — a range of where the price might land</span>
+          </li>
+          <li class="model-trait">
+            <div class="trait-icon trait-pro">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Easy to interpret and explain to non-technical audiences</span>
+          </li>
+          <li class="model-trait">
+            <div class="trait-icon trait-con">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Struggles when markets behave unpredictably — average error of <strong>24.9%</strong></span>
+          </li>
+          <li class="model-trait">
+            <div class="trait-icon trait-con">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Does not learn from fine-grained price signals across different items</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- LightGBM -->
+      <div class="model-card model-lgb fade-in">
+        <div class="model-badge badge-lgb">Model 02 · Microsoft</div>
+        <h3 class="model-title">LightGBM</h3>
+        <p class="model-subtitle">The Pattern-Recognition Machine</p>
+        <div class="model-analogy amber-border">
+          "Think of LightGBM as a highly precise data detective. It doesn't rely on calendar intuition. Instead, it reads thousands of tiny clues — the month, last month's price, the 3-month trend, whether it's dry season — and finds the hidden combinations that predict tomorrow's price. It's less of a storyteller, more of a calculator."
+        </div>
+        <p class="model-desc">
+          LightGBM is a <strong>gradient-boosted decision tree</strong> model made by Microsoft. It learns by making thousands of small predictions and correcting its own mistakes step by step. It treats forecasting like a puzzle, piecing together dozens of input signals — called <em>features</em> — to arrive at a price estimate.
+        </p>
+        <ul class="model-traits">
+          <li class="model-trait">
+            <div class="trait-icon trait-pro">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Best-in-class accuracy — average error of only <strong>7.6%</strong></span>
+          </li>
+          <li class="model-trait">
+            <div class="trait-icon trait-pro">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Learns from complex, non-linear relationships in the data</span>
+          </li>
+          <li class="model-trait">
+            <div class="trait-icon trait-pro">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Adapts faster to recent price shocks and market events</span>
+          </li>
+          <li class="model-trait">
+            <div class="trait-icon trait-con">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Does not produce a built-in confidence band (less transparent uncertainty)</span>
+          </li>
+          <li class="model-trait">
+            <div class="trait-icon trait-con">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Needs more data engineering; less intuitive to explain step-by-step</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Visual comparison strip -->
+    <div style="margin-top:40px; background:var(--white); border:1px solid var(--slate-300); border-radius:20px; padding:32px; display:grid; grid-template-columns:1fr auto 1fr; gap:32px; align-items:center;" class="fade-in">
+      <div style="text-align:center;">
+        <div style="font-family:'Fira Code',monospace;font-size:13px;font-weight:700;color:var(--blue-800);margin-bottom:12px;letter-spacing:0.5px;">PROPHET STRENGTHS</div>
+        <div style="font-size:14px;color:var(--slate-600);line-height:1.7;">
+          Seasonal storytelling<br/>
+          Trend explanation<br/>
+          Uncertainty bands<br/>
+          Transparent logic
+        </div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <div style="width:56px;height:56px;background:linear-gradient(135deg,var(--blue-800),var(--amber-500));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+          <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M8 9l4-4 4 4m0 6l-4 4-4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="font-family:'Fira Code',monospace;font-size:12px;font-weight:700;color:var(--slate-500);letter-spacing:0.5px;">VS</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'Fira Code',monospace;font-size:13px;font-weight:700;color:#92400E;margin-bottom:12px;letter-spacing:0.5px;">LIGHTGBM STRENGTHS</div>
+        <div style="font-size:14px;color:var(--slate-600);line-height:1.7;">
+          Higher accuracy (3× better)<br/>
+          Captures sudden shifts<br/>
+          Multi-signal learning<br/>
+          Robust on volatile items
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ACCURACY FACE-OFF ═══════════════ -->
+<section id="accuracy">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-tag">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Accuracy Face-Off
+      </span>
+      <div class="divider"></div>
+      <h2 class="section-title">Which Model was Right More Often?</h2>
+      <p class="section-lead">
+        We tested both models against 12 months of real price data they had never seen. Lower error = closer to the actual price. Think of it as a prediction contest judged on past performance.
+      </p>
+    </div>
+
+    <div class="accuracy-callout fade-in">
+      <div class="callout-big">3.3×</div>
+      <div class="callout-text">
+        <h3>LightGBM is 3.3× More Accurate Than Prophet</h3>
+        <p>
+          Across all 44 food items, Prophet's average prediction error was <strong>24.9%</strong> — meaning if rice costs ₦1,000, its forecast could be off by ₦249. LightGBM's average error was just <strong>7.6%</strong> — off by only ₦76 on the same item. That's the difference between a useful forecast and an unreliable one.
+        </p>
+      </div>
+    </div>
+
+    <div class="accuracy-table-wrap fade-in">
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:200px;">Food Item</th>
+            <th>Prophet Error</th>
+            <th style="min-width:160px;">Prophet Accuracy Bar</th>
+            <th>LGB Error</th>
+            <th style="min-width:160px;">LGB Accuracy Bar</th>
+            <th>Winner</th>
+          </tr>
+        </thead>
+        <tbody id="accuracy-table-body">
+          <!-- Injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:24px; padding:16px 20px; background:var(--blue-50); border-radius:12px; font-size:13px; color:var(--slate-600); line-height:1.7;" class="fade-in">
+      <strong>How to read this table:</strong> MAPE (Mean Absolute Percentage Error) tells you how far off the forecast was, expressed as a percentage of the actual price. A MAPE of 5% means the model was off by 5% on average. Lower is better. Bars are scaled relative to the worst performer (35.7%).
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PRICE FORECASTS ═══════════════ -->
+<section id="forecasts">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-tag">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Price Forecasts 2025–2026
+      </span>
+      <div class="divider"></div>
+      <h2 class="section-title">Where Are Prices Headed?</h2>
+      <p class="section-lead">
+        Interactive charts comparing both model forecasts side by side. The shaded band shows Prophet's 80% confidence range — where the true price is likely to fall.
+      </p>
+    </div>
+
+    <!-- Tab selector -->
+    <div class="chart-tabs fade-in">
+      <button class="chart-tab active" onclick="switchChart('yam')">Yam Tuber</button>
+      <button class="chart-tab" onclick="switchChart('rice')">Rice (Medium)</button>
+      <button class="chart-tab" onclick="switchChart('tomato')">Tomato</button>
+      <button class="chart-tab" onclick="switchChart('groundnut')">Groundnut Oil</button>
+    </div>
+
+    <div class="chart-container fade-in">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title" id="chart-main-title">Yam Tuber — Price Forecast</h3>
+          <p class="chart-desc" id="chart-main-desc">Monthly price forecasts from July 2025 through December 2026. Both models agree on yam's general upward drift into 2026.</p>
+        </div>
+        <div class="legend-row">
+          <div class="legend-item">
+            <div class="legend-line" style="background:#1E40AF;"></div>
+            <span>Prophet Forecast</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-line" style="background:#F59E0B;border:2px dashed #F59E0B;background:none;flex-shrink:0;width:24px;height:0;border-bottom:3px dashed #F59E0B;"></div>
+            <span>LightGBM Forecast</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-band" style="background:#1E40AF;"></div>
+            <span>80% Confidence Band</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart panels -->
+      <div id="panel-yam" class="chart-panel active">
+        <div class="canvas-wrap"><canvas id="chart-yam"></canvas></div>
+      </div>
+      <div id="panel-rice" class="chart-panel">
+        <div class="canvas-wrap"><canvas id="chart-rice"></canvas></div>
+      </div>
+      <div id="panel-tomato" class="chart-panel">
+        <div class="canvas-wrap"><canvas id="chart-tomato"></canvas></div>
+      </div>
+      <div id="panel-groundnut" class="chart-panel">
+        <div class="canvas-wrap"><canvas id="chart-groundnut"></canvas></div>
+      </div>
+
+      <div class="legend-explainer">
+        <strong>How to read this chart:</strong> The solid blue line shows what Prophet predicts. The dashed amber line shows LightGBM's prediction. The light blue shaded area is Prophet's "uncertainty band" — the actual price has an 80% chance of being somewhere inside that range. When both lines move in the same direction, confidence is high. When they diverge, it signals model disagreement and higher uncertainty.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ WATCH LIST ═══════════════ -->
+<section id="watchlist">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-tag">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Prices to Watch
+      </span>
+      <div class="divider"></div>
+      <h2 class="section-title">Top 5 Foods Forecasted to Rise Most<br/>by December 2026</h2>
+      <p class="section-lead">Based on LightGBM projections from January 2025 to December 2026 — these items show the steepest expected price increases.</p>
+    </div>
+
+    <div class="watchlist-grid">
+      <div class="watch-card fade-in">
+        <div class="watch-rank"># 1 Highest Rise</div>
+        <div class="watch-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 13a7 7 0 0114 0 7 7 0 01-14 0zm7 3v2m0-11v2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="13" r="2"/></svg>
+        </div>
+        <div class="watch-name">Agric Eggs (crate)</div>
+        <div class="watch-pct">+127%</div>
+        <div class="watch-label">₦1,875 → ₦4,258</div>
+      </div>
+      <div class="watch-card fade-in">
+        <div class="watch-rank"># 2 Highest Rise</div>
+        <div class="watch-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M12 3c1.5 2 3 5 3 9s-1.5 7-3 9M12 3c-1.5 2-3 5-3 9s1.5 7 3 9" stroke-linecap="round"/></svg>
+        </div>
+        <div class="watch-name">Beans Brown (sold loose)</div>
+        <div class="watch-pct">+99%</div>
+        <div class="watch-label">₦1,274 → ₦2,530</div>
+      </div>
+      <div class="watch-card fade-in">
+        <div class="watch-rank"># 3 Highest Rise</div>
+        <div class="watch-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round"/></svg>
+        </div>
+        <div class="watch-name">Imported Rice (high quality)</div>
+        <div class="watch-pct">+90%</div>
+        <div class="watch-label">₦1,647 → ₦3,134</div>
+      </div>
+      <div class="watch-card fade-in">
+        <div class="watch-rank"># 4 Highest Rise</div>
+        <div class="watch-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="watch-name">Dried Fish Sardine</div>
+        <div class="watch-pct">+83%</div>
+        <div class="watch-label">₦2,906 → ₦5,328</div>
+      </div>
+      <div class="watch-card fade-in">
+        <div class="watch-rank"># 5 Highest Rise</div>
+        <div class="watch-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 3C4 3 2 5 2 8c0 5 10 13 10 13s10-8 10-13c0-3-2-5-5-5-2 0-3.5 1-5 3C10.5 4 9 3 7 3z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="watch-name">Catfish (Obokun) Fresh</div>
+        <div class="watch-pct">+73%</div>
+        <div class="watch-label">₦3,103 → ₦5,365</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px; background:var(--amber-100); border:1px solid #FDE68A; border-radius:16px; padding:24px 28px; display:flex; align-items:flex-start; gap:16px;" class="fade-in">
+      <div style="flex-shrink:0; width:40px; height:40px; background:var(--amber-500); border-radius:10px; display:flex; align-items:center; justify-content:center;">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="white"/></svg>
+      </div>
+      <div>
+        <strong style="font-size:15px; color:#92400E; font-family:'Fira Code',monospace; letter-spacing:0.3px;">Important Note on Model Disagreement</strong>
+        <p style="font-size:14px; color:#78350F; margin-top:6px; line-height:1.65;">
+          Prophet and LightGBM often give different forecasts for the same item. Prophet tends to show higher prices for eggs, yam, and rice because it projects long-term upward trends. LightGBM, being more sensitive to recent data, sometimes shows stabilisation after an initial spike. When the two models agree, you can be more confident. When they disagree significantly, treat the forecast range as wide.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SEASONAL GUIDE ═══════════════ -->
+<section id="seasonal">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-tag">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Seasonal Buying Guide
+      </span>
+      <div class="divider"></div>
+      <h2 class="section-title">Buy Low, Sell High — Know the Calendar</h2>
+      <p class="section-lead">
+        Prices follow seasonal patterns. January is consistently the cheapest month for most staples. October–December is the most expensive period for vegetables and grains. Use this calendar to time your purchases.
+      </p>
+    </div>
+
+    <div class="calendar-grid fade-in">
+      <div class="cal-header-item">Food Item</div>
+      <div class="cal-header">Jan</div><div class="cal-header">Feb</div><div class="cal-header">Mar</div>
+      <div class="cal-header">Apr</div><div class="cal-header">May</div><div class="cal-header">Jun</div>
+      <div class="cal-header">Jul</div><div class="cal-header">Aug</div><div class="cal-header">Sep</div>
+      <div class="cal-header">Oct</div><div class="cal-header">Nov</div><div class="cal-header">Dec</div>
+
+      <!-- Yam Tuber -->
+      <div class="cal-item">Yam Tuber</div>
+      <div class="cal-cell cal-lowest"></div><div class="cal-cell cal-lowest"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-peak"></div>
+      <div class="cal-cell cal-peak"></div><div class="cal-cell cal-peak"></div><div class="cal-cell cal-peak"></div>
+
+      <!-- Beans Brown -->
+      <div class="cal-item">Beans Brown</div>
+      <div class="cal-cell cal-lowest"></div><div class="cal-cell cal-lowest"></div><div class="cal-cell cal-lowest"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-peak"></div>
+      <div class="cal-cell cal-peak"></div><div class="cal-cell cal-peak"></div><div class="cal-cell cal-mid"></div>
+
+      <!-- Tomato -->
+      <div class="cal-item">Tomato</div>
+      <div class="cal-cell cal-lowest"></div><div class="cal-cell cal-lowest"></div><div class="cal-cell cal-lowest"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-peak"></div><div class="cal-cell cal-peak"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-peak"></div>
+
+      <!-- Maize -->
+      <div class="cal-item">Maize Grain</div>
+      <div class="cal-cell cal-lowest"></div><div class="cal-cell cal-lowest"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-peak"></div><div class="cal-cell cal-peak"></div>
+
+      <!-- Rice -->
+      <div class="cal-item">Rice (Medium)</div>
+      <div class="cal-cell cal-lowest"></div><div class="cal-cell cal-lowest"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-peak"></div><div class="cal-cell cal-peak"></div>
+
+      <!-- Groundnut Oil -->
+      <div class="cal-item">Groundnut Oil</div>
+      <div class="cal-cell cal-lowest"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-peak"></div>
+
+      <!-- Onion -->
+      <div class="cal-item">Onion Bulb</div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-lowest"></div>
+      <div class="cal-cell cal-lowest"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div><div class="cal-cell cal-mid"></div>
+      <div class="cal-cell cal-mid"></div><div class="cal-cell cal-peak"></div><div class="cal-cell cal-peak"></div>
+    </div>
+
+    <div class="cal-legend fade-in">
+      <div class="cal-legend-item"><div class="cal-swatch" style="background:#DCFCE7;border:1px solid #BBF7D0;"></div><span>Cheapest period — best time to bulk-buy</span></div>
+      <div class="cal-legend-item"><div class="cal-swatch" style="background:#FEF3C7;border:1px solid #FDE68A;"></div><span>Moderate prices — average range</span></div>
+      <div class="cal-legend-item"><div class="cal-swatch" style="background:#FEE2E2;border:1px solid #FECACA;"></div><span>Peak prices — avoid large purchases if possible</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ACTION PLAN ═══════════════ -->
+<section id="action">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-tag">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Your Action Plan
+      </span>
+      <div class="divider"></div>
+      <h2 class="section-title">What Should You Do With This?</h2>
+      <p class="section-lead">
+        Data without action is just numbers. Here are concrete steps for three different audiences, based directly on the forecast findings.
+      </p>
+    </div>
+
+    <div class="action-grid">
+      <div class="action-card action-household fade-in">
+        <div class="action-tag tag-household">For Households</div>
+        <h3>Smart Family Shopping</h3>
+        <ul class="action-list">
+          <li class="action-item">
+            <div class="action-bullet bullet-blue">1</div>
+            <span><strong>Buy beans and eggs in January–March</strong> when prices hit their yearly low. Stock up with 2–3 months' supply if you have storage.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-blue">2</div>
+            <span><strong>Expect to spend more on fish by mid-2026.</strong> Dried sardine and catfish are forecast to rise 70–83%. Consider building a small reserve now.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-blue">3</div>
+            <span><strong>Plantain and sweet potato show modest rises.</strong> These remain relatively affordable staples — consider increasing their share in your household diet.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-blue">4</div>
+            <span><strong>Avoid bulk tomato purchases in May–June.</strong> Tomato prices historically spike then, driven by mid-year rainfall disruption to supply chains.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="action-card action-business fade-in">
+        <div class="action-tag tag-business">For Traders &amp; Businesses</div>
+        <h3>Strategic Sourcing Windows</h3>
+        <ul class="action-list">
+          <li class="action-item">
+            <div class="action-bullet bullet-amber">1</div>
+            <span><strong>Import rice in Q1 (Jan–Mar).</strong> Forecasts show significant price rises for imported high-quality rice through 2026. Source early before demand outpaces supply.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-amber">2</div>
+            <span><strong>Watch the egg market closely.</strong> At +127% LightGBM forecast, agric eggs represent one of the biggest arbitrage opportunities — but also the highest risk from supply shocks.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-amber">3</div>
+            <span><strong>Use LightGBM's forecast as your primary price baseline.</strong> With 3× lower error vs Prophet, it consistently gives a more reliable price estimate for operational planning.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-amber">4</div>
+            <span><strong>Groundnut oil peaks in December.</strong> Build inventory in January and ride the year-long price trend — forecast shows a rise from ₦3,093 to ₦4,172 (LGB) by Dec 2026.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="action-card action-policy fade-in">
+        <div class="action-tag tag-policy">For Policymakers</div>
+        <h3>Evidence-Based Interventions</h3>
+        <ul class="action-list">
+          <li class="action-item">
+            <div class="action-bullet bullet-green">1</div>
+            <span><strong>Prioritise protein stabilisation.</strong> Eggs, catfish, and dried fish show the highest forecast volatility. Targeted subsidies or cold chain infrastructure investments would have maximum impact.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-green">2</div>
+            <span><strong>Beans and maize require harvest-period intervention.</strong> Both staples spike in Oct–Dec. Pre-positioning buffer stocks by September could dampen the seasonal shock.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-green">3</div>
+            <span><strong>The geographic price gap is large.</strong> In most items, the most expensive state pays 3–5× more than the cheapest. Transport infrastructure and market information systems can reduce this gap.</span>
+          </li>
+          <li class="action-item">
+            <div class="action-bullet bullet-green">4</div>
+            <span><strong>Deploy monthly price monitoring via LightGBM.</strong> Its 7.6% average error is accurate enough to serve as an early warning system for imminent price shocks — update forecasts monthly with fresh data.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ METHODOLOGY NOTE ═══════════════ -->
+<section id="methodology">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-tag" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.55);">
+        Methodology
+      </span>
+      <div class="divider" style="background:linear-gradient(90deg,var(--amber-500),var(--amber-400));"></div>
+      <h2 class="section-title" style="color:white;">How This Analysis Was Built</h2>
+    </div>
+
+    <div class="method-grid">
+      <div class="method-left">
+        <p>
+          The dataset covers <strong>44 food commodities</strong> tracked monthly across Nigeria's 36 states and the FCT from January 2016 through December 2024 — totalling over 180,000 price records from the National Bureau of Statistics.
+        </p>
+        <p>
+          Each model was trained on data from 2016 to 2023, then tested on 2024 (12 months of unseen data). The MAPE scores shown in this report reflect that out-of-sample accuracy test. Forecasts extend from January 2025 to December 2026.
+        </p>
+        <p>
+          For <strong>Prophet</strong>, each item was modelled independently with yearly seasonality and country-specific holidays. For <strong>LightGBM</strong>, features included lagged prices (1, 3, 6, 12 months), rolling averages, month-of-year, and year indicators — trained as a unified cross-item regression model.
+        </p>
+        <p>
+          All figures are in Nigerian Naira (₦). Prices represent national averages. State-level forecasts are available in the supplementary data files.
+        </p>
+      </div>
+      <div>
+        <div class="method-code">
+          <div><span class="code-comment">// Model evaluation framework</span></div>
+          <div><span class="code-key">train_period</span>: <span class="code-val">"2016-01 → 2023-12"</span></div>
+          <div><span class="code-key">test_period</span>: <span class="code-val">"2024-01 → 2024-12"</span></div>
+          <div><span class="code-key">forecast_horizon</span>: <span class="code-val">"24 months"</span></div>
+          <div>&nbsp;</div>
+          <div><span class="code-comment">// Error metrics</span></div>
+          <div><span class="code-key">prophet_avg_MAPE</span>: <span class="code-val">24.9%</span></div>
+          <div><span class="code-key">lgb_avg_MAPE</span>: <span class="code-val">7.6%</span></div>
+          <div><span class="code-key">confidence_interval</span>: <span class="code-val">80%</span></div>
+          <div>&nbsp;</div>
+          <div><span class="code-comment">// LGB feature set</span></div>
+          <div><span class="code-key">lag_features</span>: <span class="code-val">[1, 3, 6, 12]</span> months</div>
+          <div><span class="code-key">rolling_avg</span>: <span class="code-val">[3, 6, 12]</span> months</div>
+          <div><span class="code-key">time_features</span>: <span class="code-val">month, year</span></div>
+          <div>&nbsp;</div>
+          <div><span class="code-comment">// Prophet config</span></div>
+          <div><span class="code-key">seasonality_mode</span>: <span class="code-val">"multiplicative"</span></div>
+          <div><span class="code-key">yearly_seasonality</span>: <span class="code-val">true</span></div>
+          <div><span class="code-key">interval_width</span>: <span class="code-val">0.80</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <div class="container">
+    <p>Nigeria Food Price Tracking · AI Forecast Report · Data: NBS Nigeria · Models: Prophet (Meta) + LightGBM (Microsoft) · Analysis: Feb 2026</p>
+  </div>
+</footer>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+// ── Progress bar ──
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+// ── Fade-in on scroll ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ── Counter animation ──
+function animateCounter(el) {
+  const target = parseFloat(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  const duration = 1600;
+  const step = target / (duration / 16);
+  let current = 0;
+  const timer = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = Math.floor(current) + suffix;
+    if (current >= target) clearInterval(timer);
+  }, 16);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('[data-target]').forEach(animateCounter);
+      counterObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+const heroStat = document.querySelector('.hero-stat-row');
+if (heroStat) counterObserver.observe(heroStat.parentElement);
+
+// ── Accuracy table data ──
+const accuracyData = [
+  { item: 'Yam Tuber',                  prophet: 35.68, lgb: 6.34 },
+  { item: 'Tomato',                     prophet: 31.79, lgb: 11.07 },
+  { item: 'Sweet Potato',               prophet: 31.89, lgb: 8.43 },
+  { item: 'Wheat Flour (2kg)',           prophet: 31.63, lgb: 4.52 },
+  { item: 'Tilapia Fish Fresh',         prophet: 31.60, lgb: 5.68 },
+  { item: 'Beans Brown (loose)',        prophet: 33.04, lgb: 4.39 },
+  { item: 'Beans White (loose)',        prophet: 37.57, lgb: 4.92 },
+  { item: 'Gari White (loose)',         prophet: 32.31, lgb: 6.54 },
+  { item: 'Catfish Fresh',              prophet: 31.30, lgb: 2.27 },
+  { item: 'Imported Rice',              prophet: 29.83, lgb: 6.90 },
+  { item: 'Bread Sliced 500g',          prophet: 29.74, lgb: 4.07 },
+  { item: 'Beef Boneless',              prophet: 29.56, lgb: 29.70 },
+  { item: 'Rice Medium Grained',        prophet: 23.19, lgb: 4.54 },
+  { item: 'Groundnut Oil (bottle)',     prophet: 24.40, lgb: 3.69 },
+  { item: 'Agric Eggs (crate)',         prophet: 25.54, lgb: 4.85 },
+  { item: 'Frozen Chicken',            prophet: 26.09, lgb: 27.59 },
+  { item: 'Evap. Milk Peak 170g',      prophet: 5.60,  lgb: 7.55 },
+  { item: 'Plantain Ripe',             prophet: 11.55, lgb: 6.99 },
+  { item: 'Palm Oil (bottle)',         prophet: 17.13, lgb: 4.68 },
+  { item: 'Catfish Dried',             prophet: 25.69, lgb: 14.07 },
+];
+
+const tbody = document.getElementById('accuracy-table-body');
+const maxMAPE = 37.57;
+accuracyData.forEach(row => {
+  const lgbWins = row.lgb < row.prophet;
+  const prophetWidth = Math.round((row.prophet / maxMAPE) * 160);
+  const lgbWidth = Math.round((row.lgb / maxMAPE) * 160);
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="font-weight:600;color:var(--slate-900);">${row.item}</td>
+    <td style="font-family:'Fira Code',monospace;font-weight:600;color:var(--blue-800);">${row.prophet.toFixed(1)}%</td>
+    <td><div class="mape-bar-wrap"><div class="mape-bar bar-prophet" style="width:${prophetWidth}px;"></div></div></td>
+    <td style="font-family:'Fira Code',monospace;font-weight:600;color:${lgbWins ? 'var(--green-500)' : '#EF4444'};">${row.lgb.toFixed(1)}%</td>
+    <td><div class="mape-bar-wrap"><div class="mape-bar bar-lgb" style="width:${lgbWidth}px;"></div></div></td>
+    <td>${lgbWins ? '<span class="winner-badge">LGB wins</span>' : '<span class="winner-badge" style="background:#FEE2E2;color:#991B1B;">Prophet</span>'}</td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// ── Chart data ──
+const chartData = {
+  yam: {
+    title: 'Yam Tuber — Price Forecast (₦)',
+    desc: 'Prophet projects a strong upward push into 2026, while LightGBM forecasts a more modest stable level around ₦1,200. The wide confidence band reflects yam\'s high seasonal volatility.',
+    labels: ['Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26'],
+    prophet: [1462,1476,1453,1455,1468,1465,1549,1567,1535,1582,1633,1679,1886,1894,1830,1822,1831,1801],
+    lgb:     [1180,1199,1200,1203,1215,1218,1218,1216,1221,1221,1223,1220,1218,1214,1215,1217,1215,1217],
+    lower:   [1411,1422,1399,1402,1411,1410,1493,1514,1479,1520,1573,1614,1814,1821,1760,1745,1753,1716],
+    upper:   [1516,1527,1510,1504,1522,1525,1603,1626,1594,1641,1695,1750,1951,1971,1906,1900,1914,1882],
+  },
+  rice: {
+    title: 'Rice Medium Grained — Price Forecast (₦)',
+    desc: 'Both models agree rice prices will rise. Prophet shows a more dramatic climb toward ₦2,130 by Dec 2026, while LightGBM predicts stabilisation around ₦1,231 — a significant divergence reflecting market uncertainty.',
+    labels: ['Jan-25','Feb-25','Mar-25','Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26'],
+    prophet: [1486,1416,1515,1528,1536,1560,1568,1601,1605,1624,1657,1681,1924,1891,1896,1960,1982,2015,1993,2021,1991,2011,2062,2130],
+    lgb:     [1163,1161,1163,1162,1166,1185,1185,1208,1225,1230,1227,1232,1228,1227,1229,1229,1233,1230,1230,1229,1230,1230,1227,1231],
+    lower:   [1444,1372,1472,1486,1492,1514,1522,1556,1558,1574,1604,1623,1864,1826,1827,1890,1907,1930,1909,1925,1902,1912,1956,2016],
+    upper:   [1529,1456,1560,1572,1580,1605,1612,1651,1655,1675,1712,1738,1986,1959,1963,2031,2058,2099,2072,2106,2089,2111,2163,2243],
+  },
+  tomato: {
+    title: 'Tomato — Price Forecast (₦)',
+    desc: 'Tomato shows the most dramatic seasonal swings. Both models identify a price spike in May–June, consistent with mid-year tomato supply disruptions. Prophet projects a sustained high through 2026; LightGBM sees a gradual moderation.',
+    labels: ['Jan-25','Feb-25','Mar-25','Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26'],
+    prophet: [1080,1037,1021,1087,1305,1328,1184,1165,1107,1141,1147,1179,1341,1333,1357,1445,1597,1633,1546,1487,1373,1422,1417,1501],
+    lgb:     [831,828,817,819,821,814,811,783,768,757,752,747,750,748,745,745,749,745,744,740,733,733,733,732],
+    lower:   [1019,976,964,1031,1245,1270,1121,1101,1047,1078,1084,1114,1277,1263,1286,1365,1514,1547,1462,1394,1285,1327,1330,1400],
+    upper:   [1139,1090,1082,1146,1364,1386,1243,1225,1166,1206,1214,1246,1409,1408,1434,1519,1680,1717,1641,1573,1459,1513,1517,1608],
+  },
+  groundnut: {
+    title: 'Groundnut Oil (1 bottle) — Price Forecast (₦)',
+    desc: 'Groundnut oil shows strong upward momentum in both models. LightGBM, which starts higher, forecasts prices reaching ~₦4,172 by Dec 2026. Both models agree on the direction — but LightGBM tracks current market levels more closely.',
+    labels: ['Jan-25','Feb-25','Mar-25','Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26'],
+    prophet: [2479,2858,2786,2828,2890,2938,3036,3073,3233,3338,3423,3634,3317,3627,3679,3620,3670,3693,3805,3912,4076,4185,4246,4382],
+    lgb:     [3093,3199,3164,3318,3329,3555,3578,3688,3813,3925,3973,4050,4312,4257,4255,4295,4315,4286,4182,4142,4160,4123,4167,4172],
+    lower:   [2399,2776,2697,2749,2792,2850,2936,2974,3126,3223,3294,3499,3175,3459,3501,3437,3460,3468,3564,3661,3802,3884,3937,4028],
+    upper:   [2556,2935,2874,2909,2970,3032,3131,3171,3340,3447,3547,3765,3462,3782,3857,3822,3882,3919,4041,4179,4349,4477,4578,4739],
+  }
+};
+
+const chartInstances = {};
+
+function buildChart(id) {
+  const d = chartData[id];
+  const ctx = document.getElementById('chart-' + id).getContext('2d');
+
+  const bandColor = 'rgba(30,64,175,0.08)';
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: d.labels,
+      datasets: [
+        {
+          label: 'Prophet 80% Upper Band',
+          data: d.upper,
+          borderColor: 'transparent',
+          backgroundColor: bandColor,
+          fill: '+1',
+          pointRadius: 0,
+          tension: 0.35,
+        },
+        {
+          label: 'Prophet 80% Lower Band',
+          data: d.lower,
+          borderColor: 'transparent',
+          backgroundColor: bandColor,
+          fill: false,
+          pointRadius: 0,
+          tension: 0.35,
+        },
+        {
+          label: 'Prophet Forecast',
+          data: d.prophet,
+          borderColor: '#1E40AF',
+          backgroundColor: 'transparent',
+          fill: false,
+          borderWidth: 2.5,
+          pointRadius: 3,
+          pointHoverRadius: 6,
+          tension: 0.35,
+        },
+        {
+          label: 'LightGBM Forecast',
+          data: d.lgb,
+          borderColor: '#F59E0B',
+          backgroundColor: 'transparent',
+          fill: false,
+          borderWidth: 2.5,
+          borderDash: [6, 4],
+          pointRadius: 3,
+          pointHoverRadius: 6,
+          tension: 0.35,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          backgroundColor: '#0F172A',
+          titleColor: '#94A3B8',
+          bodyColor: '#F8FAFC',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: ctx => {
+              if (ctx.dataset.label.includes('Band')) return null;
+              return ` ${ctx.dataset.label}: ₦${ctx.parsed.y.toLocaleString()}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(203,213,225,0.4)', drawTicks: false },
+          ticks: {
+            color: '#94A3B8',
+            font: { family: "'Fira Code', monospace", size: 11 },
+            maxRotation: 45,
+          },
+          border: { display: false }
+        },
+        y: {
+          grid: { color: 'rgba(203,213,225,0.4)', drawTicks: false },
+          ticks: {
+            color: '#94A3B8',
+            font: { family: "'Fira Code', monospace", size: 11 },
+            callback: v => '₦' + v.toLocaleString()
+          },
+          border: { display: false }
+        }
+      }
+    }
+  });
+  chartInstances[id] = chart;
+}
+
+function switchChart(id) {
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.chart-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('chart-main-title').textContent = chartData[id].title;
+  document.getElementById('chart-main-desc').textContent = chartData[id].desc;
+  if (!chartInstances[id]) buildChart(id);
+}
+
+// Build initial chart
+buildChart('yam');
+</script>
+</body>
+</html>
