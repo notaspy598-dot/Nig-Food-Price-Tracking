@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cost of Eating in Nigeria — A Data Story</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0C2233;
+            --teal: #2D6A6A;
+            --cream: #FBF6EE;
+            --orange: #F28C00;
+            --brown: #6B3521;
+            --navy-light: #1A2E38;
+            --teal-light: #5BAAAA;
+            --cream-dark: #F5DEB3;
+            --orange-light: #F5A832;
+            --brown-light: #FCEEE4;
+            --text-primary: #FBF6EE;
+            --text-secondary: rgba(251, 246, 238, 0.7);
+            --card-bg: rgba(45, 106, 106, 0.08);
+            --card-border: rgba(45, 106, 106, 0.25);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ─── NAVIGATION ─── */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(12, 34, 51, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 0 2rem;
+            transition: transform 0.3s ease;
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--orange);
+            font-weight: 800;
+        }
+        .nav-links {
+            display: flex;
+            gap: 0.25rem;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.4rem 0.7rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+            letter-spacing: 0.02em;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--orange);
+            background: rgba(242, 140, 0, 0.1);
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(45, 106, 106, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(242, 140, 0, 0.08) 0%, transparent 50%);
+            animation: heroGlow 15s ease-in-out infinite alternate;
+        }
+        @keyframes heroGlow {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-5%, 3%) rotate(3deg); }
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 900px; }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(242, 140, 0, 0.15);
+            border: 1px solid rgba(242, 140, 0, 0.3);
+            color: var(--orange);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            margin-bottom: 2rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 .highlight {
+            color: var(--orange);
+            position: relative;
+        }
+        .hero h1 .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--orange);
+            opacity: 0.4;
+            border-radius: 2px;
+        }
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            font-weight: 300;
+        }
+        .hero-stat-row {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .hero-stat {
+            text-align: center;
+        }
+        .hero-stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--orange);
+            line-height: 1;
+        }
+        .hero-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+            font-weight: 500;
+        }
+        .hero-quote {
+            background: rgba(45, 106, 106, 0.12);
+            border-left: 4px solid var(--teal);
+            padding: 1.5rem 2rem;
+            border-radius: 0 12px 12px 0;
+            font-size: 1.05rem;
+            color: var(--cream);
+            font-style: italic;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            z-index: 1;
+        }
+        .scroll-indicator svg { width: 24px; height: 24px; fill: var(--text-secondary); }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* ─── SECTIONS ─── */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .section-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--orange);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .section-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        /* ─── DIVIDER ─── */
+        .divider {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .divider-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: border-color 0.3s;
+        }
+        .card:hover {
+            border-color: rgba(45, 106, 106, 0.5);
+        }
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--cream);
+        }
+
+        /* ─── CHART CONTAINERS ─── */
+        .chart-container {
+            background: rgba(21, 45, 62, 0.5);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--cream);
+        }
+        .chart-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        .chart-annotation {
+            position: absolute;
+            background: rgba(242, 140, 0, 0.15);
+            border: 1px solid rgba(242, 140, 0, 0.4);
+            color: var(--orange);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.35rem 0.8rem;
+            border-radius: 8px;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .chart-canvas-wrap {
+            position: relative;
+            width: 100%;
+        }
+        .chart-canvas-wrap canvas {
+            width: 100% !important;
+        }
+
+        /* ─── TWO-COL GRID ─── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
+            gap: 2rem;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+            gap: 1.5rem;
+        }
+
+        /* ─── STAT CARDS ─── */
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.8rem;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--orange);
+        }
+        .stat-card .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--orange);
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ─── DATA TABLE ─── */
+        .data-table-wrap {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
+        }
+        .data-table thead th {
+            background: rgba(45, 106, 106, 0.2);
+            color: var(--cream);
+            font-weight: 600;
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--teal);
+            white-space: nowrap;
+        }
+        .data-table thead th:first-child { border-radius: 10px 0 0 0; }
+        .data-table thead th:last-child { border-radius: 0 10px 0 0; }
+        .data-table tbody td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid rgba(45, 106, 106, 0.1);
+            color: var(--text-secondary);
+        }
+        .data-table tbody tr:hover td {
+            background: rgba(45, 106, 106, 0.08);
+            color: var(--cream);
+        }
+        .data-table .val-up { color: var(--orange); font-weight: 700; }
+        .data-table .val-down { color: var(--teal-light); font-weight: 700; }
+
+        /* ─── GEO MAP VISUALIZATION ─── */
+        .geo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .geo-box {
+            border-radius: 14px;
+            padding: 1.8rem;
+        }
+        .geo-box.cheap {
+            background: rgba(45, 106, 106, 0.12);
+            border: 1px solid rgba(45, 106, 106, 0.3);
+        }
+        .geo-box.expensive {
+            background: rgba(242, 140, 0, 0.08);
+            border: 1px solid rgba(242, 140, 0, 0.3);
+        }
+        .geo-box h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .geo-box.cheap h4 { color: var(--teal-light); }
+        .geo-box.expensive h4 { color: var(--orange); }
+        .geo-state {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .geo-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .geo-box.cheap .geo-dot { background: var(--teal-light); }
+        .geo-box.expensive .geo-dot { background: var(--orange); }
+        .geo-state-name { font-size: 0.85rem; font-weight: 500; }
+        .geo-state-note { font-size: 0.72rem; color: var(--text-secondary); margin-left: auto; }
+
+        /* ─── CALLOUT ─── */
+        .callout {
+            border-radius: 14px;
+            padding: 1.8rem 2rem;
+            margin: 2rem 0;
+            display: flex;
+            gap: 1.2rem;
+            align-items: flex-start;
+        }
+        .callout-icon {
+            font-size: 1.8rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .callout.warning {
+            background: rgba(242, 140, 0, 0.1);
+            border: 1px solid rgba(242, 140, 0, 0.3);
+        }
+        .callout.insight {
+            background: rgba(45, 106, 106, 0.1);
+            border: 1px solid rgba(45, 106, 106, 0.3);
+        }
+        .callout.danger {
+            background: rgba(107, 53, 33, 0.15);
+            border: 1px solid rgba(107, 53, 33, 0.4);
+        }
+        .callout-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+        }
+        .callout-text {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ─── INTERACTIVE CONTROLS ─── */
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .controls button {
+            background: rgba(45, 106, 106, 0.12);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .controls button:hover {
+            border-color: var(--teal);
+            color: var(--cream);
+        }
+        .controls button.active {
+            background: rgba(242, 140, 0, 0.15);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* ─── PROGRESS BAR ANIMATION ─── */
+        .bar-row {
+            margin-bottom: 1rem;
+        }
+        .bar-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.35rem;
+        }
+        .bar-label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--cream);
+        }
+        .bar-value {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--orange);
+        }
+        .bar-track {
+            height: 10px;
+            background: rgba(45, 106, 106, 0.15);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--teal), var(--orange));
+            width: 0;
+            transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* ─── RECOMMENDATIONS ─── */
+        .rec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .rec-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 2rem;
+            transition: transform 0.2s;
+        }
+        .rec-card:hover { transform: translateY(-3px); }
+        .rec-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        .rec-card.policy .rec-card-icon { background: rgba(45, 106, 106, 0.2); }
+        .rec-card.business .rec-card-icon { background: rgba(242, 140, 0, 0.15); }
+        .rec-card.household .rec-card-icon { background: rgba(107, 53, 33, 0.2); }
+        .rec-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: var(--cream);
+        }
+        .rec-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ─── BOTTOM LINE ─── */
+        .bottom-line {
+            background: linear-gradient(135deg, rgba(45, 106, 106, 0.15), rgba(242, 140, 0, 0.08));
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin: 3rem 0;
+        }
+        .bottom-line h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+        }
+        .bottom-line p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        .bottom-line .emphasis {
+            color: var(--orange);
+            font-weight: 700;
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+        .footer a { color: var(--teal-light); text-decoration: none; }
+        .footer a:hover { color: var(--orange); }
+
+        /* ─── FADE-IN ANIMATION ─── */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .geo-grid { grid-template-columns: 1fr; }
+            .hero-stat-row { gap: 1.2rem; }
+            .hero-stat-value { font-size: 2rem; }
+            .section { padding: 4rem 1.2rem; }
+            .chart-container { padding: 1.2rem; }
+        }
+
+        /* ─── TOOLTIP ─── */
+        .tooltip-custom {
+            position: absolute;
+            background: var(--navy-light);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            font-size: 0.8rem;
+            max-width: 220px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        /* ─── PRICE COMPARISON BAR CHART ─── */
+        .comparison-legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        /* ─── SELECT DROPDOWN ─── */
+        select.chart-select {
+            background: rgba(45, 106, 106, 0.15);
+            border: 1px solid var(--card-border);
+            color: var(--cream);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+            margin-bottom: 1rem;
+        }
+        select.chart-select option {
+            background: var(--navy);
+            color: var(--cream);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════ NAVIGATION ═══════ -->
+<nav class="nav" id="mainNav">
+    <div class="nav-inner">
+        <div class="nav-logo">NFPT</div>
+        <div class="nav-links">
+            <a href="#hero" class="active">Overview</a>
+            <a href="#inflation">Inflation</a>
+            <a href="#geography">Geography</a>
+            <a href="#volatility">Volatility</a>
+            <a href="#seasonal">Seasonal</a>
+            <a href="#forecast">Forecast</a>
+            <a href="#recommendations">Action</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero" id="hero">
+    <div class="hero-content">
+        <div class="hero-badge">Data Analysis · 2016 — 2024</div>
+        <h1>The Cost of Eating<br>in <span class="highlight">Nigeria</span></h1>
+        <p class="hero-subtitle">Food prices rose 746% in 8 years — and they're not slowing down. An analysis of 43 food items across 37 states from 1.7 million price observations.</p>
+        <div class="hero-stat-row">
+            <div class="hero-stat">
+                <div class="hero-stat-value" data-count="746" data-suffix="%">0%</div>
+                <div class="hero-stat-label">Max Price Increase</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" data-count="43">0</div>
+                <div class="hero-stat-label">Food Items Tracked</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" data-count="37">0</div>
+                <div class="hero-stat-label">States Covered</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" data-count="1.7" data-decimals="1" data-suffix="M">0.0M</div>
+                <div class="hero-stat-label">Price Observations</div>
+            </div>
+        </div>
+        <div class="hero-quote">
+            "A single Irish potato that cost ₦129 in Bauchi in January 2016 now costs over ₦5,508 in Anambra. That's not a typo."
+        </div>
+    </div>
+    <div class="scroll-indicator">
+        <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
+    </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══════ PART 1: INFLATION ═══════ -->
+<section class="section" id="inflation">
+    <div class="section-header fade-in">
+        <div class="section-number">Part 01</div>
+        <h2 class="section-title">A Nation Under Price Pressure</h2>
+        <p class="section-subtitle">Every single food item got more expensive. Not one of the 43 tracked items escaped inflation over the 8-year period.</p>
+    </div>
+
+    <!-- Key Stats Row -->
+    <div class="grid-3 fade-in">
+        <div class="stat-card">
+            <div class="stat-value">430%</div>
+            <div class="stat-label">Avg. price increase across all items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">1.7%</div>
+            <div class="stat-label">Avg. month-over-month increase</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">~3 yrs</div>
+            <div class="stat-label">Time for prices to double</div>
+        </div>
+    </div>
+
+    <!-- Top Price Risers Bar Chart -->
+    <div class="chart-container fade-in" style="margin-top: 2.5rem;">
+        <div class="chart-title">The Fastest-Rising Foods (2016–2024)</div>
+        <div class="chart-description">Total percentage price change over the 8-year period. Staple foods — root crops, grains, and legumes — lead the surge.</div>
+        <div class="chart-canvas-wrap" style="height: 400px;">
+            <canvas id="topRisersChart"></canvas>
+        </div>
+    </div>
+
+    <div class="callout warning fade-in">
+        <div class="callout-icon">⚠️</div>
+        <div>
+            <div class="callout-title">The "best case" is still alarming</div>
+            <div class="callout-text">Even the slowest-rising items (dried/smoked fish) saw prices more than double (+125–174%). There is no category of food that has been spared.</div>
+        </div>
+    </div>
+
+    <!-- All Items Price Change Animated Bars -->
+    <div class="card fade-in">
+        <div class="card-title">Total Price Change: All 43 Food Items</div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">Sorted by total % change. Hover for details.</p>
+        <div id="allItemsBars"></div>
+    </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══════ PART 2: GEOGRAPHY ═══════ -->
+<section class="section" id="geography">
+    <div class="section-header fade-in">
+        <div class="section-number">Part 02</div>
+        <h2 class="section-title">Geography Is Destiny</h2>
+        <p class="section-subtitle">Where you live determines what you pay. The same item can cost up to 571% more depending on which state you're in.</p>
+    </div>
+
+    <!-- Geographic Price Gap Chart -->
+    <div class="chart-container fade-in">
+        <div class="chart-title">Top Geographic Price Gaps</div>
+        <div class="chart-description">Average price comparison between the cheapest and most expensive state for each item. Interactive — hover for details.</div>
+        <div class="comparison-legend">
+            <div class="legend-item"><div class="legend-dot" style="background: var(--teal-light);"></div> Cheapest State Price</div>
+            <div class="legend-item"><div class="legend-dot" style="background: var(--orange);"></div> Most Expensive State Price</div>
+        </div>
+        <div class="chart-canvas-wrap" style="height: 450px;">
+            <canvas id="geoGapChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Cheap vs Expensive Belt -->
+    <div class="geo-grid fade-in">
+        <div class="geo-box cheap">
+            <h4>🟢 The "Cheap Belt" — Northern States</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem;">Closer to agricultural production zones. Cheapest for 30+ of the 43 items.</p>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Borno</span><span class="geo-state-note">Cheapest for 5 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Yobe</span><span class="geo-state-note">Cheapest for 5 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Jigawa</span><span class="geo-state-note">Cheapest for 11 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Katsina</span><span class="geo-state-note">Cheapest for 2 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Taraba</span><span class="geo-state-note">Cheapest for 5 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Adamawa</span><span class="geo-state-note">Cheapest for 3 items</span></div>
+        </div>
+        <div class="geo-box expensive">
+            <h4>🔴 The "Expensive Corridor" — Southern States</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem;">Further from production areas. Higher logistics & infrastructure costs.</p>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Anambra</span><span class="geo-state-note">Most expensive for 15 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Bayelsa</span><span class="geo-state-note">Most expensive for 12 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Ebonyi</span><span class="geo-state-note">Most expensive for 5 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Lagos</span><span class="geo-state-note">Most expensive for 2 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Imo</span><span class="geo-state-note">Most expensive for 3 items</span></div>
+            <div class="geo-state"><div class="geo-dot"></div><span class="geo-state-name">Enugu</span><span class="geo-state-note">Most expensive for 4 items</span></div>
+        </div>
+    </div>
+
+    <div class="callout insight fade-in">
+        <div class="callout-icon">💡</div>
+        <div>
+            <div class="callout-title">What this means</div>
+            <div class="callout-text">A family in Borno buying a basic food basket could spend <strong>less than half</strong> of what the same basket costs in Anambra. This gap points to deep structural issues: poor road infrastructure, insecurity along trade corridors, and limited cold-chain logistics.</div>
+        </div>
+    </div>
+
+    <!-- Interactive: Pick an item to see state spread -->
+    <div class="chart-container fade-in">
+        <div class="chart-title">Explore: Price Spread by Food Item</div>
+        <div class="chart-description">Select a food item to see the cheapest vs. most expensive state and the price spread.</div>
+        <select class="chart-select" id="geoItemSelect"></select>
+        <div class="chart-canvas-wrap" style="height: 300px;">
+            <canvas id="geoItemChart"></canvas>
+        </div>
+        <div id="geoItemAnnotation" style="text-align: center; margin-top: 0.8rem; font-size: 0.85rem; color: var(--text-secondary);"></div>
+    </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══════ PART 3: VOLATILITY ═══════ -->
+<section class="section" id="volatility">
+    <div class="section-header fade-in">
+        <div class="section-number">Part 03</div>
+        <h2 class="section-title">Prices Don't Just Rise — They Swing Wildly</h2>
+        <p class="section-subtitle">Price volatility makes household budgeting nearly impossible. Some items are essentially unpredictable.</p>
+    </div>
+
+    <div class="stat-card fade-in" style="max-width: 500px; margin: 0 auto 2rem; border-color: var(--orange);">
+        <div class="stat-value">512.6%</div>
+        <div class="stat-label">Egg prices CV in Lagos — the standard deviation exceeds the mean by 5×</div>
+    </div>
+
+    <!-- Volatility Scatter/Bubble Chart -->
+    <div class="chart-container fade-in">
+        <div class="chart-title">Volatility vs. Average Price</div>
+        <div class="chart-description">Coefficient of Variation (CV%) vs. average price. Larger bubbles = higher volatility. Items in the top-left are cheap but unstable; top-right are expensive AND unstable.</div>
+        <div class="chart-canvas-wrap" style="height: 420px;">
+            <canvas id="volatilityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Volatility ranking -->
+    <div class="grid-2 fade-in">
+        <div class="card">
+            <div class="card-title" style="color: var(--orange);">🔥 Most Volatile (CV > 95%)</div>
+            <div id="highVolBars"></div>
+        </div>
+        <div class="card">
+            <div class="card-title" style="color: var(--teal-light);">🧊 Most Stable (CV < 65%)</div>
+            <div id="lowVolBars"></div>
+        </div>
+    </div>
+
+    <div class="callout danger fade-in">
+        <div class="callout-icon">🚨</div>
+        <div>
+            <div class="callout-title">13 of 43 items have CV above 80%</div>
+            <div class="callout-text">Their prices are highly erratic. The most stable items are dried and smoked fish products (CV 47–58%), likely because processing adds a price floor that dampens raw commodity swings.</div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══════ PART 4: SEASONAL ═══════ -->
+<section class="section" id="seasonal">
+    <div class="section-header fade-in">
+        <div class="section-number">Part 04</div>
+        <h2 class="section-title">The Seasonal Rhythm</h2>
+        <p class="section-subtitle">When you buy matters. January is the cheapest month, December the most expensive — an overwhelming seasonal pattern.</p>
+    </div>
+
+    <div class="grid-2 fade-in">
+        <div class="stat-card" style="border-color: var(--teal);">
+            <div class="stat-value" style="color: var(--teal-light);">38 / 43</div>
+            <div class="stat-label">Items cheapest in January</div>
+        </div>
+        <div class="stat-card" style="border-color: var(--orange);">
+            <div class="stat-value">37 / 43</div>
+            <div class="stat-label">Items most expensive in December</div>
+        </div>
+    </div>
+
+    <!-- Seasonal heatmap-style chart -->
+    <div class="chart-container fade-in" style="margin-top: 2rem;">
+        <div class="chart-title">Monthly Price Slopes — Who's Climbing Fastest?</div>
+        <div class="chart-description">Monthly absolute price increase (₦/month). Protein items show the steepest absolute increases.</div>
+        <div class="chart-canvas-wrap" style="height: 380px;">
+            <canvas id="monthlyClimbChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Notable Exceptions -->
+    <div class="card fade-in">
+        <div class="card-title">Notable Seasonal Exceptions</div>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Food Item</th><th>Cheapest Month</th><th>Most Expensive Month</th><th>Why?</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Irish Potato</td><td style="color: var(--teal-light);">January</td><td class="val-up">June</td><td>Rainy season supply disruption</td></tr>
+                    <tr><td>Tomato</td><td style="color: var(--teal-light);">January</td><td class="val-up">June</td><td>Flooding & poor road conditions</td></tr>
+                    <tr><td>Onion Bulb</td><td style="color: var(--teal-light);">March</td><td class="val-up">December</td><td>Delayed harvest cycle</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══════ PART 5: FORECAST ═══════ -->
+<section class="section" id="forecast">
+    <div class="section-header fade-in">
+        <div class="section-number">Part 05</div>
+        <h2 class="section-title">What's Coming in 2025–2026</h2>
+        <p class="section-subtitle">Two models, one alarming message. LightGBM outperforms Prophet with ~7.3% average error, projecting continued steep increases.</p>
+    </div>
+
+    <!-- Model Comparison -->
+    <div class="grid-2 fade-in">
+        <div class="stat-card" style="border-color: var(--teal);">
+            <div class="stat-value" style="color: var(--teal-light); font-size: 1.5rem;">LightGBM</div>
+            <div class="stat-label" style="font-size: 1rem; color: var(--cream); margin-top: 0.5rem;">~7.3% Avg. MAPE</div>
+            <div class="stat-label">Primary forecast model</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--text-secondary); font-size: 1.5rem;">Prophet</div>
+            <div class="stat-label" style="font-size: 1rem; color: var(--cream); margin-top: 0.5rem;">~24.5% Avg. MAPE</div>
+            <div class="stat-label">Secondary / comparison</div>
+        </div>
+    </div>
+
+    <!-- Model Accuracy Chart -->
+    <div class="chart-container fade-in" style="margin-top: 2rem;">
+        <div class="chart-title">Model Accuracy Comparison (MAPE %)</div>
+        <div class="chart-description">Mean Absolute Percentage Error for each item. Lower = better. LightGBM (teal) vs Prophet (cream) on 12-month holdout.</div>
+        <div class="controls" id="forecastModelControls">
+            <button class="active" data-show="both">Both Models</button>
+            <button data-show="lgb">LightGBM Only</button>
+            <button data-show="prophet">Prophet Only</button>
+        </div>
+        <div class="chart-canvas-wrap" style="height: 500px;">
+            <canvas id="modelAccuracyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Interactive Forecast Line Charts -->
+    <div class="chart-container fade-in">
+        <div class="chart-title">Price Forecast Through 2026</div>
+        <div class="chart-description">Select a food item to see Prophet (with 80% confidence interval) vs. LightGBM forecasts through December 2026.</div>
+        <div class="controls" id="forecastItemBtns"></div>
+        <div class="chart-canvas-wrap" style="height: 380px;">
+            <canvas id="forecastLineChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Forecast Table -->
+    <div class="card fade-in">
+        <div class="card-title">Biggest Expected Price Increases (2024 → 2026, LightGBM)</div>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Food Item</th><th>2024 Avg Price</th><th>2026 Forecast</th><th>Expected Change</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Agric eggs (per unit)</td><td>₦161.93</td><td>₦498.35</td><td class="val-up">+207.8%</td></tr>
+                    <tr><td>Agric eggs (crate)</td><td>₦1,659.32</td><td>₦3,834.53</td><td class="val-up">+131.1%</td></tr>
+                    <tr><td>Palm oil (1 bottle)</td><td>₦1,802.05</td><td>₦3,569.03</td><td class="val-up">+98.1%</td></tr>
+                    <tr><td>Imported rice (high quality)</td><td>₦1,562.46</td><td>₦3,024.78</td><td class="val-up">+93.6%</td></tr>
+                    <tr><td>Vegetable oil (1 bottle)</td><td>₦2,171.55</td><td>₦4,210.14</td><td class="val-up">+93.9%</td></tr>
+                    <tr><td>Groundnut oil (1 bottle)</td><td>₦2,250.07</td><td>₦4,222.15</td><td class="val-up">+87.6%</td></tr>
+                    <tr><td>Chicken Wings</td><td>₦2,692.59</td><td>₦4,785.81</td><td class="val-up">+77.7%</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="callout insight fade-in">
+        <div class="callout-icon">🍅</div>
+        <div>
+            <div class="callout-title">Bright spot: Tomato may get cheaper</div>
+            <div class="callout-text">Tomato is the <strong>only item</strong> projected to decline (−12.9% by 2026), from ₦850.90 to ₦741.34 — likely driven by expanding greenhouse and dry-season farming in northern states.</div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══════ PART 6: TAKEAWAYS & RECOMMENDATIONS ═══════ -->
+<section class="section" id="recommendations">
+    <div class="section-header fade-in">
+        <div class="section-number">Part 06</div>
+        <h2 class="section-title">What This Data Tells Us</h2>
+        <p class="section-subtitle">Three critical takeaways and actionable recommendations.</p>
+    </div>
+
+    <!-- Three Takeaways -->
+    <div class="grid-3 fade-in" style="margin-bottom: 3rem;">
+        <div class="card" style="border-left: 4px solid var(--orange);">
+            <div class="card-title">1. Structural, Not Cyclical</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Every food item shows sustained 1.5–2.1% monthly increases for 8 years. Root causes: currency depreciation (naira lost ~75%), rising energy costs, climate disruption, and insecurity.</p>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--teal);">
+            <div class="card-title">2. Supply Chain Crisis</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Food costs 2–6× more depending on state. This reveals failures in logistics, road infrastructure, cold chains, market integration, and security along corridors.</p>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--brown);">
+            <div class="card-title">3. Eggs & Oil = New Luxuries</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Eggs projected to nearly <strong>triple</strong> by 2026, cooking oils to nearly double. These daily essentials represent a severe threat to household food security.</p>
+        </div>
+    </div>
+
+    <!-- Recommendation Cards -->
+    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; text-align: center; margin-bottom: 2rem;" class="fade-in">Recommendations</h3>
+
+    <div class="rec-grid fade-in">
+        <div class="rec-card policy">
+            <div class="rec-card-icon">🏛️</div>
+            <h4>For Policymakers</h4>
+            <p><strong>Invest in logistics corridors</strong> — 200–571% price spreads represent enormous inefficiency. Better roads, storage, and cold chains could cut food costs 30–50% in expensive states.</p>
+        </div>
+        <div class="rec-card policy">
+            <div class="rec-card-icon">🎯</div>
+            <h4>Target Subsidies</h4>
+            <p><strong>Eggs and cooking oils</strong> are projected to see the largest increases. Targeted support for poultry farming and oilseed cultivation could blunt the impact.</p>
+        </div>
+        <div class="rec-card policy">
+            <div class="rec-card-icon">🌱</div>
+            <h4>Expand Dry-Season Farming</h4>
+            <p>Tomato is the only item forecast to decline — because of successful greenhouse programs. <strong>Extend this model</strong> to other perishables.</p>
+        </div>
+        <div class="rec-card business">
+            <div class="rec-card-icon">📊</div>
+            <h4>For Businesses</h4>
+            <p><strong>Arbitrage opportunities exist.</strong> Irish potato at ₦310 in Borno vs. ₦2,083 in Anambra = ₦1,773/unit margin for anyone who solves the logistics problem.</p>
+        </div>
+        <div class="rec-card business">
+            <div class="rec-card-icon">📅</div>
+            <h4>Time Your Purchases</h4>
+            <p><strong>Buy and store during Q1</strong> (January–March) when seasonal prices are at annual lows. The pattern is overwhelming across 38 of 43 items.</p>
+        </div>
+        <div class="rec-card household">
+            <div class="rec-card-icon">🏠</div>
+            <h4>For Households</h4>
+            <p><strong>Substitute where possible:</strong> Tomato prices are falling, local rice is nearly flat. Build meals around stable-price items. If near a state border, shop across it — savings of 80–100%.</p>
+        </div>
+    </div>
+
+    <!-- Bottom Line -->
+    <div class="bottom-line fade-in">
+        <h3>The Bottom Line</h3>
+        <p>Nigerian food prices have increased by an average of <span class="emphasis">430% since 2016</span>, and forecasts project a further <span class="emphasis">40–200% increase by 2026</span>.</p>
+        <p style="margin-top: 1rem;">The question is no longer <em>whether</em> food prices will continue to rise. <strong>They will.</strong> The question is whether Nigeria can build the infrastructure, policies, and market systems to slow the ascent before it becomes a <span class="emphasis">full-blown food security emergency</span>.</p>
+    </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer class="footer">
+    <p>Analysis prepared March 2026 · Data: NFPT Complete Dataset · Models: Prophet + LightGBM</p>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCRIPTS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+// ━━━ COLOR PALETTE ━━━
+const COLORS = {
+    navy: '#0C2233',
+    teal: '#2D6A6A',
+    cream: '#FBF6EE',
+    orange: '#F28C00',
+    brown: '#6B3521',
+    tealLight: '#5BAAAA',
+    orangeLight: '#F5A832',
+    brownLight: '#FCEEE4',
+    creamDark: '#F5DEB3',
+    grid: 'rgba(251, 246, 238,0.07)',
+    gridText: 'rgba(251, 246, 238,0.45)',
+};
+
+// Chart.js defaults
+Chart.defaults.color = COLORS.gridText;
+Chart.defaults.borderColor = COLORS.grid;
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(12, 34, 51,0.95)';
+Chart.defaults.plugins.tooltip.borderColor = COLORS.teal;
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.cornerRadius = 10;
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.titleFont = { weight: '600', size: 13 };
+Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+
+// ━━━ DATA ━━━
+const priceChangeData = [
+    {item: 'Irish potato', change: 746.5, mom: 2.13},
+    {item: 'Yam tuber', change: 698.9, mom: 2.11},
+    {item: 'Maize yellow', change: 685.0, mom: 1.94},
+    {item: 'White-eye beans', change: 667.9, mom: 2.05},
+    {item: 'Sweet potato', change: 658.3, mom: 2.12},
+    {item: 'Maize white', change: 656.4, mom: 2.03},
+    {item: 'Brown beans', change: 620.5, mom: 1.98},
+    {item: 'Rice local', change: 573.4, mom: 1.90},
+    {item: 'Rice medium', change: 569.6, mom: 1.88},
+    {item: 'Plantain (unripe)', change: 543.1, mom: 1.90},
+    {item: 'Imported rice', change: 519.7, mom: 1.89},
+    {item: 'Plantain (ripe)', change: 513.9, mom: 1.85},
+    {item: 'Rice agric', change: 512.7, mom: 1.78},
+    {item: 'Groundnut oil', change: 505.6, mom: 1.85},
+    {item: 'Vegetable oil', change: 505.6, mom: 1.84},
+    {item: 'Broken rice (Ofada)', change: 495.5, mom: 1.72},
+    {item: 'Gari white', change: 494.0, mom: 1.75},
+    {item: 'Onion bulb', change: 493.9, mom: 1.91},
+    {item: 'Evap. milk (Peak)', change: 490.5, mom: 1.72},
+    {item: 'Evap. milk (Carnation)', change: 484.0, mom: 1.77},
+    {item: 'Wheat flour', change: 450.1, mom: 1.78},
+    {item: 'Palm oil', change: 442.6, mom: 1.71},
+    {item: 'Agric eggs (crate)', change: 438.8, mom: 1.68},
+    {item: 'Gari yellow', change: 437.4, mom: 1.62},
+    {item: 'Agric eggs (unit)', change: 428.4, mom: 1.71},
+    {item: 'Titus frozen', change: 426.0, mom: 1.70},
+    {item: 'Tomato', change: 412.6, mom: 1.73},
+    {item: 'Bread sliced', change: 390.6, mom: 1.66},
+    {item: 'Bread unsliced', change: 390.4, mom: 1.69},
+    {item: 'Beef bone-in', change: 379.0, mom: 1.59},
+    {item: 'Beef boneless', change: 373.6, mom: 1.58},
+    {item: 'Chicken Wings', change: 371.9, mom: 1.49},
+    {item: 'Iced Sardine', change: 336.0, mom: 1.49},
+    {item: 'Chicken Feet', change: 333.2, mom: 1.44},
+    {item: 'Mackerel frozen', change: 328.7, mom: 1.50},
+    {item: 'Tilapia fresh', change: 314.4, mom: 1.43},
+    {item: 'Frozen chicken', change: 313.2, mom: 1.35},
+    {item: 'Catfish fresh', change: 296.2, mom: 1.36},
+    {item: 'Mudfish fresh', change: 295.2, mom: 1.29},
+    {item: 'Mudfish dried', change: 191.3, mom: 0.82},
+    {item: 'Dried Fish Sardine', change: 173.8, mom: 0.99},
+    {item: 'Catfish dried', change: 153.5, mom: 0.88},
+    {item: 'Catfish smoked', change: 125.9, mom: 0.76},
+];
+
+const geoData = [
+    {item: 'Irish potato', cheap: 'Borno', cheapPrice: 310, expensive: 'Anambra', expPrice: 2083, spread: 571},
+    {item: 'Gari white', cheap: 'Kwara', cheapPrice: 296, expensive: 'Anambra', expPrice: 1662, spread: 461},
+    {item: 'Tinned milk (Carnation)', cheap: 'Kogi', cheapPrice: 232, expensive: 'Anambra', expPrice: 1292, spread: 457},
+    {item: 'Tomato', cheap: 'Adamawa', cheapPrice: 276, expensive: 'Anambra', expPrice: 1353, spread: 390},
+    {item: 'Maize yellow', cheap: 'Katsina', cheapPrice: 232, expensive: 'Bayelsa', expPrice: 1008, spread: 335},
+    {item: 'Plantain (unripe)', cheap: 'Yobe', cheapPrice: 270, expensive: 'Bayelsa', expPrice: 970, spread: 259},
+    {item: 'Chicken Feet', cheap: 'Taraba', cheapPrice: 452, expensive: 'Anambra', expPrice: 1573, spread: 248},
+    {item: 'Plantain (ripe)', cheap: 'Taraba', cheapPrice: 286, expensive: 'Bayelsa', expPrice: 994, spread: 247},
+    {item: 'Evap. milk (Peak)', cheap: 'Niger', cheapPrice: 263, expensive: 'Anambra', expPrice: 900, spread: 243},
+    {item: 'Yam tuber', cheap: 'Borno', cheapPrice: 248, expensive: 'Bayelsa', expPrice: 831, spread: 235},
+];
+
+const volatilityData = [
+    {item: 'Agric eggs (unit)', cv: 181.9, mean: 69.25, stateCV: 512.6, state: 'Lagos'},
+    {item: 'Irish potato', cv: 113.8, mean: 534.7, stateCV: 153.3, state: 'Kogi'},
+    {item: 'Gari white', cv: 106.4, mean: 379.74, stateCV: 100.9, state: 'Gombe'},
+    {item: 'Yam tuber', cv: 106.0, mean: 446.42, stateCV: 157.5, state: 'Kwara'},
+    {item: 'Maize yellow', cv: 105.4, mean: 365.6, stateCV: 137.1, state: 'Kwara'},
+    {item: 'Tinned milk (Carnation)', cv: 104.3, mean: 286.08, stateCV: 111.5, state: 'Gombe'},
+    {item: 'Sweet potato', cv: 103.3, mean: 259.26, stateCV: 137.8, state: 'Cross River'},
+    {item: 'White-eye beans', cv: 100.9, mean: 563.4, stateCV: 128.2, state: 'Bauchi'},
+    {item: 'Tomato', cv: 99.5, mean: 476.13, stateCV: 131.0, state: 'Nassarawa'},
+    {item: 'Brown beans', cv: 99.4, mean: 604.71, stateCV: 136.1, state: 'Bauchi'},
+    {item: 'Plantain (unripe)', cv: 99.3, mean: 416.99, stateCV: 128.2, state: 'Cross River'},
+    {item: 'Onion bulb', cv: 97.4, mean: 406.3, stateCV: 132.1, state: 'Adamawa'},
+    {item: 'Plantain (ripe)', cv: 96.5, mean: 426.09, stateCV: 127.9, state: 'Kwara'},
+    {item: 'Evap. milk (Peak)', cv: 88.4, mean: 337.88, stateCV: 123.0, state: 'Kwara'},
+    {item: 'Rice local', cv: 88.2, mean: 566.44, stateCV: 112.1, state: 'Kogi'},
+    {item: 'Maize white', cv: 87.2, mean: 308.97, stateCV: 116.9, state: 'Taraba'},
+    {item: 'Broken rice (Ofada)', cv: 86.4, mean: 621.92, stateCV: 109.4, state: 'Osun'},
+    {item: 'Rice agric', cv: 84.0, mean: 601.2, stateCV: 108.5, state: 'Nassarawa'},
+    {item: 'Rice medium', cv: 83.5, mean: 603.85, stateCV: 124.9, state: 'Kogi'},
+    {item: 'Imported rice', cv: 80.7, mean: 683.98, stateCV: 107.1, state: 'Kwara'},
+    {item: 'Chicken Feet', cv: 78.5, mean: 1064.44, stateCV: 115.0, state: 'Abuja'},
+    {item: 'Wheat flour', cv: 77.8, mean: 1065.09, stateCV: 121.5, state: 'Anambra'},
+    {item: 'Gari yellow', cv: 76.1, mean: 377.84, stateCV: 96.4, state: 'Anambra'},
+    {item: 'Groundnut oil', cv: 75.9, mean: 932.33, stateCV: 95.2, state: 'Jigawa'},
+    {item: 'Vegetable oil', cv: 75.8, mean: 891.03, stateCV: 101.5, state: 'Bayelsa'},
+    {item: 'Tilapia fresh', cv: 75.8, mean: 1220.03, stateCV: 107.7, state: 'Bayelsa'},
+    {item: 'Bread unsliced', cv: 74.2, mean: 448.34, stateCV: 87.6, state: 'Kwara'},
+    {item: 'Chicken Wings', cv: 74.0, mean: 1412.88, stateCV: 107.7, state: 'Niger'},
+    {item: 'Agric eggs (crate)', cv: 73.8, mean: 746.53, stateCV: 93.2, state: 'Gombe'},
+    {item: 'Bread sliced', cv: 72.7, mean: 482.28, stateCV: 86.0, state: 'Gombe'},
+    {item: 'Titus frozen', cv: 72.1, mean: 1416.35, stateCV: 132.0, state: 'Anambra'},
+    {item: 'Mackerel frozen', cv: 69.1, mean: 1359.63, stateCV: 119.5, state: 'Anambra'},
+    {item: 'Beef bone-in', cv: 68.9, mean: 1585.56, stateCV: 88.3, state: 'Osun'},
+    {item: 'Palm oil', cv: 68.7, mean: 796.91, stateCV: 80.9, state: 'Ogun'},
+    {item: 'Catfish fresh', cv: 65.9, mean: 1413.21, stateCV: 116.0, state: 'Anambra'},
+    {item: 'Beef boneless', cv: 65.0, mean: 1977.77, stateCV: 77.0, state: 'Niger'},
+    {item: 'Mudfish fresh', cv: 63.6, mean: 1383.88, stateCV: 119.3, state: 'Anambra'},
+    {item: 'Iced Sardine', cv: 62.9, mean: 1308.93, stateCV: 91.6, state: 'Jigawa'},
+    {item: 'Catfish dried', cv: 58.5, mean: 2224.87, stateCV: 121.8, state: 'Anambra'},
+    {item: 'Frozen chicken', cv: 56.5, mean: 2296.0, stateCV: 80.8, state: 'Anambra'},
+    {item: 'Dried Fish Sardine', cv: 56.0, mean: 1799.32, stateCV: 126.6, state: 'Anambra'},
+    {item: 'Mudfish dried', cv: 52.9, mean: 2198.4, stateCV: 92.3, state: 'Jigawa'},
+    {item: 'Catfish smoked', cv: 47.2, mean: 1857.46, stateCV: 91.1, state: 'Anambra'},
+];
+
+const monthlyClimbData = [
+    {item: 'Beef boneless', slope: 31.19},
+    {item: 'Frozen chicken', slope: 30.95},
+    {item: 'Beef bone-in', slope: 25.25},
+    {item: 'Titus frozen', slope: 24.06},
+    {item: 'Chicken Wings', slope: 21.05},
+    {item: 'Mackerel frozen', slope: 20.41},
+    {item: 'Iced Sardine', slope: 19.55},
+    {item: 'Catfish dried', slope: 19.57},
+    {item: 'Catfish fresh', slope: 19.27},
+    {item: 'Wheat flour', slope: 18.99},
+    {item: 'Mudfish dried', slope: 18.11},
+    {item: 'Dried Fish Sardine', slope: 17.85},
+    {item: 'Mudfish fresh', slope: 17.81},
+    {item: 'Tilapia fresh', slope: 17.47},
+    {item: 'Groundnut oil', slope: 17.23},
+];
+
+const forecastEval = [
+    {item:'Catfish fresh',mape_p:31.3,mape_l:2.27},{item:'Titus frozen',mape_p:25.2,mape_l:2.73},
+    {item:'Catfish smoked',mape_p:20.48,mape_l:2.83},{item:'Chicken Wings',mape_p:24.13,mape_l:3.17},
+    {item:'Rice agric',mape_p:25.8,mape_l:3.46},{item:'Bread unsliced',mape_p:27.15,mape_l:3.47},
+    {item:'Groundnut oil',mape_p:24.4,mape_l:3.69},{item:'Bread sliced',mape_p:29.74,mape_l:4.07},
+    {item:'Brown beans',mape_p:33.04,mape_l:4.39},{item:'Rice medium',mape_p:23.19,mape_l:4.54},
+    {item:'Wheat flour',mape_p:31.63,mape_l:4.52},{item:'Palm oil',mape_p:17.13,mape_l:4.68},
+    {item:'Agric eggs (crate)',mape_p:25.54,mape_l:4.85},{item:'White-eye beans',mape_p:37.57,mape_l:4.92},
+    {item:'Vegetable oil',mape_p:23.96,mape_l:4.96},{item:'Gari yellow',mape_p:30.57,mape_l:5.24},
+    {item:'Maize yellow',mape_p:22.97,mape_l:5.45},{item:'Iced Sardine',mape_p:19.6,mape_l:5.55},
+    {item:'Rice local',mape_p:21.47,mape_l:5.61},{item:'Tilapia fresh',mape_p:31.6,mape_l:5.68},
+    {item:'Yam tuber',mape_p:35.68,mape_l:6.34},{item:'Mackerel frozen',mape_p:23.3,mape_l:6.33},
+    {item:'Gari white',mape_p:32.31,mape_l:6.54},{item:'Dried Fish Sardine',mape_p:14.77,mape_l:6.71},
+    {item:'Plantain (unripe)',mape_p:16.48,mape_l:6.8},{item:'Imported rice',mape_p:29.83,mape_l:6.9},
+    {item:'Plantain (ripe)',mape_p:11.55,mape_l:6.99},{item:'Irish potato',mape_p:29.89,mape_l:7.54},
+    {item:'Evap. milk (Peak)',mape_p:5.6,mape_l:7.55},{item:'Chicken Feet',mape_p:25.92,mape_l:7.64},
+    {item:'Evap. milk (Carnation)',mape_p:9.44,mape_l:7.66},{item:'Mudfish fresh',mape_p:23.6,mape_l:7.58},
+    {item:'Maize white',mape_p:19.66,mape_l:7.97},{item:'Sweet potato',mape_p:31.89,mape_l:8.43},
+    {item:'Agric eggs (unit)',mape_p:28.42,mape_l:8.68},{item:'Onion bulb',mape_p:24.8,mape_l:8.76},
+    {item:'Broken rice (Ofada)',mape_p:16.73,mape_l:8.96},{item:'Tomato',mape_p:31.79,mape_l:11.07},
+    {item:'Beef bone-in',mape_p:22.24,mape_l:11.94},{item:'Catfish dried',mape_p:25.69,mape_l:14.07},
+    {item:'Mudfish dried',mape_p:27.51,mape_l:18.86},{item:'Frozen chicken',mape_p:26.09,mape_l:27.59},
+    {item:'Beef boneless',mape_p:29.56,mape_l:29.7},
+];
+
+// Full geographic arbitrage data
+const fullGeoData = [
+    {item:'Irish potato',cheap:'Borno',cheapPrice:310.38,expensive:'Anambra',expPrice:2083.13,spread:571.1},
+    {item:'Gari white',cheap:'Kwara',cheapPrice:296.45,expensive:'Anambra',expPrice:1661.76,spread:460.5},
+    {item:'Tinned milk (Carnation)',cheap:'Kogi',cheapPrice:232.0,expensive:'Anambra',expPrice:1292.24,spread:457.0},
+    {item:'Tomato',cheap:'Adamawa',cheapPrice:275.95,expensive:'Anambra',expPrice:1352.63,spread:390.2},
+    {item:'Maize yellow',cheap:'Katsina',cheapPrice:231.58,expensive:'Bayelsa',expPrice:1008.18,spread:335.3},
+    {item:'Plantain (unripe)',cheap:'Yobe',cheapPrice:270.44,expensive:'Bayelsa',expPrice:969.68,spread:258.6},
+    {item:'Chicken Feet',cheap:'Taraba',cheapPrice:452.17,expensive:'Anambra',expPrice:1573.18,spread:247.9},
+    {item:'Plantain (ripe)',cheap:'Taraba',cheapPrice:286.28,expensive:'Bayelsa',expPrice:993.77,spread:247.1},
+    {item:'Evap. milk (Peak)',cheap:'Niger',cheapPrice:262.85,expensive:'Anambra',expPrice:900.41,spread:242.6},
+    {item:'Yam tuber',cheap:'Borno',cheapPrice:248.04,expensive:'Bayelsa',expPrice:830.67,spread:234.9},
+    {item:'Chicken Wings',cheap:'Taraba',cheapPrice:762.21,expensive:'Anambra',expPrice:2518.28,spread:230.4},
+    {item:'Mudfish dried',cheap:'Jigawa',cheapPrice:1068.15,expensive:'Abia',expPrice:3385.47,spread:216.9},
+    {item:'Rice agric',cheap:'Kebbi',cheapPrice:446.81,expensive:'Bayelsa',expPrice:1358.0,spread:203.9},
+    {item:'Rice medium',cheap:'Adamawa',cheapPrice:466.47,expensive:'Anambra',expPrice:1267.47,spread:171.7},
+    {item:'Rice local',cheap:'Benue',cheapPrice:439.14,expensive:'Bayelsa',expPrice:1186.21,spread:170.1},
+    {item:'Onion bulb',cheap:'Adamawa',cheapPrice:251.68,expensive:'Cross River',expPrice:667.06,spread:165.0},
+    {item:'Sweet potato',cheap:'Borno',cheapPrice:172.22,expensive:'Bayelsa',expPrice:452.19,spread:162.6},
+    {item:'Tilapia fresh',cheap:'Taraba',cheapPrice:738.06,expensive:'Edo',expPrice:1729.31,spread:134.3},
+    {item:'Mudfish fresh',cheap:'Anambra',cheapPrice:764.95,expensive:'Edo',expPrice:1791.3,spread:134.2},
+    {item:'Agric eggs (unit)',cheap:'Borno',cheapPrice:59.95,expensive:'Lagos',expPrice:138.33,spread:130.7},
+    {item:'Catfish dried',cheap:'Jigawa',cheapPrice:1618.94,expensive:'Imo',expPrice:3696.09,spread:128.3},
+    {item:'Palm oil',cheap:'Niger',cheapPrice:626.07,expensive:'Anambra',expPrice:1403.21,spread:124.1},
+    {item:'Dried Fish Sardine',cheap:'Jigawa',cheapPrice:1155.39,expensive:'Enugu',expPrice:2552.74,spread:120.9},
+    {item:'Catfish fresh',cheap:'Anambra',cheapPrice:907.28,expensive:'Akwa Ibom',expPrice:1958.77,spread:115.9},
+    {item:'Mackerel frozen',cheap:'Jigawa',cheapPrice:869.15,expensive:'Ebonyi',expPrice:1822.88,spread:109.7},
+    {item:'Titus frozen',cheap:'Anambra',cheapPrice:894.98,expensive:'Abia',expPrice:1802.67,spread:101.4},
+    {item:'Broken rice (Ofada)',cheap:'Kebbi',cheapPrice:482.65,expensive:'Lagos',expPrice:970.15,spread:101.0},
+    {item:'Catfish smoked',cheap:'Jigawa',cheapPrice:1167.25,expensive:'Enugu',expPrice:2345.01,spread:100.9},
+    {item:'Maize white',cheap:'Katsina',cheapPrice:236.08,expensive:'Bayelsa',expPrice:459.47,spread:94.6},
+    {item:'Brown beans',cheap:'Yobe',cheapPrice:448.48,expensive:'Ebonyi',expPrice:841.99,spread:87.7},
+    {item:'Iced Sardine',cheap:'Jigawa',cheapPrice:934.99,expensive:'Imo',expPrice:1722.76,spread:84.3},
+    {item:'White-eye beans',cheap:'Yobe',cheapPrice:433.22,expensive:'Ebonyi',expPrice:782.7,spread:80.7},
+    {item:'Wheat flour',cheap:'Anambra',cheapPrice:721.41,expensive:'Abuja',expPrice:1273.73,spread:76.6},
+    {item:'Bread unsliced',cheap:'Yobe',cheapPrice:346.27,expensive:'Bayelsa',expPrice:607.55,spread:75.5},
+    {item:'Groundnut oil',cheap:'Jigawa',cheapPrice:717.62,expensive:'Ebonyi',expPrice:1242.12,spread:73.1},
+    {item:'Bread sliced',cheap:'Yobe',cheapPrice:365.42,expensive:'Bayelsa',expPrice:627.32,spread:71.7},
+    {item:'Gari yellow',cheap:'Anambra',cheapPrice:322.16,expensive:'Bayelsa',expPrice:549.5,spread:70.6},
+    {item:'Vegetable oil',cheap:'Jigawa',cheapPrice:641.67,expensive:'Ekiti',expPrice:1087.48,spread:69.5},
+    {item:'Frozen chicken',cheap:'Taraba',cheapPrice:1817.66,expensive:'Enugu',expPrice:2987.99,spread:64.4},
+    {item:'Imported rice',cheap:'Borno',cheapPrice:583.92,expensive:'Bayelsa',expPrice:824.96,spread:41.3},
+    {item:'Beef bone-in',cheap:'Taraba',cheapPrice:1350.27,expensive:'Bayelsa',expPrice:1893.26,spread:40.2},
+    {item:'Beef boneless',cheap:'Borno',cheapPrice:1685.29,expensive:'Ebonyi',expPrice:2311.06,spread:37.1},
+    {item:'Agric eggs (crate)',cheap:'Borno',cheapPrice:644.42,expensive:'Enugu',expPrice:824.9,spread:28.0},
+];
+
+// Forecast time series data
+const forecastTS = {
+    "Irish potato": {"dates":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],"prophet":[1343.31,1406.91,1308.14,1387.25,1508.53,1542.96,1519.37,1509.81,1499.33,1532.31,1540.42,1593.47,1720.66,1820.37,1830.0,1875.73,1946.23,2011.4,1964.26,1944.61,1912.82,1981.83,1972.74,2108.95],"lgb":[1116.43,1123.11,1142.17,1154.08,1167.71,1189.31,1189.02,1210.24,1227.2,1231.91,1236.07,1259.46,1276.45,1272.23,1274.67,1276.32,1281.36,1296.54,1303.97,1321.85,1343.46,1363.68,1375.95,1412.65],"lower":[1312.09,1373.91,1273.9,1353.2,1472.03,1498.27,1476.05,1462.0,1446.55,1470.22,1476.37,1511.28,1630.97,1714.18,1715.34,1752.16,1809.71,1865.56,1812.69,1774.92,1742.33,1794.72,1777.69,1886.54],"upper":[1376.7,1440.36,1340.25,1421.86,1548.15,1585.19,1564.37,1561.72,1555.96,1599.0,1608.31,1673.5,1816.7,1927.26,1942.71,2005.23,2087.53,2176.92,2138.32,2133.72,2102.26,2188.25,2192.51,2343.81]},
+    "Agric eggs (crate)": {"dates":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],"prophet":[2041.79,2114.79,2164.56,2211.72,2253.64,2311.03,2334.31,2351.15,2370.27,2411.57,2437.47,2450.72,2610.48,2724.39,2836.38,2877.24,2897.44,2949.85,2949.16,2955.09,2962.04,3033.48,3087.79,3091.15],"lgb":[1874.99,1979.69,2162.47,2355.36,2486.56,2589.77,2679.97,2743.26,2859.11,2935.05,3031.26,3060.55,3182.35,3290.71,3595.18,3622.07,3762.84,3822.17,3886.1,4126.82,4104.15,4109.49,4254.72,4257.8],"lower":[2000.72,2072.54,2121.08,2164.84,2205.02,2260.67,2275.39,2285.79,2300.31,2328.46,2349.56,2352.35,2500.64,2594.67,2686.03,2719.57,2725.19,2764.01,2744.83,2743.91,2735.0,2791.25,2838.71,2811.53],"upper":[2086.84,2161.31,2206.34,2258.74,2301.64,2363.51,2396.13,2415.94,2442.02,2487.15,2521.79,2543.74,2723.48,2846.64,2978.89,3025.35,3059.72,3128.82,3138.22,3161.93,3177.53,3268.32,3336.61,3356.33]},
+    "Tomato": {"dates":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],"prophet":[1079.69,1036.64,1020.99,1086.51,1305.24,1328.23,1184.48,1164.79,1106.54,1141.4,1146.52,1178.61,1341.04,1332.76,1357.09,1444.88,1597.08,1633.45,1546.48,1486.61,1373.11,1422.34,1417.19,1501.07],"lgb":[831.03,827.75,816.7,819.07,821.01,814.28,811.2,783.44,767.81,756.96,752.25,746.96,749.69,747.87,745.15,744.89,749.11,745.44,743.51,740.16,732.56,732.56,733.07,732.05],"lower":[1019.14,975.62,963.62,1031.19,1245.31,1270.25,1120.77,1101.48,1046.52,1078.04,1084.41,1114.39,1277.07,1262.86,1286.33,1364.52,1513.65,1546.51,1461.96,1394.17,1284.86,1327.44,1329.6,1400.02],"upper":[1139.05,1090.31,1081.65,1145.63,1363.83,1386.34,1243.5,1224.97,1166.32,1205.76,1214.29,1245.77,1408.81,1407.72,1434.06,1518.54,1680.49,1717.28,1640.88,1572.93,1458.97,1513.09,1517.09,1608.03]},
+    "Palm oil": {"dates":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],"prophet":[1956.45,2200.26,2105.39,2139.76,2239.23,2283.39,2327.66,2340.0,2461.75,2493.71,2730.17,2863.38,2530.48,2712.2,2764.76,2686.99,2700.14,2758.89,2857.63,2937.9,3046.9,3125.61,3252.8,3336.11],"lgb":[2598.95,2636.3,2708.31,2787.29,2892.93,3001.1,3014.77,2992.69,3030.83,3038.54,3014.75,3025.18,3111.15,3173.24,3158.86,3383.37,3391.62,3582.3,3615.44,3700.78,3816.88,3911.84,3950.28,4032.63],"lower":[1890.06,2134.28,2042.87,2076.44,2174.99,2218.1,2258.36,2266.86,2383.7,2413.6,2639.69,2769.31,2431.95,2601.81,2642.21,2545.38,2563.3,2612.8,2705.48,2755.53,2857.9,2912.41,3019.56,3092.68],"upper":[2020.91,2260.21,2169.07,2204.76,2306.08,2353.49,2400.72,2414.63,2545.87,2575.49,2829.56,2976.28,2638.74,2831.14,2893.17,2813.92,2859.18,2925.96,3036.84,3127.79,3257.43,3365.75,3505.38,3591.71]},
+    "Imported rice": {"dates":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],"prophet":[2029.63,2078.48,2097.34,2156.51,2218.97,2227.27,2232.03,2264.12,2257.03,2245.15,2306.45,2327.42,2666.77,2741.26,2771.87,2849.03,2893.03,2882.44,2864.47,2919.82,2873.5,2804.96,2944.19,2990.07],"lgb":[1646.83,1671.36,1684.67,1708.35,1771.26,1806.61,1868.23,1956.88,2092.79,2247.75,2438.18,2631.61,2733.05,2860.76,2933.06,2995.59,3081.21,3097.96,3078.43,3092.47,3098.07,3105.01,3088.22,3133.5],"lower":[1983.04,2029.51,2052.34,2110.28,2165.58,2175.47,2171.97,2203.71,2194.11,2169.21,2222.23,2242.66,2562.12,2624.93,2644.78,2706.52,2739.53,2722.99,2696.97,2739.84,2687.44,2608.19,2728.14,2762.37],"upper":[2071.09,2123.79,2140.7,2201.64,2268.44,2281.07,2289.63,2318.6,2321.33,2311.5,2381.45,2412.58,2772.84,2848.32,2898.17,2978.59,3040.2,3036.89,3026.43,3106.22,3066.18,2998.9,3168.97,3228.64]},
+    "Brown beans": {"dates":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],"prophet":[1536.14,1514.17,1487.72,1536.83,1664.13,1674.97,1683.14,1683.45,1698.72,1735.26,1739.19,1735.0,1980.58,2015.14,1990.6,2045.05,2134.84,2162.99,2171.06,2142.76,2155.27,2236.36,2216.78,2190.5],"lgb":[1274.01,1281.56,1283.26,1289.42,1301.41,1321.16,1336.78,1356.69,1370.27,1400.01,1427.34,1463.91,1523.57,1638.03,1700.93,1749.64,1796.32,1855.11,1919.22,1942.81,2082.84,2236.7,2426.37,2529.86],"lower":[1502.32,1477.56,1452.93,1498.73,1621.63,1630.86,1628.66,1620.88,1631.46,1656.75,1656.71,1641.21,1862.58,1874.72,1847.92,1882.07,1953.75,1965.67,1959.18,1924.55,1921.02,1986.93,1952.71,1920.75],"upper":[1570.79,1548.14,1525.37,1572.82,1708.18,1720.17,1732.06,1742.54,1763.93,1810.08,1820.0,1823.51,2088.49,2131.14,2120.37,2197.54,2301.8,2344.36,2355.49,2336.4,2364.23,2463.57,2453.15,2428.86]},
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CHARTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ── 1. Top Risers Horizontal Bar Chart ──
+(function() {
+    const top7 = priceChangeData.slice(0, 7);
+    new Chart(document.getElementById('topRisersChart'), {
+        type: 'bar',
+        data: {
+            labels: top7.map(d => d.item),
+            datasets: [{
+                data: top7.map(d => d.change),
+                backgroundColor: top7.map((_, i) => {
+                    const colors = [COLORS.orange, COLORS.orangeLight, COLORS.cream, COLORS.tealLight, COLORS.teal, COLORS.brownLight, COLORS.brown];
+                    return colors[i] + 'CC';
+                }),
+                borderColor: 'transparent',
+                borderRadius: 6,
+                barThickness: 32,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const d = top7[ctx.dataIndex];
+                            return [`+${d.change}% total increase`, `${d.mom}%/month avg.`, `Prices double every ~3 years`];
+                        }
+                    }
+                },
+                annotation: {
+                    annotations: {
+                        line1: {
+                            type: 'line',
+                            xMin: 430,
+                            xMax: 430,
+                            borderColor: COLORS.cream + '40',
+                            borderWidth: 1,
+                            borderDash: [6, 4],
+                            label: {
+                                display: true,
+                                content: '430% average',
+                                position: 'start',
+                                color: COLORS.gridText,
+                                font: { size: 11 },
+                                backgroundColor: 'transparent',
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: COLORS.grid },
+                    ticks: { callback: v => v + '%', color: COLORS.gridText },
+                    title: { display: true, text: 'Total Price Change (%)', color: COLORS.gridText }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { color: COLORS.cream, font: { weight: '500' } }
+                }
+            }
+        }
+    });
+})();
+
+// ── 2. All Items Animated Bars ──
+(function() {
+    const container = document.getElementById('allItemsBars');
+    const maxChange = priceChangeData[0].change;
+    priceChangeData.forEach((d, i) => {
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+            <div class="bar-label-row">
+                <span class="bar-label">${d.item}</span>
+                <span class="bar-value">+${d.change}%</span>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill" data-width="${(d.change / maxChange * 100)}" style="transition-delay: ${i * 30}ms;"></div>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+})();
+
+// ── 3. Geographic Price Gap Chart ──
+(function() {
+    const ctx = document.getElementById('geoGapChart');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: geoData.map(d => d.item),
+            datasets: [
+                {
+                    label: 'Cheapest State',
+                    data: geoData.map(d => d.cheapPrice),
+                    backgroundColor: COLORS.tealLight + 'BB',
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                },
+                {
+                    label: 'Most Expensive State',
+                    data: geoData.map(d => d.expPrice),
+                    backgroundColor: COLORS.orange + 'BB',
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        afterTitle: (items) => {
+                            const d = geoData[items[0].dataIndex];
+                            return `${d.spread}% price spread`;
+                        },
+                        label: (ctx) => {
+                            const d = geoData[ctx.dataIndex];
+                            if (ctx.datasetIndex === 0) return `${d.cheap}: ₦${d.cheapPrice.toLocaleString()}`;
+                            return `${d.expensive}: ₦${d.expPrice.toLocaleString()}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: COLORS.grid },
+                    ticks: { callback: v => '₦' + v.toLocaleString(), color: COLORS.gridText }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { color: COLORS.cream, font: { size: 11, weight: '500' } }
+                }
+            }
+        }
+    });
+})();
+
+// ── 4. Interactive Geo Item Selector ──
+(function() {
+    const select = document.getElementById('geoItemSelect');
+    fullGeoData.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.item;
+        opt.textContent = `${d.item} (${d.spread}% spread)`;
+        select.appendChild(opt);
+    });
+
+    let chart = null;
+    function renderGeoItem(itemName) {
+        const d = fullGeoData.find(g => g.item === itemName);
+        if (!d) return;
+        const ann = document.getElementById('geoItemAnnotation');
+        ann.innerHTML = `<strong style="color: var(--orange);">₦${(d.expPrice - d.cheapPrice).toLocaleString()}</strong> price difference per unit · ${d.spread}% spread between <strong>${d.cheap}</strong> → <strong>${d.expensive}</strong>`;
+        
+        if (chart) chart.destroy();
+        chart = new Chart(document.getElementById('geoItemChart'), {
+            type: 'bar',
+            data: {
+                labels: [d.cheap, d.expensive],
+                datasets: [{
+                    data: [d.cheapPrice, d.expPrice],
+                    backgroundColor: [COLORS.tealLight + 'CC', COLORS.orange + 'CC'],
+                    borderRadius: 8,
+                    barThickness: 60,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `₦${ctx.raw.toLocaleString()}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: { color: COLORS.grid },
+                        ticks: { callback: v => '₦' + v.toLocaleString(), color: COLORS.gridText }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: COLORS.cream, font: { weight: '600', size: 13 } }
+                    }
+                }
+            }
+        });
+    }
+
+    select.addEventListener('change', () => renderGeoItem(select.value));
+    renderGeoItem(fullGeoData[0].item);
+})();
+
+// ── 5. Volatility Bubble Chart ──
+(function() {
+    // Split into high vol and low vol for coloring
+    const data = volatilityData.map(d => ({
+        x: d.mean,
+        y: d.cv,
+        r: Math.max(4, d.cv / 12),
+        item: d.item,
+        state: d.state,
+        stateCV: d.stateCV,
+    }));
+
+    new Chart(document.getElementById('volatilityChart'), {
+        type: 'bubble',
+        data: {
+            datasets: [{
+                label: 'Food Items',
+                data: data,
+                backgroundColor: data.map(d => d.y > 95 ? COLORS.orange + '88' : d.y > 70 ? COLORS.cream + '55' : COLORS.tealLight + '66'),
+                borderColor: data.map(d => d.y > 95 ? COLORS.orange : d.y > 70 ? COLORS.cream + '77' : COLORS.tealLight),
+                borderWidth: 1.5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: items => items[0].raw.item,
+                        label: item => [
+                            `CV: ${item.raw.y}%`,
+                            `Avg Price: ₦${item.raw.x.toLocaleString()}`,
+                            `Most volatile in: ${item.raw.state} (${item.raw.stateCV}% CV)`
+                        ]
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: COLORS.grid },
+                    title: { display: true, text: 'Average Price (₦)', color: COLORS.gridText },
+                    ticks: { callback: v => '₦' + v.toLocaleString(), color: COLORS.gridText }
+                },
+                y: {
+                    grid: { color: COLORS.grid },
+                    title: { display: true, text: 'Coefficient of Variation (%)', color: COLORS.gridText },
+                    ticks: { callback: v => v + '%', color: COLORS.gridText }
+                }
+            }
+        }
+    });
+
+    // High vol bars
+    const highVol = volatilityData.filter(d => d.cv >= 95).sort((a,b) => b.cv - a.cv);
+    const highContainer = document.getElementById('highVolBars');
+    highVol.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+            <div class="bar-label-row"><span class="bar-label">${d.item}</span><span class="bar-value">${d.cv}%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-width="${(d.cv / 182 * 100)}" style="background: linear-gradient(90deg, ${COLORS.orange}, ${COLORS.brown});"></div></div>
+        `;
+        highContainer.appendChild(row);
+    });
+
+    const lowVol = volatilityData.filter(d => d.cv < 65).sort((a,b) => a.cv - b.cv);
+    const lowContainer = document.getElementById('lowVolBars');
+    lowVol.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+            <div class="bar-label-row"><span class="bar-label">${d.item}</span><span class="bar-value">${d.cv}%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-width="${(d.cv / 65 * 100)}" style="background: linear-gradient(90deg, ${COLORS.teal}, ${COLORS.tealLight});"></div></div>
+        `;
+        lowContainer.appendChild(row);
+    });
+})();
+
+// ── 6. Monthly Climb Chart ──
+(function() {
+    new Chart(document.getElementById('monthlyClimbChart'), {
+        type: 'bar',
+        data: {
+            labels: monthlyClimbData.map(d => d.item),
+            datasets: [{
+                data: monthlyClimbData.map(d => d.slope),
+                backgroundColor: monthlyClimbData.map((d, i) => {
+                    const t = i / (monthlyClimbData.length - 1);
+                    return i < 5 ? COLORS.orange + 'CC' : i < 10 ? COLORS.cream + '88' : COLORS.tealLight + '77';
+                }),
+                borderRadius: 6,
+                barThickness: 24,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `₦${ctx.raw.toFixed(2)} increase per month`
+                    }
+                },
+                annotation: {
+                    annotations: {
+                        proteinZone: {
+                            type: 'box',
+                            yMin: -0.5,
+                            yMax: 4.5,
+                            backgroundColor: COLORS.orange + '0D',
+                            borderColor: COLORS.orange + '30',
+                            borderWidth: 1,
+                            label: {
+                                display: true,
+                                content: 'Protein items',
+                                position: { x: 'end', y: 'start' },
+                                color: COLORS.orange,
+                                font: { size: 10, weight: '600' },
+                                backgroundColor: 'transparent',
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: COLORS.grid },
+                    ticks: { callback: v => '₦' + v, color: COLORS.gridText },
+                    title: { display: true, text: 'Monthly Price Increase (₦)', color: COLORS.gridText }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { color: COLORS.cream, font: { size: 11 } }
+                }
+            }
+        }
+    });
+})();
+
+// ── 7. Model Accuracy Comparison ──
+(function() {
+    const sorted = [...forecastEval].sort((a,b) => a.mape_l - b.mape_l);
+    let chart = new Chart(document.getElementById('modelAccuracyChart'), {
+        type: 'bar',
+        data: {
+            labels: sorted.map(d => d.item),
+            datasets: [
+                {
+                    label: 'LightGBM MAPE',
+                    data: sorted.map(d => d.mape_l),
+                    backgroundColor: COLORS.tealLight + 'BB',
+                    borderRadius: 3,
+                    barPercentage: 0.7,
+                },
+                {
+                    label: 'Prophet MAPE',
+                    data: sorted.map(d => d.mape_p),
+                    backgroundColor: COLORS.cream + '55',
+                    borderRadius: 3,
+                    barPercentage: 0.7,
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { color: COLORS.cream, usePointStyle: true, pointStyle: 'rectRounded', padding: 16 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
+                    }
+                },
+                annotation: {
+                    annotations: {
+                        goodLine: {
+                            type: 'line',
+                            xMin: 10,
+                            xMax: 10,
+                            borderColor: COLORS.tealLight + '55',
+                            borderWidth: 1,
+                            borderDash: [4, 3],
+                            label: {
+                                display: true,
+                                content: '10% MAPE',
+                                position: 'start',
+                                color: COLORS.tealLight,
+                                font: { size: 10 },
+                                backgroundColor: 'transparent',
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: COLORS.grid },
+                    ticks: { callback: v => v + '%', color: COLORS.gridText },
+                    title: { display: true, text: 'Mean Absolute Percentage Error (%)', color: COLORS.gridText }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { color: COLORS.cream, font: { size: 9 } }
+                }
+            }
+        }
+    });
+
+    // Controls
+    document.getElementById('forecastModelControls').addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        document.querySelectorAll('#forecastModelControls button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const show = btn.dataset.show;
+        chart.data.datasets[0].hidden = show === 'prophet';
+        chart.data.datasets[1].hidden = show === 'lgb';
+        chart.update();
+    });
+})();
+
+// ── 8. Interactive Forecast Line Chart ──
+(function() {
+    const container = document.getElementById('forecastItemBtns');
+    const items = Object.keys(forecastTS);
+    items.forEach((item, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = item;
+        btn.dataset.item = item;
+        if (i === 0) btn.classList.add('active');
+        container.appendChild(btn);
+    });
+
+    let chart = null;
+    function renderForecast(itemName) {
+        const d = forecastTS[itemName];
+        if (!d) return;
+        if (chart) chart.destroy();
+
+        chart = new Chart(document.getElementById('forecastLineChart'), {
+            type: 'line',
+            data: {
+                labels: d.dates,
+                datasets: [
+                    {
+                        label: 'Prophet 80% Upper',
+                        data: d.upper,
+                        borderColor: 'transparent',
+                        backgroundColor: COLORS.cream + '15',
+                        fill: '+1',
+                        pointRadius: 0,
+                        order: 3,
+                    },
+                    {
+                        label: 'Prophet 80% Lower',
+                        data: d.lower,
+                        borderColor: 'transparent',
+                        backgroundColor: 'transparent',
+                        fill: false,
+                        pointRadius: 0,
+                        order: 3,
+                    },
+                    {
+                        label: 'Prophet Forecast',
+                        data: d.prophet,
+                        borderColor: COLORS.cream + 'AA',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [6, 3],
+                        pointRadius: 2,
+                        pointBackgroundColor: COLORS.cream,
+                        tension: 0.3,
+                        order: 2,
+                    },
+                    {
+                        label: 'LightGBM Forecast',
+                        data: d.lgb,
+                        borderColor: COLORS.tealLight,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        pointRadius: 3,
+                        pointBackgroundColor: COLORS.tealLight,
+                        tension: 0.3,
+                        order: 1,
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: COLORS.cream,
+                            usePointStyle: true,
+                            filter: (item) => !item.text.includes('80%'),
+                            padding: 16,
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                if (ctx.dataset.label.includes('80%')) return null;
+                                return `${ctx.dataset.label}: ₦${ctx.raw.toLocaleString()}`;
+                            }
+                        }
+                    },
+                    annotation: {
+                        annotations: {
+                            yearLine: {
+                                type: 'line',
+                                xMin: 11.5,
+                                xMax: 11.5,
+                                borderColor: COLORS.orange + '55',
+                                borderWidth: 1,
+                                borderDash: [5, 3],
+                                label: {
+                                    display: true,
+                                    content: '2026 →',
+                                    position: 'start',
+                                    color: COLORS.orange,
+                                    font: { size: 10, weight: '600' },
+                                    backgroundColor: 'transparent',
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: COLORS.grid },
+                        ticks: { color: COLORS.gridText, maxRotation: 45 }
+                    },
+                    y: {
+                        grid: { color: COLORS.grid },
+                        ticks: { callback: v => '₦' + v.toLocaleString(), color: COLORS.gridText }
+                    }
+                }
+            }
+        });
+    }
+
+    container.addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderForecast(btn.dataset.item);
+    });
+
+    renderForecast(items[0]);
+})();
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SCROLL ANIMATIONS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Trigger bar fills
+            entry.target.querySelectorAll('.bar-fill').forEach(bar => {
+                bar.style.width = bar.dataset.width + '%';
+            });
+        }
+    });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ── Navbar Active State ──
+const sections = document.querySelectorAll('.section, .hero');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+        const top = sec.offsetTop - 100;
+        if (scrollY >= top) current = sec.id;
+    });
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+    });
+});
+
+// ── Hero counter animation ──
+document.querySelectorAll('[data-count]').forEach(counterEl => {
+    const target = parseFloat(counterEl.dataset.count);
+    const decimals = parseInt(counterEl.dataset.decimals || '0', 10);
+    const suffix = counterEl.dataset.suffix || '';
+    let current = 0;
+    const frames = 60;
+    const step = target / frames;
+
+    const formatValue = (value) => {
+        if (decimals > 0) return value.toFixed(decimals) + suffix;
+        return Math.floor(value).toLocaleString() + suffix;
+    };
+
+    const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+            current = target;
+            clearInterval(timer);
+        }
+        counterEl.textContent = formatValue(current);
+    }, 25);
+});
+</script>
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+
+</body>
+</html>

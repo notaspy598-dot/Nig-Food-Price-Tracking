@@ -1,0 +1,33 @@
+# Environments
+.venv/
+__pycache__/
+*.pyc
+
+# Agent tooling
+.agents/
+
+# Raw data and generated analysis outputs (kept locally, not deployed)
+*.csv
+*.xlsx
+images/
+output/
+
+# Analysis and build scripts (kept locally, not deployed)
+analysis.py
+create_excel_report.py
+eda_analysis.py
+forecast.py
+replace_colors.py
+fix_v2.ps1
+
+# Superseded dashboard
+dashboard.html
+
+# Working notes and drafts
+DATA_STORY.md
+DEPLOYMENT.md
+design_system.md
+ui_ux_guidelines.md
+ui_ux_guidelines_utf8.md
+future plans.txt
+plan-*.prompt.md

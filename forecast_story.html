@@ -10,29 +10,29 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --blue-900: #1E3A8A;
-    --blue-800: #1E40AF;
-    --blue-600: #2563EB;
-    --blue-400: #60A5FA;
-    --blue-100: #DBEAFE;
-    --blue-50: #EFF6FF;
-    --amber-500: #F59E0B;
-    --amber-400: #FBBF24;
-    --amber-100: #FEF3C7;
-    --slate-900: #0F172A;
-    --slate-700: #334155;
-    --slate-500: #64748B;
-    --slate-300: #CBD5E1;
-    --slate-100: #F1F5F9;
-    --bg: #F8FAFC;
+    --blue-900: #0C2233;
+    --blue-800: #2D6A6A;
+    --blue-600: #3D8A8A;
+    --blue-400: #5BAAAA;
+    --blue-100: #D0E8E8;
+    --blue-50: #E8F3F3;
+    --amber-500: #F28C00;
+    --amber-400: #F5A832;
+    --amber-100: #F5DEB3;
+    --slate-900: #0C2233;
+    --slate-700: #1A2E38;
+    --slate-500: #6E8088;
+    --slate-300: #BDCDD2;
+    --slate-100: #E3ECEE;
+    --bg: #FBF6EE;
     --white: #FFFFFF;
     --green-500: #22C55E;
     --green-100: #DCFCE7;
-    --red-500: #EF4444;
-    --red-100: #FEE2E2;
-    --orange-500: #F97316;
-    --purple-500: #A855F7;
-    --teal-500: #14B8A6;
+    --red-500: #6B3521;
+    --red-100: #FCEEE4;
+    --orange-500: #F28C00;
+    --purple-500: #6B3521;
+    --teal-500: #2D6A6A;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -79,7 +79,7 @@
     align-items: center;
     gap: 28px;
     z-index: 1000;
-    box-shadow: 0 4px 24px rgba(30,64,175,0.10);
+    box-shadow: 0 4px 24px rgba(45,106,106,0.12);
   }
 
   .nav-brand {
@@ -107,6 +107,11 @@
   }
 
   .nav-links a:hover { color: var(--blue-800); }
+
+  .nav-links a.active {
+    color: var(--blue-800);
+    font-weight: 600;
+  }
 
   /* ── Container ── */
   .container {
@@ -157,18 +162,39 @@
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #1E40AF 100%);
+    background: linear-gradient(135deg, #0C2233 0%, #1A3D4A 50%, #2D6A6A 100%);
     position: relative;
     overflow: hidden;
     padding-top: 100px;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    animation: bounce 2s infinite;
+  }
+
+  .scroll-indicator svg {
+    width: 24px;
+    height: 24px;
+    fill: rgba(255,255,255,0.65);
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+    40% { transform: translateX(-50%) translateY(-10px); }
+    60% { transform: translateX(-50%) translateY(-5px); }
   }
 
   #hero::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at 70% 50%, rgba(59,130,246,0.25) 0%, transparent 60%),
-                radial-gradient(ellipse at 10% 80%, rgba(245,158,11,0.12) 0%, transparent 50%);
+    background: radial-gradient(ellipse at 70% 50%, rgba(45,106,106,0.30) 0%, transparent 60%),
+                radial-gradient(ellipse at 10% 80%, rgba(242,140,0,0.15) 0%, transparent 50%);
   }
 
   .hero-grid {
@@ -184,8 +210,8 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(245,158,11,0.15);
-    border: 1px solid rgba(245,158,11,0.4);
+    background: rgba(242,140,0,0.15);
+    border: 1px solid rgba(242,140,0,0.4);
     color: var(--amber-400);
     font-size: 12px;
     font-weight: 600;
@@ -292,8 +318,8 @@
     border-radius: 100px;
   }
 
-  .up { background: rgba(239,68,68,0.18); color: #FCA5A5; }
-  .up-mild { background: rgba(249,115,22,0.18); color: #FED7AA; }
+  .up { background: rgba(107,53,33,0.30); color: #E8B49C; }
+  .up-mild { background: rgba(242,140,0,0.22); color: #F5DEB3; }
   .stable { background: rgba(34,197,94,0.15); color: #86EFAC; }
 
   /* ── Why it matters ── */
@@ -318,7 +344,7 @@
   }
 
   .why-card:hover {
-    box-shadow: 0 8px 32px rgba(30,64,175,0.10);
+    box-shadow: 0 8px 32px rgba(45,106,106,0.15);
     border-color: var(--blue-400);
     transform: translateY(-3px);
   }
@@ -375,7 +401,7 @@
   }
 
   .model-prophet::before { background: linear-gradient(90deg, var(--blue-800), var(--blue-400)); }
-  .model-lgb::before { background: linear-gradient(90deg, var(--amber-500), #F97316); }
+  .model-lgb::before { background: linear-gradient(90deg, var(--amber-500), #F28C00); }
 
   .model-badge {
     display: inline-flex;
@@ -392,7 +418,7 @@
   }
 
   .badge-prophet { background: var(--blue-100); color: var(--blue-800); }
-  .badge-lgb { background: var(--amber-100); color: #92400E; }
+  .badge-lgb { background: var(--amber-100); color: #6B3521; }
 
   .model-title {
     font-size: 22px;
@@ -463,7 +489,7 @@
   }
 
   .accuracy-callout {
-    background: linear-gradient(135deg, var(--blue-800) 0%, #2563EB 100%);
+    background: linear-gradient(135deg, var(--blue-800) 0%, #3D8A8A 100%);
     border-radius: 20px;
     padding: 36px 40px;
     display: flex;
@@ -541,7 +567,8 @@
     height: 6px;
     border-radius: 3px;
     flex-shrink: 0;
-    transition: width 0.4s ease;
+    width: 0;
+    transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .bar-prophet { background: var(--blue-600); }
@@ -562,7 +589,7 @@
 
   /* ── Charts ── */
   #forecasts {
-    background: linear-gradient(180deg, var(--bg) 0%, #EFF6FF 100%);
+    background: linear-gradient(180deg, var(--bg) 0%, #E8F3F3 100%);
   }
 
   .chart-tabs {
@@ -710,8 +737,8 @@
   }
 
   .watch-card:hover {
-    box-shadow: 0 8px 24px rgba(239,68,68,0.12);
-    border-color: #FCA5A5;
+    box-shadow: 0 8px 24px rgba(107,53,33,0.15);
+    border-color: #D4A88E;
     transform: translateY(-3px);
   }
 
@@ -765,7 +792,7 @@
 
   /* ── Seasonal calendar ── */
   #seasonal {
-    background: linear-gradient(180deg, var(--bg) 0%, #F0FDF4 100%);
+    background: linear-gradient(180deg, var(--bg) 0%, #F5EDE0 100%);
   }
 
   .calendar-grid {
@@ -819,15 +846,15 @@
   }
 
   .cal-lowest {
-    background: #DCFCE7;
+    background: #D0E8E8;
   }
 
   .cal-mid {
-    background: #FEF3C7;
+    background: #F5DEB3;
   }
 
   .cal-peak {
-    background: #FEE2E2;
+    background: #FCEEE4;
   }
 
   .cal-dot {
@@ -884,12 +911,12 @@
 
   .action-business {
     background: var(--amber-100);
-    border-color: #FDE68A;
+    border-color: #E8C87A;
   }
 
   .action-policy {
-    background: var(--green-100);
-    border-color: #BBF7D0;
+    background: #D0E8E8;
+    border-color: #A8D4D4;
   }
 
   .action-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
@@ -904,8 +931,8 @@
   }
 
   .tag-household { color: var(--blue-800); }
-  .tag-business { color: #92400E; }
-  .tag-policy { color: #166534; }
+  .tag-business { color: #6B3521; }
+  .tag-policy { color: #1A5050; }
 
   .action-card h3 {
     font-size: 18px;
@@ -1008,8 +1035,8 @@
 
   .fade-in {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
   }
 
   .fade-in.visible {
@@ -1134,6 +1161,10 @@
       </div>
     </div>
   </div>
+
+  <a class="scroll-indicator" href="#why" aria-label="Scroll to next section">
+    <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
+  </a>
 </section>
 
 <!-- ═══════════════ WHY IT MATTERS ═══════════════ -->
@@ -1301,7 +1332,7 @@
         <div style="font-family:'Fira Code',monospace;font-size:12px;font-weight:700;color:var(--slate-500);letter-spacing:0.5px;">VS</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-family:'Fira Code',monospace;font-size:13px;font-weight:700;color:#92400E;margin-bottom:12px;letter-spacing:0.5px;">LIGHTGBM STRENGTHS</div>
+        <div style="font-family:'Fira Code',monospace;font-size:13px;font-weight:700;color:#6B3521;margin-bottom:12px;letter-spacing:0.5px;">LIGHTGBM STRENGTHS</div>
         <div style="font-size:14px;color:var(--slate-600);line-height:1.7;">
           Higher accuracy (3× better)<br/>
           Captures sudden shifts<br/>
@@ -1393,15 +1424,15 @@
         </div>
         <div class="legend-row">
           <div class="legend-item">
-            <div class="legend-line" style="background:#1E40AF;"></div>
+            <div class="legend-line" style="background:#2D6A6A;"></div>
             <span>Prophet Forecast</span>
           </div>
           <div class="legend-item">
-            <div class="legend-line" style="background:#F59E0B;border:2px dashed #F59E0B;background:none;flex-shrink:0;width:24px;height:0;border-bottom:3px dashed #F59E0B;"></div>
+            <div class="legend-line" style="background:#F28C00;border:2px dashed #F28C00;background:none;flex-shrink:0;width:24px;height:0;border-bottom:3px dashed #F28C00;"></div>
             <span>LightGBM Forecast</span>
           </div>
           <div class="legend-item">
-            <div class="legend-band" style="background:#1E40AF;"></div>
+            <div class="legend-band" style="background:#2D6A6A;"></div>
             <span>80% Confidence Band</span>
           </div>
         </div>
@@ -1489,13 +1520,13 @@
       </div>
     </div>
 
-    <div style="margin-top:32px; background:var(--amber-100); border:1px solid #FDE68A; border-radius:16px; padding:24px 28px; display:flex; align-items:flex-start; gap:16px;" class="fade-in">
+    <div style="margin-top:32px; background:var(--amber-100); border:1px solid #E8C87A; border-radius:16px; padding:24px 28px; display:flex; align-items:flex-start; gap:16px;" class="fade-in">
       <div style="flex-shrink:0; width:40px; height:40px; background:var(--amber-500); border-radius:10px; display:flex; align-items:center; justify-content:center;">
         <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="white"/></svg>
       </div>
       <div>
-        <strong style="font-size:15px; color:#92400E; font-family:'Fira Code',monospace; letter-spacing:0.3px;">Important Note on Model Disagreement</strong>
-        <p style="font-size:14px; color:#78350F; margin-top:6px; line-height:1.65;">
+        <strong style="font-size:15px; color:#6B3521; font-family:'Fira Code',monospace; letter-spacing:0.3px;">Important Note on Model Disagreement</strong>
+        <p style="font-size:14px; color:#4A2515; margin-top:6px; line-height:1.65;">
           Prophet and LightGBM often give different forecasts for the same item. Prophet tends to show higher prices for eggs, yam, and rice because it projects long-term upward trends. LightGBM, being more sensitive to recent data, sometimes shows stabilisation after an initial spike. When the two models agree, you can be more confident. When they disagree significantly, treat the forecast range as wide.
         </p>
       </div>
@@ -1576,9 +1607,9 @@
     </div>
 
     <div class="cal-legend fade-in">
-      <div class="cal-legend-item"><div class="cal-swatch" style="background:#DCFCE7;border:1px solid #BBF7D0;"></div><span>Cheapest period — best time to bulk-buy</span></div>
-      <div class="cal-legend-item"><div class="cal-swatch" style="background:#FEF3C7;border:1px solid #FDE68A;"></div><span>Moderate prices — average range</span></div>
-      <div class="cal-legend-item"><div class="cal-swatch" style="background:#FEE2E2;border:1px solid #FECACA;"></div><span>Peak prices — avoid large purchases if possible</span></div>
+      <div class="cal-legend-item"><div class="cal-swatch" style="background:#D0E8E8;border:1px solid #A8D4D4;"></div><span>Cheapest period — best time to bulk-buy</span></div>
+      <div class="cal-legend-item"><div class="cal-swatch" style="background:#F5DEB3;border:1px solid #E8C87A;"></div><span>Moderate prices — average range</span></div>
+      <div class="cal-legend-item"><div class="cal-swatch" style="background:#FCEEE4;border:1px solid #E8B49C;"></div><span>Peak prices — avoid large purchases if possible</span></div>
     </div>
   </div>
 </section>
@@ -1741,13 +1772,41 @@ window.addEventListener('scroll', () => {
   document.getElementById('progress-bar').style.width = pct + '%';
 });
 
-// ── Fade-in on scroll ──
+// ── Fade-up per element (each .fade-in reveals individually on scroll) ──
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('visible'); }
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      // Trigger accuracy bars
+      entry.target.querySelectorAll('[data-target-width]').forEach(bar => {
+        bar.style.width = bar.dataset.targetWidth + 'px';
+      });
+    }
   });
-}, { threshold: 0.12 });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ── Navbar active state on scroll (mirrors data_story.html flow) ──
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(sec => {
+    const top = sec.offsetTop - 100;
+    if (window.scrollY >= top) current = sec.id;
+  });
+
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + current) {
+      link.classList.add('active');
+    }
+  });
+});
+
+window.dispatchEvent(new Event('scroll'));
 
 // ── Counter animation ──
 function animateCounter(el) {
@@ -1808,10 +1867,10 @@ accuracyData.forEach(row => {
   tr.innerHTML = `
     <td style="font-weight:600;color:var(--slate-900);">${row.item}</td>
     <td style="font-family:'Fira Code',monospace;font-weight:600;color:var(--blue-800);">${row.prophet.toFixed(1)}%</td>
-    <td><div class="mape-bar-wrap"><div class="mape-bar bar-prophet" style="width:${prophetWidth}px;"></div></div></td>
-    <td style="font-family:'Fira Code',monospace;font-weight:600;color:${lgbWins ? 'var(--green-500)' : '#EF4444'};">${row.lgb.toFixed(1)}%</td>
-    <td><div class="mape-bar-wrap"><div class="mape-bar bar-lgb" style="width:${lgbWidth}px;"></div></div></td>
-    <td>${lgbWins ? '<span class="winner-badge">LGB wins</span>' : '<span class="winner-badge" style="background:#FEE2E2;color:#991B1B;">Prophet</span>'}</td>
+    <td><div class="mape-bar-wrap"><div class="mape-bar bar-prophet" data-target-width="${prophetWidth}"></div></div></td>
+    <td style="font-family:'Fira Code',monospace;font-weight:600;color:${lgbWins ? 'var(--green-500)' : '#6B3521'};">${row.lgb.toFixed(1)}%</td>
+    <td><div class="mape-bar-wrap"><div class="mape-bar bar-lgb" data-target-width="${lgbWidth}"></div></div></td>
+    <td>${lgbWins ? '<span class="winner-badge">LGB wins</span>' : '<span class="winner-badge" style="background:#FCEEE4;color:#6B3521;">Prophet</span>'}</td>
   `;
   tbody.appendChild(tr);
 });
@@ -1862,7 +1921,7 @@ function buildChart(id) {
   const d = chartData[id];
   const ctx = document.getElementById('chart-' + id).getContext('2d');
 
-  const bandColor = 'rgba(30,64,175,0.08)';
+  const bandColor = 'rgba(45,106,106,0.10)';
 
   const chart = new Chart(ctx, {
     type: 'line',
@@ -1890,7 +1949,7 @@ function buildChart(id) {
         {
           label: 'Prophet Forecast',
           data: d.prophet,
-          borderColor: '#1E40AF',
+          borderColor: '#2D6A6A',
           backgroundColor: 'transparent',
           fill: false,
           borderWidth: 2.5,
@@ -1901,7 +1960,7 @@ function buildChart(id) {
         {
           label: 'LightGBM Forecast',
           data: d.lgb,
-          borderColor: '#F59E0B',
+          borderColor: '#F28C00',
           backgroundColor: 'transparent',
           fill: false,
           borderWidth: 2.5,
@@ -1921,9 +1980,9 @@ function buildChart(id) {
           display: false,
         },
         tooltip: {
-          backgroundColor: '#0F172A',
-          titleColor: '#94A3B8',
-          bodyColor: '#F8FAFC',
+          backgroundColor: '#0C2233',
+          titleColor: '#93AEB7',
+          bodyColor: '#FBF6EE',
           borderColor: 'rgba(255,255,255,0.1)',
           borderWidth: 1,
           padding: 12,
@@ -1939,7 +1998,7 @@ function buildChart(id) {
         x: {
           grid: { color: 'rgba(203,213,225,0.4)', drawTicks: false },
           ticks: {
-            color: '#94A3B8',
+            color: '#93AEB7',
             font: { family: "'Fira Code', monospace", size: 11 },
             maxRotation: 45,
           },
@@ -1948,7 +2007,7 @@ function buildChart(id) {
         y: {
           grid: { color: 'rgba(203,213,225,0.4)', drawTicks: false },
           ticks: {
-            color: '#94A3B8',
+            color: '#93AEB7',
             font: { family: "'Fira Code', monospace", size: 11 },
             callback: v => '₦' + v.toLocaleString()
           },
@@ -1973,5 +2032,9 @@ function switchChart(id) {
 // Build initial chart
 buildChart('yam');
 </script>
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

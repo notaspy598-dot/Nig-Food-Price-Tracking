@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
     rel="stylesheet">
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <style>
@@ -23,29 +23,29 @@
     }
 
     :root {
-      --bg: #06080f;
-      --bg2: #0c1019;
-      --surface: #111827;
-      --surface2: #1a2332;
-      --surface3: #1f2a3d;
-      --border: rgba(255, 255, 255, 0.06);
-      --border2: rgba(255, 255, 255, 0.1);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --accent: #10b981;
-      --accent2: #06b6d4;
-      --accent3: #8b5cf6;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #22c55e;
+      --bg: #FBF6EE;
+      --bg2: #E8F3F3;
+      --surface: #FFFFFF;
+      --surface2: #E3ECEE;
+      --surface3: #D0E8E8;
+      --border: #BDCDD2;
+      --border2: #93AEB7;
+      --text: #1A2E38;
+      --text-muted: #6E8088;
+      --text-dim: #6E8088;
+      --accent: #2D6A6A;
+      --accent2: #F28C00;
+      --accent3: #F5A832;
+      --danger: #6B3521;
+      --warning: #F28C00;
+      --success: #22C55E;
       --sidebar-w: 260px;
       --header-h: 64px;
       --radius: 12px;
       --radius-sm: 8px;
       --radius-xs: 6px;
-      --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-      --glow: 0 0 30px rgba(16, 185, 129, 0.08);
+      --shadow: 0 4px 24px rgba(45, 106, 106, 0.12);
+      --glow: 0 0 30px rgba(45, 106, 106, 0.08);
     }
 
     @media(prefers-reduced-motion:reduce) {
@@ -61,37 +61,47 @@
     }
 
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: 'Fira Sans', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden
     }
 
-    /* ═══ SIDEBAR ═══ */
+    /* ═══ SIDEBAR — Aceternity Style ═══ */
     .sidebar {
       position: fixed;
       left: 0;
       top: 0;
       bottom: 0;
-      width: var(--sidebar-w);
-      background: var(--surface);
+      width: 60px;
+      background: #FFFFFF;
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       z-index: 100;
-      transition: transform .3s cubic-bezier(.4, 0, .2, 1)
+      transition: width .3s cubic-bezier(.4, 0, .2, 1);
+      overflow: hidden
+    }
+
+    .sidebar.expanded {
+      width: 260px
     }
 
     .sidebar-header {
-      padding: 24px 20px;
-      border-bottom: 1px solid var(--border)
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--border);
+      min-height: 68px;
+      display: flex;
+      align-items: center
     }
 
     .sidebar-logo {
       display: flex;
       align-items: center;
-      gap: 12px
+      gap: 12px;
+      white-space: nowrap;
+      overflow: hidden
     }
 
     .sidebar-logo svg {
@@ -106,7 +116,17 @@
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      line-height: 1.3
+      line-height: 1.3;
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity .25s ease, transform .25s ease;
+      pointer-events: none
+    }
+
+    .sidebar.expanded .sidebar-logo h1 {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto
     }
 
     .sidebar-logo .subtitle {
@@ -121,8 +141,13 @@
 
     .sidebar-nav {
       flex: 1;
-      padding: 16px 12px;
-      overflow-y: auto
+      padding: 16px 6px;
+      overflow-y: auto;
+      overflow-x: hidden
+    }
+
+    .sidebar.expanded .sidebar-nav {
+      padding: 16px 12px
     }
 
     .nav-label {
@@ -132,14 +157,25 @@
       letter-spacing: 1px;
       color: var(--text-dim);
       padding: 8px 12px 4px;
-      margin-top: 8px
+      margin-top: 8px;
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      transition: opacity .2s ease, height .2s ease;
+      pointer-events: none
+    }
+
+    .sidebar.expanded .nav-label {
+      opacity: 1;
+      height: auto;
+      pointer-events: auto
     }
 
     .nav-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 14px;
+      padding: 11px;
       border-radius: var(--radius-sm);
       cursor: pointer;
       transition: all .2s;
@@ -148,16 +184,23 @@
       font-weight: 500;
       margin: 2px 0;
       position: relative;
-      overflow: hidden
+      overflow: hidden;
+      justify-content: center;
+      white-space: nowrap
+    }
+
+    .sidebar.expanded .nav-item {
+      justify-content: flex-start;
+      padding: 10px 14px
     }
 
     .nav-item:hover {
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(45, 106, 106, 0.06);
       color: var(--text)
     }
 
     .nav-item.active {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.08));
+      background: linear-gradient(135deg, rgba(45, 106, 106, 0.10), rgba(242, 140, 0, 0.06));
       color: var(--accent);
       font-weight: 600
     }
@@ -174,8 +217,8 @@
     }
 
     .nav-item svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
       opacity: .7
     }
@@ -184,12 +227,61 @@
       opacity: 1
     }
 
+    .nav-text {
+      opacity: 0;
+      display: none;
+      transform: translateX(-4px);
+      transition: opacity .2s ease .05s, transform .2s ease .05s
+    }
+
+    .sidebar.expanded .nav-text {
+      opacity: 1;
+      display: inline-block;
+      transform: translateX(0)
+    }
+
     .sidebar-footer {
-      padding: 16px 20px;
+      padding: 12px;
       border-top: 1px solid var(--border);
       font-size: 11px;
       color: var(--text-dim);
-      line-height: 1.5
+      line-height: 1.5;
+      overflow: hidden;
+      white-space: nowrap
+    }
+
+    .sidebar-footer p {
+      opacity: 0;
+      transition: opacity .2s ease
+    }
+
+    .sidebar.expanded .sidebar-footer p {
+      opacity: 1
+    }
+
+    /* Mobile close button */
+    .sidebar-close {
+      display: none;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 4px;
+      z-index: 105;
+      border-radius: 6px;
+      transition: background .2s
+    }
+
+    .sidebar-close:hover {
+      background: rgba(45, 106, 106, 0.08)
+    }
+
+    .sidebar-close svg {
+      width: 22px;
+      height: 22px
     }
 
     /* ═══ MAIN ═══ */
@@ -202,9 +294,10 @@
       position: sticky;
       top: 0;
       height: var(--header-h);
-      background: rgba(6, 8, 15, 0.85);
-      backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 24px rgba(45, 106, 106, 0.08);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -321,7 +414,7 @@
     }
 
     .stat-value {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Fira Code', monospace;
       font-size: 24px;
       font-weight: 700;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -347,13 +440,13 @@
     }
 
     .stat-card.purple .stat-value {
-      background: linear-gradient(135deg, var(--accent3), #ec4899);
+      background: linear-gradient(135deg, var(--accent3), #E87400);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent
     }
 
     .stat-card.purple::after {
-      background: linear-gradient(90deg, var(--accent3), #ec4899)
+      background: linear-gradient(90deg, var(--accent3), #E87400)
     }
 
     /* ═══ CHART CONTAINERS ═══ */
@@ -420,10 +513,10 @@
       border-radius: var(--radius-xs);
       padding: 8px 32px 8px 12px;
       font-size: 13px;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Fira Sans', sans-serif;
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236E8088' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 10px center;
       min-width: 220px;
@@ -437,7 +530,7 @@
     select:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15)
+      box-shadow: 0 0 0 3px rgba(45, 106, 106, 0.15)
     }
 
     /* ═══ TABLES ═══ */
@@ -534,18 +627,18 @@
 
     td {
       padding: 9px 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       white-space: nowrap;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11.5px
     }
 
     tr:hover td {
-      background: rgba(255, 255, 255, 0.02)
+      background: #E8F3F3
     }
 
     tr:nth-child(even) td {
-      background: rgba(255, 255, 255, 0.01)
+      background: rgba(45, 106, 106, 0.03)
     }
 
     td.positive {
@@ -567,40 +660,18 @@
     }
 
     ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(45, 106, 106, 0.15);
       border-radius: 3px
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.14)
+      background: rgba(45, 106, 106, 0.25)
     }
 
     /* ═══ RESPONSIVE ═══ */
-    @media(max-width:1024px) {
+    @media(min-width:769px) {
       :root {
         --sidebar-w: 60px
-      }
-
-      .sidebar-logo h1,
-      .sidebar-logo .subtitle,
-      .nav-label,
-      .nav-item span,
-      .sidebar-footer p {
-        display: none
-      }
-
-      .sidebar-header {
-        padding: 16px 12px
-      }
-
-      .nav-item {
-        justify-content: center;
-        padding: 12px
-      }
-
-      .nav-item svg {
-        width: 20px;
-        height: 20px
       }
 
       .chart-grid {
@@ -608,21 +679,78 @@
       }
     }
 
+    @media(min-width:1025px) {
+      .chart-grid {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
     @media(max-width:768px) {
       .sidebar {
-        transform: translateX(-100%)
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: width .3s cubic-bezier(.4, 0, .2, 1), opacity .3s ease
       }
 
       .sidebar.open {
+        width: 100%;
+        opacity: 1;
+        pointer-events: auto
+      }
+
+      /* When open on mobile, force expanded look */
+      .sidebar.open .sidebar-logo h1 {
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: auto
+      }
+
+      .sidebar.open .nav-label {
+        opacity: 1;
+        height: auto;
+        pointer-events: auto
+      }
+
+      .sidebar.open .nav-item {
+        justify-content: flex-start;
+        padding: 12px 20px
+      }
+
+      .sidebar.open .nav-text {
+        opacity: 1;
+        display: inline-block;
         transform: translateX(0)
+      }
+
+      .sidebar.open .sidebar-footer p {
+        opacity: 1
+      }
+
+      .sidebar.open .sidebar-nav {
+        padding: 24px 20px
+      }
+
+      .sidebar.open .sidebar-header {
+        padding: 24px 20px
+      }
+
+      .sidebar-close {
+        display: block
       }
 
       .sidebar-overlay {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: 99
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 99;
+        transition: opacity .3s ease
       }
 
       .sidebar-overlay.open {
@@ -676,80 +804,490 @@
     }
 
     /* ═══ EXECUTIVE STORY ═══ */
-    .story-hero{text-align:center;padding:48px 24px 36px;position:relative}
-    .story-hero-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:20px;padding:6px 16px;margin-bottom:20px}
-    .story-hero-title{font-size:clamp(24px,4vw,42px);font-weight:800;line-height:1.15;color:var(--text);margin-bottom:16px}
-    .hero-highlight{background:linear-gradient(135deg,var(--danger),var(--warning));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-family:'JetBrains Mono',monospace}
-    .story-hero-sub{font-size:16px;color:var(--text-muted);line-height:1.6;max-width:600px;margin:0 auto}
-    .story-hero-sub strong{color:var(--text);font-weight:600}
-    .hero-divider{width:80px;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));margin:28px auto 0;border-radius:2px}
-
-    .story-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:40px}
-    .metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 16px;text-align:center;position:relative;overflow:hidden;transition:all .25s}
-    .metric-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--glow)}
-    .metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:.5}
-    .metric-card.metric-danger::after{background:linear-gradient(90deg,var(--danger),var(--warning))}
-    .metric-card.metric-purple::after{background:linear-gradient(90deg,var(--accent3),#ec4899)}
-    .metric-card.metric-stable::after{background:linear-gradient(90deg,var(--success),var(--accent))}
-    .metric-icon{margin-bottom:10px}
-    .metric-icon svg{width:22px;height:22px;color:var(--accent);opacity:.6}
-    .metric-card.metric-danger .metric-icon svg{color:var(--danger)}
-    .metric-card.metric-purple .metric-icon svg{color:var(--accent3)}
-    .metric-card.metric-stable .metric-icon svg{color:var(--success)}
-    .metric-value{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.2}
-    .metric-card.metric-danger .metric-value{color:var(--danger)}
-    .metric-card.metric-purple .metric-value{color:var(--accent3)}
-    .metric-card.metric-stable .metric-value{color:var(--success)}
-    .metric-label{font-size:11px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
-
-    .story-section{margin-bottom:40px}
-    .story-section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
-    .story-section-number{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;min-width:40px}
-    .story-section-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
-    .story-section-desc{font-size:14px;color:var(--text-muted);font-style:italic;line-height:1.5}
-
-    .geo-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .geo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden}
-    .geo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-    .geo-cheap::before{background:linear-gradient(90deg,var(--success),var(--accent))}
-    .geo-expensive::before{background:linear-gradient(90deg,var(--danger),var(--warning))}
-    .geo-card-header{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;margin-bottom:16px}
-    .geo-cheap .geo-card-header{color:var(--success)}
-    .geo-expensive .geo-card-header{color:var(--danger)}
-    .geo-card-header svg{width:18px;height:18px}
-    .geo-card-body{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-    .geo-state-tag{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--text)}
-    .geo-cheap .geo-state-tag{border-color:rgba(34,197,94,0.2);background:rgba(34,197,94,0.06)}
-    .geo-expensive .geo-state-tag{border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.06)}
-    .geo-card-note{font-size:12px;color:var(--text-dim);line-height:1.6;border-top:1px solid var(--border);padding-top:12px}
-
-    .season-callout{background:var(--surface);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius);padding:24px;display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
-    .season-callout-icon{font-size:28px;line-height:1}
-    .season-callout-text{font-size:14px;color:var(--text-muted);line-height:1.7}
-    .season-callout-text strong{color:var(--text);font-weight:600}
-    .season-low{color:var(--success);font-weight:700}
-    .season-high{color:var(--danger);font-weight:700}
-    .season-strip{display:flex;gap:4px;padding:4px 0}
-    .season-month{flex:1;text-align:center;border-radius:var(--radius-xs);padding:12px 4px;font-size:11px;font-weight:600;transition:transform .2s}
-    .season-month:hover{transform:scaleY(1.05)}
-    .season-month-label{display:block;color:var(--text);margin-bottom:4px}
-    .season-month-val{display:block;font-family:'JetBrains Mono',monospace;font-size:10px}
-
-    .reco-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-    .reco-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;transition:all .25s}
-    .reco-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
-    .reco-icon{font-size:32px;margin-bottom:14px}
-    .reco-card h4{font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px}
-    .reco-card p{font-size:13px;color:var(--text-muted);line-height:1.65}
-
-    @media(max-width:768px){
-      .geo-cards{grid-template-columns:1fr}
-      .story-metrics{grid-template-columns:1fr 1fr}
-      .season-strip{flex-wrap:wrap}
-      .season-month{min-width:calc(25% - 4px)}
+    .story-hero {
+      text-align: center;
+      padding: 72px 24px 48px;
+      position: relative;
+      overflow: hidden
     }
-    @media(max-width:480px){
-      .story-metrics{grid-template-columns:1fr}
+
+    .story-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(45, 106, 106, 0.08) 0%, transparent 70%);
+      pointer-events: none
+    }
+
+    .story-hero-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(45, 106, 106, 0.1);
+      border: 1px solid rgba(45, 106, 106, 0.2);
+      border-radius: 20px;
+      padding: 6px 16px;
+      margin-bottom: 24px
+    }
+
+    .story-hero-title {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 20px;
+      letter-spacing: -0.5px
+    }
+
+    .hero-highlight {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: 'Fira Code', monospace
+    }
+
+    .story-hero-sub {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 560px;
+      margin: 0 auto
+    }
+
+    .story-hero-sub strong {
+      color: var(--text);
+      font-weight: 600
+    }
+
+    .hero-divider {
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      margin: 32px auto 0;
+      border-radius: 2px
+    }
+
+    .story-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 40px
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all .25s
+    }
+
+    .metric-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+      box-shadow: var(--glow)
+    }
+
+    .metric-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: .5
+    }
+
+    .metric-card.metric-danger::after {
+      background: linear-gradient(90deg, var(--danger), var(--warning))
+    }
+
+    .metric-card.metric-purple::after {
+      background: linear-gradient(90deg, var(--accent3), #E87400)
+    }
+
+    .metric-card.metric-stable::after {
+      background: linear-gradient(90deg, var(--success), var(--accent))
+    }
+
+    .metric-icon {
+      margin-bottom: 10px
+    }
+
+    .metric-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--accent);
+      opacity: .6
+    }
+
+    .metric-card.metric-danger .metric-icon svg {
+      color: var(--danger)
+    }
+
+    .metric-card.metric-purple .metric-icon svg {
+      color: var(--accent3)
+    }
+
+    .metric-card.metric-stable .metric-icon svg {
+      color: var(--success)
+    }
+
+    .metric-value {
+      font-family: 'Fira Code', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.2
+    }
+
+    .metric-card.metric-danger .metric-value {
+      color: var(--danger)
+    }
+
+    .metric-card.metric-purple .metric-value {
+      color: var(--accent3)
+    }
+
+    .metric-card.metric-stable .metric-value {
+      color: var(--success)
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .5px
+    }
+
+    .story-section {
+      margin-bottom: 52px
+    }
+
+    .story-section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      border-left: 3px solid rgba(45, 106, 106, 0.35);
+      padding-left: 18px
+    }
+
+    .story-section-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      min-width: 36px;
+      opacity: 0.5
+    }
+
+    .story-section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px
+    }
+
+    .story-section-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 680px
+    }
+
+    .geo-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px
+    }
+
+    .geo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .geo-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px
+    }
+
+    .geo-cheap::before {
+      background: linear-gradient(90deg, var(--success), var(--accent))
+    }
+
+    .geo-expensive::before {
+      background: linear-gradient(90deg, var(--danger), var(--warning))
+    }
+
+    .geo-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px
+    }
+
+    .geo-cheap .geo-card-header {
+      color: var(--success)
+    }
+
+    .geo-expensive .geo-card-header {
+      color: var(--danger)
+    }
+
+    .geo-card-header svg {
+      width: 18px;
+      height: 18px
+    }
+
+    .geo-card-body {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px
+    }
+
+    .geo-state-tag {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text)
+    }
+
+    .geo-cheap .geo-state-tag {
+      border-color: rgba(44, 110, 110, 0.2);
+      background: rgba(44, 110, 110, 0.06)
+    }
+
+    .geo-expensive .geo-state-tag {
+      border-color: rgba(107, 44, 27, 0.2);
+      background: rgba(107, 44, 27, 0.06)
+    }
+
+    .geo-card-note {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 12px
+    }
+
+    .season-callout {
+      background: var(--surface);
+      border: 1px solid rgba(232, 116, 0, 0.2);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px
+    }
+
+    .season-callout-icon {
+      font-size: 28px;
+      line-height: 1
+    }
+
+    .season-callout-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7
+    }
+
+    .season-callout-text strong {
+      color: var(--text);
+      font-weight: 600
+    }
+
+    .season-low {
+      color: var(--success);
+      font-weight: 700
+    }
+
+    .season-high {
+      color: var(--danger);
+      font-weight: 700
+    }
+
+    .season-strip {
+      display: flex;
+      gap: 4px;
+      padding: 4px 0
+    }
+
+    .season-month {
+      flex: 1;
+      text-align: center;
+      border-radius: var(--radius-xs);
+      padding: 12px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      transition: transform .2s
+    }
+
+    .season-month:hover {
+      transform: scaleY(1.05)
+    }
+
+    .season-month-label {
+      display: block;
+      color: var(--text);
+      margin-bottom: 4px
+    }
+
+    .season-month-val {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px
+    }
+
+    .reco-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px
+    }
+
+    .reco-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: all .25s
+    }
+
+    .reco-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow)
+    }
+
+    .reco-icon {
+      font-size: 28px;
+      margin-bottom: 12px
+    }
+
+    .reco-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px
+    }
+
+    .reco-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7
+    }
+
+    /* Hero stat banner */
+    .hero-stat-banner {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin: 0 0 44px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden
+    }
+
+    .hero-stat-item {
+      flex: 1;
+      padding: 22px 16px;
+      text-align: center;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      transition: background .2s
+    }
+
+    .hero-stat-item:last-child {
+      border-right: none
+    }
+
+    .hero-stat-item:hover {
+      background: rgba(45, 106, 106, 0.05)
+    }
+
+    .hero-stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(18px, 2.5vw, 26px);
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 5px
+    }
+
+    .hero-stat-value.red {
+      color: var(--danger)
+    }
+
+    .hero-stat-value.green {
+      color: var(--success)
+    }
+
+    .hero-stat-value.blue {
+      color: var(--accent2)
+    }
+
+    .hero-stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.6px
+    }
+
+    @media(max-width:768px) {
+      .geo-cards {
+        grid-template-columns: 1fr
+      }
+
+      .story-metrics {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .season-strip {
+        flex-wrap: wrap
+      }
+
+      .season-month {
+        min-width: calc(25% - 4px)
+      }
+    }
+
+    @media(max-width:480px) {
+      .story-metrics {
+        grid-template-columns: 1fr
+      }
     }
   </style>
 </head>
@@ -760,6 +1298,12 @@
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
+    <!-- Mobile close button -->
+    <button class="sidebar-close" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
     <div class="sidebar-header">
       <div class="sidebar-logo">
         <svg viewBox="0 0 36 36" fill="none">
@@ -769,8 +1313,8 @@
           <path d="M15 26v-6h6v6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
           <defs>
             <linearGradient id="lg" x1="0" y1="0" x2="36" y2="36">
-              <stop stop-color="#10b981" />
-              <stop offset="1" stop-color="#06b6d4" />
+              <stop stop-color="#E87400" />
+              <stop offset="1" stop-color="#2C6E6E" />
             </linearGradient>
           </defs>
         </svg>
@@ -784,26 +1328,26 @@
           <circle cx="12" cy="12" r="10" />
           <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
         </svg>
-        <span>Geographic Arbitrage</span>
+        <span class="nav-text">Geographic Arbitrage</span>
       </div>
       <div class="nav-item" data-section="trends" onclick="switchSection('trends')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
         </svg>
-        <span>Seasonal Trends</span>
+        <span class="nav-text">Seasonal Trends</span>
       </div>
       <div class="nav-item" data-section="volatility" onclick="switchSection('volatility')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
-        <span>Volatility</span>
+        <span class="nav-text">Volatility</span>
       </div>
       <div class="nav-item" data-section="executive" onclick="switchSection('executive')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <rect x="2" y="7" width="20" height="14" rx="2" />
           <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M12 12v4M8 12v4M16 12v4" />
         </svg>
-        <span>Executive Overview</span>
+        <span class="nav-text">Executive Overview</span>
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -821,7 +1365,6 @@
           <line x1="3" y1="18" x2="21" y2="18" />
         </svg></button>
       <span class="topbar-title">Nigerian Food Price Analysis</span>
-      <span class="topbar-badge">LIVE DATA</span>
     </header>
     <div class="content">
 
@@ -1009,10 +1552,11 @@
         <!-- ── HERO HEADLINE ── -->
         <div class="story-hero">
           <div class="story-hero-badge">EXECUTIVE OVERVIEW</div>
-          <h2 class="story-hero-title">Nigerian Food Prices Rose <span class="hero-highlight"
-              id="exec-hero-pct">453%</span> in 8 Years</h2>
-          <p class="story-hero-sub">Tracking <strong id="exec-hero-items">43</strong> essential food items across
-            <strong>37 states</strong> from <strong>2016 to 2024</strong></p>
+          <h2 class="story-hero-title">Food Prices Up<br><span class="hero-highlight" id="exec-hero-pct">453%</span> in
+            8 Years</h2>
+          <p class="story-hero-sub">Tracking <strong id="exec-hero-items">43</strong> everyday food items
+            across <strong>37 states</strong> from 2016 to 2024 — what Nigerians pay for food has changed
+            dramatically.</p>
           <div class="hero-divider"></div>
         </div>
 
@@ -1074,12 +1618,13 @@
           <div class="story-section-header">
             <div class="story-section-number">01</div>
             <div>
-              <h3 class="story-section-title">The Acceleration</h3>
-              <p class="story-section-desc">Prices that took 6 years to double... doubled again in just 12 months</p>
+              <h3 class="story-section-title">The Acceleration: Prices Are Doubling Faster</h3>
+              <p class="story-section-desc">It took six years for prices to double (2016–2022), but they doubled
+                again in just the last 12–18 months. The speed of increase is unprecedented.</p>
             </div>
           </div>
-          <div class="chart-card" style="border-color:rgba(239,68,68,0.15)">
-            <div id="exec-acceleration-chart" style="height:340px"></div>
+          <div class="chart-card" style="border-color:rgba(107,44,27,0.15)">
+            <div id="exec-acceleration-chart" style="height:440px"></div>
           </div>
         </div>
 
@@ -1088,12 +1633,13 @@
           <div class="story-section-header">
             <div class="story-section-number">02</div>
             <div>
-              <h3 class="story-section-title">What's Most at Risk</h3>
-              <p class="story-section-desc">The five food items with the steepest price increases since 2016</p>
+              <h3 class="story-section-title">What's Most at Risk: Everyday Staples Hit Hardest</h3>
+              <p class="story-section-desc">These food items have seen the biggest price jumps. What used to be
+                affordable everyday meals is now becoming a luxury for many households.</p>
             </div>
           </div>
           <div class="chart-card">
-            <div id="exec-top5-chart" style="height:280px"></div>
+            <div id="exec-top5-chart" style="height:380px"></div>
           </div>
         </div>
 
@@ -1102,8 +1648,9 @@
           <div class="story-section-header">
             <div class="story-section-number">03</div>
             <div>
-              <h3 class="story-section-title">The Geographic Divide</h3>
-              <p class="story-section-desc">A bag of rice in Borno costs half what it does in Bayelsa</p>
+              <h3 class="story-section-title">The Geographic Divide: Where You Live Decides What You Pay</h3>
+              <p class="story-section-desc">The same food item can cost up to 571% more depending on the state.
+                Where you buy matters as much as what you buy.</p>
             </div>
           </div>
           <div class="geo-cards">
@@ -1112,7 +1659,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
                 </svg>
-                <span>Cheapest States</span>
+                <span>Cheapest Sourcing Hubs</span>
               </div>
               <div class="geo-card-body" id="exec-cheap-states">
                 <div class="geo-state-tag">Borno</div>
@@ -1121,15 +1668,15 @@
                 <div class="geo-state-tag">Katsina</div>
                 <div class="geo-state-tag">Taraba</div>
               </div>
-              <div class="geo-card-note">These northern states consistently have the lowest average food prices across
-                nearly all 43 tracked items.</div>
+              <div class="geo-card-note">These farming states consistently offer the lowest average prices — ideal for
+                bulk buying.</div>
             </div>
             <div class="geo-card geo-expensive">
               <div class="geo-card-header">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                 </svg>
-                <span>Most Expensive States</span>
+                <span>Highest Cost Centers</span>
               </div>
               <div class="geo-card-body" id="exec-expensive-states">
                 <div class="geo-state-tag">Anambra</div>
@@ -1138,8 +1685,8 @@
                 <div class="geo-state-tag">Enugu</div>
                 <div class="geo-state-tag">Imo</div>
               </div>
-              <div class="geo-card-note">Southern/eastern states show prices up to 571% higher than the cheapest states
-                for the same food items.</div>
+              <div class="geo-card-note">Southern and eastern states pay the highest prices due to transport costs and
+                distance from farming regions.</div>
             </div>
           </div>
         </div>
@@ -1149,16 +1696,18 @@
           <div class="story-section-header">
             <div class="story-section-number">04</div>
             <div>
-              <h3 class="story-section-title">The Seasonal Pattern</h3>
-              <p class="story-section-desc">A near-universal calendar effect across all tracked items</p>
+              <h3 class="story-section-title">The Seasonal Pattern: Prices Follow a Calendar</h3>
+              <p class="story-section-desc">Despite wild inflation, food prices still follow a reliable yearly
+                cycle across almost all items.</p>
             </div>
           </div>
           <div class="season-callout">
             <div class="season-callout-icon">📅</div>
             <div class="season-callout-text">
-              <strong>42 of 43 items</strong> are cheapest in <span class="season-low">January</span> and most expensive
-              in <span class="season-high">November–December</span>. Strategic purchasing during January could save up
-              to 15–20% on annual food costs.
+              <strong>Buy in January, save all year:</strong> 42 of 43 items are cheapest in <span
+                class="season-low">January</span> right after harvest season, and most expensive in <span
+                class="season-high">November–December</span>. Stocking up early in the year can save 15–20%
+              compared to buying during year-end price spikes.
             </div>
           </div>
           <div class="season-strip" id="exec-season-strip"></div>
@@ -1169,28 +1718,31 @@
           <div class="story-section-header">
             <div class="story-section-number">05</div>
             <div>
-              <h3 class="story-section-title">What Must Be Done</h3>
-              <p class="story-section-desc">Data-driven recommendations for policymakers and businesses</p>
+              <h3 class="story-section-title">What Can Be Done</h3>
+              <p class="story-section-desc">Turning eight years of price data into practical next steps</p>
             </div>
           </div>
           <div class="reco-grid">
             <div class="reco-card">
               <div class="reco-icon">🔄</div>
-              <h4>Improve Supply Chains</h4>
-              <p>Up to 571% price spreads between states signal massive inefficiencies. Better logistics and storage
-                infrastructure can bridge the geographic divide.</p>
+              <h4>Buy Where It's Cheapest</h4>
+              <p>With prices varying by 200–500% across states, buying from low-cost regions (Borno, Yobe, Adamawa)
+                and distributing to high-cost areas can dramatically cut costs. Centralised buying hubs make this
+                possible at scale.</p>
             </div>
             <div class="reco-card">
               <div class="reco-icon">📦</div>
-              <h4>Strategic Stockpiling</h4>
-              <p>January prices are consistently 15–20% lower than December peaks. Government and private stockpiling in
-                Q1 can stabilize year-round costs.</p>
+              <h4>Stock Up in January–March</h4>
+              <p>Since prices reliably drop after harvest season, buying in bulk during the first quarter
+                avoids the combined hit of inflation and year-end seasonal price jumps. The data shows this
+                pattern is highly predictable.</p>
             </div>
             <div class="reco-card">
-              <div class="reco-icon">📊</div>
-              <h4>Monitor Acceleration</h4>
-              <p>The 2023–2024 surge (+187% on beans in one year) demands urgent policy attention. Without intervention,
-                basic food items may become unaffordable for millions.</p>
+              <div class="reco-icon">📉</div>
+              <h4>Swap Ingredients When Prices Spike</h4>
+              <p>When certain items spike in price (some jump over 200% in a few months), switching to cheaper
+                alternatives — like swapping between grain or root crop varieties — can cushion
+                the blow. Flexibility is key.</p>
             </div>
           </div>
         </div>
@@ -1236,10 +1788,10 @@
     const plotlyLayout = {
       paper_bgcolor: 'transparent',
       plot_bgcolor: 'transparent',
-      font: { color: '#c8ccd4', family: 'Inter, system-ui, sans-serif' },
+      font: { color: '#6E8088', family: 'Fira Sans, system-ui, sans-serif' },
       margin: { l: 180, r: 30, t: 40, b: 60 },
-      xaxis: { gridcolor: 'rgba(255,255,255,0.06)' },
-      yaxis: { gridcolor: 'rgba(255,255,255,0.06)' },
+      xaxis: { gridcolor: 'rgba(189,205,210,0.4)' },
+      yaxis: { gridcolor: 'rgba(189,205,210,0.4)' },
     };
 
     const plotlyConfig = { responsive: true, displayModeBar: false };
@@ -1349,7 +1901,7 @@
         textfont: { size: 10 },
         marker: {
           color: top15.map(d => d["Spread (%)"]),
-          colorscale: [[0, '#2ecc71'], [0.5, '#f1c40f'], [1, '#e74c3c']],
+          colorscale: [[0, '#2D6A6A'], [0.5, '#F28C00'], [1, '#6B3521']],
         },
       }], {
         ...plotlyLayout,
@@ -1376,9 +1928,9 @@
       if (!d) return;
 
       const colors = d.states.map((s, i) => {
-        if (i === 0) return '#27ae60';
-        if (i === d.states.length - 1) return '#e74c3c';
-        return '#00d68f';
+        if (i === 0) return '#2D6A6A';
+        if (i === d.states.length - 1) return '#6B3521';
+        return '#F28C00';
       });
 
       Plotly.newPlot('arb-detail-chart', [{
@@ -1420,13 +1972,13 @@
         y: sorted.map(d => d["Food Item"]),
         x: sorted.map(d => d["MoM Change (%)"]),
         marker: {
-          color: sorted.map(d => d["MoM Change (%)"] > 0 ? '#e74c3c' : '#2ecc71'),
+          color: sorted.map(d => d["MoM Change (%)"] > 0 ? '#6B3521' : '#2D6A6A'),
         },
       }], {
         ...plotlyLayout,
         yaxis: { ...plotlyLayout.yaxis, autorange: 'reversed' },
         xaxis: { ...plotlyLayout.xaxis, title: 'MoM % Change' },
-        shapes: [{ type: 'line', x0: 0, x1: 0, y0: -0.5, y1: sorted.length - 0.5, line: { color: '#fff', width: 1 } }],
+        shapes: [{ type: 'line', x0: 0, x1: 0, y0: -0.5, y1: sorted.length - 0.5, line: { color: '#2D6A6A', width: 1 } }],
       }, plotlyConfig);
 
       renderTable('trend-table', trendData, [
@@ -1444,7 +1996,7 @@
         mode: 'lines',
         x: d.dates,
         y: d.prices,
-        line: { color: '#00d68f', width: 2 },
+         line: { color: '#2D6A6A', width: 2 },
         name: 'Actual Price',
       }], {
         ...plotlyLayout,
@@ -1465,14 +2017,14 @@
         x: d.months,
         y: d.prices,
         marker: {
-          color: d.prices.map(p => p > avg ? '#e74c3c' : '#2ecc71'),
+          color: d.prices.map(p => p > avg ? '#6B3521' : '#2D6A6A'),
         },
       }, {
         type: 'scatter',
         mode: 'lines',
         x: d.months,
         y: Array(12).fill(avg),
-        line: { color: '#f1c40f', width: 2, dash: 'dash' },
+         line: { color: '#F28C00', width: 2, dash: 'dash' },
         name: 'Annual Avg',
       }], {
         ...plotlyLayout,
@@ -1539,22 +2091,22 @@
       document.getElementById('exec-total-items').textContent = totalItems;
       document.getElementById('exec-hero-items').textContent = totalItems;
 
-      var totalChanges = execData.map(function(d) { return typeof d['Total Change (%)'] === 'number' ? d['Total Change (%)'] : 0; });
-      var avgChange = totalChanges.reduce(function(a, b) { return a + b; }) / totalChanges.length;
+      var totalChanges = execData.map(function (d) { return typeof d['Total Change (%)'] === 'number' ? d['Total Change (%)'] : 0; });
+      var avgChange = totalChanges.reduce(function (a, b) { return a + b; }) / totalChanges.length;
       document.getElementById('exec-avg-change').textContent = '+' + avgChange.toFixed(0) + '%';
       document.getElementById('exec-hero-pct').textContent = avgChange.toFixed(0) + '%';
 
-      var sorted = execData.slice().sort(function(a, b) { return (b['Total Change (%)'] || 0) - (a['Total Change (%)'] || 0); });
+      var sorted = execData.slice().sort(function (a, b) { return (b['Total Change (%)'] || 0) - (a['Total Change (%)'] || 0); });
       document.getElementById('exec-most-inflated').textContent = sorted[0]['Food Item'];
 
-      var byCv = execData.slice().sort(function(a, b) { return (a['CV (%)'] || 999) - (b['CV (%)'] || 999); });
+      var byCv = execData.slice().sort(function (a, b) { return (a['CV (%)'] || 999) - (b['CV (%)'] || 999); });
       document.getElementById('exec-most-stable').textContent = byCv[0]['Food Item'];
 
       // 2. Acceleration Chart — average price index across all items
       var allDates = monthlyData[Object.keys(monthlyData)[0]].dates;
-      var avgPriceIndex = allDates.map(function(_, di) {
+      var avgPriceIndex = allDates.map(function (_, di) {
         var sum = 0; var count = 0;
-        Object.keys(monthlyData).forEach(function(item) {
+        Object.keys(monthlyData).forEach(function (item) {
           var prices = monthlyData[item].prices;
           if (prices[0] > 0 && prices[di] !== undefined) {
             sum += (prices[di] / prices[0]) * 100;
@@ -1564,24 +2116,42 @@
         return count > 0 ? sum / count : 100;
       });
 
-      var accelAnnotations = [];
-      var midIdx = Math.floor(allDates.length * 0.7);
-      accelAnnotations.push({
-        x: allDates[midIdx], y: avgPriceIndex[midIdx],
-        text: '2023–2024<br>Acceleration',
-        showarrow: true, arrowhead: 2, arrowcolor: '#ef4444',
-        font: { color: '#ef4444', size: 12, family: 'Inter' },
-        ax: -60, ay: -40
-      });
+      var accelAnnotations = [
+        {
+          x: '2023-06', y: avgPriceIndex[allDates.indexOf('2023-06')],
+          text: '⚡ Acceleration<br>Crisis Begins',
+          showarrow: true, arrowhead: 2, arrowcolor: '#6B2C1B', arrowwidth: 2,
+          font: { color: 'rgba(110,128,136,0.7)', size: 10, family: 'Fira Sans, sans-serif' },
+          bgcolor: 'rgba(255,255,255,0.92)', borderpad: 5, bordercolor: 'rgba(107,53,33,0.3)', borderwidth: 1,
+          ax: -70, ay: -50
+        },
+        {
+          x: '2016-01', y: 105,
+          text: 'Baseline: Jan 2016 = 100',
+          showarrow: false,
+          font: { color: 'rgba(45,106,106,0.8)', size: 10, family: 'Fira Sans, sans-serif' },
+          xanchor: 'left'
+        },
+        {
+          x: '2019-06', y: avgPriceIndex[allDates.indexOf('2019-06')],
+          text: 'Stable<br>Growth Phase',
+          showarrow: false,
+          font: { color: 'rgba(44,110,110,0.8)', size: 10, family: 'Inter, sans-serif' },
+          yshift: 20
+        }
+      ];
+
+      var maxIdx = avgPriceIndex.reduce((mI, v, i, arr) => v > arr[mI] ? i : mI, 0);
 
       Plotly.newPlot('exec-acceleration-chart', [
         {
           type: 'scatter', mode: 'lines',
           x: allDates, y: avgPriceIndex,
-          line: { color: '#ef4444', width: 2.5 },
+          line: { color: '#2D6A6A', width: 2.5 },
           fill: 'tozeroy',
-          fillcolor: 'rgba(239,68,68,0.06)',
-          name: 'Avg Price Index (Jan 2016 = 100)'
+          fillcolor: 'rgba(45,106,106,0.06)',
+          name: 'Avg Price Index (Jan 2016 = 100)',
+          hovertemplate: '<b>%{x}</b><br>Price Index: %{y:.1f}<extra></extra>'
         }
       ], {
         ...plotlyLayout,
@@ -1589,36 +2159,63 @@
         xaxis: { ...plotlyLayout.xaxis, title: '' },
         yaxis: { ...plotlyLayout.yaxis, title: 'Price Index (Jan 2016 = 100)' },
         annotations: accelAnnotations,
-        shapes: [{
-          type: 'line', x0: '2023-06', x1: '2023-06',
-          y0: 0, y1: Math.max.apply(null, avgPriceIndex),
-          line: { color: 'rgba(239,68,68,0.3)', width: 1, dash: 'dot' }
-        }]
+        shapes: [
+          {
+            type: 'line', x0: '2023-01', x1: '2023-01',
+            y0: 0, y1: 1, yref: 'paper',
+            line: { color: 'rgba(45,106,106,0.35)', width: 1.5, dash: 'dot' }
+          },
+          {
+            type: 'rect', x0: '2023-01', x1: allDates[allDates.length - 1],
+            y0: 0, y1: 1, yref: 'paper',
+            fillcolor: 'rgba(45,106,106,0.04)', line: { width: 0 }
+          }
+        ]
       }, plotlyConfig);
+
 
       // 3. Top 5 Most Inflated Items
       var top5 = sorted.slice(0, 5);
-      var t5Colors = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#facc15'];
+      var t5Colors = ['#6B3521', '#8B4D2F', '#F28C00', '#F5A832', '#F5DEB3'];
+      var riskLabels = ['🔴 Critical', '🟠 Very High', '🟡 High', '🟡 High', '🟡 Elevated'];
+      var top5Annotations = top5.map(function (d, i) {
+        return {
+          x: d['Total Change (%)'] * 0.5,
+          y: d['Food Item'],
+          text: riskLabels[i],
+          showarrow: false,
+          font: { color: '#fff', size: 11, family: 'Inter, sans-serif', weight: 600 },
+          xanchor: 'center',
+          bgcolor: 'rgba(0,0,0,0.45)',
+          borderpad: 3,
+          bordercolor: 'rgba(255,255,255,0.1)',
+          borderwidth: 1
+        };
+      });
+
       Plotly.newPlot('exec-top5-chart', [{
         type: 'bar', orientation: 'h',
-        y: top5.map(function(d) { return d['Food Item']; }),
-        x: top5.map(function(d) { return d['Total Change (%)']; }),
-        text: top5.map(function(d) { return '+' + (d['Total Change (%)'] || 0).toFixed(0) + '%'; }),
+        y: top5.map(function (d) { return d['Food Item']; }),
+        x: top5.map(function (d) { return d['Total Change (%)']; }),
+        text: top5.map(function (d) { return '+' + (d['Total Change (%)'] || 0).toFixed(0) + '%'; }),
         textposition: 'outside',
-        textfont: { size: 13, family: 'JetBrains Mono', color: '#e2e8f0' },
-        marker: { color: t5Colors, line: { color: 'rgba(255,255,255,0.1)', width: 1 } }
+        textfont: { size: 13, family: 'Fira Code', color: '#1A2E38' },
+        marker: { color: t5Colors, line: { color: 'rgba(255,255,255,0.1)', width: 1 } },
+        hovertemplate: '<b>%{y}</b><br>Total increase: +%{x:.0f}%<extra></extra>'
       }], {
         ...plotlyLayout,
-        margin: { l: 180, r: 80, t: 10, b: 40 },
+        margin: { l: 200, r: 80, t: 10, b: 50 },
         yaxis: { ...plotlyLayout.yaxis, autorange: 'reversed' },
-        xaxis: { ...plotlyLayout.xaxis, title: 'Total Price Change (%)' }
+        xaxis: { ...plotlyLayout.xaxis, title: 'Total Price Change (%) Since 2016' },
+        annotations: top5Annotations
       }, plotlyConfig);
 
+
       // 4. Seasonal Calendar Strip (average across all items)
-      var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var seasonAvg = monthNames.map(function(_, mi) {
+      var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      var seasonAvg = monthNames.map(function (_, mi) {
         var sum = 0; var count = 0;
-        Object.keys(seasonData).forEach(function(item) {
+        Object.keys(seasonData).forEach(function (item) {
           sum += seasonData[item].prices[mi];
           count++;
         });
@@ -1628,11 +2225,11 @@
       var sMax = Math.max.apply(null, seasonAvg);
       var stripEl = document.getElementById('exec-season-strip');
       var stripHtml = '';
-      seasonAvg.forEach(function(val, i) {
+      seasonAvg.forEach(function (val, i) {
         var pct = sMax > sMin ? (val - sMin) / (sMax - sMin) : 0;
-        var r = Math.round(34 + pct * (239 - 34));
-        var g = Math.round(197 - pct * (197 - 68));
-        var b = Math.round(94 - pct * (94 - 68));
+        var r = Math.round(44 + pct * (107 - 44));
+        var g = Math.round(110 - pct * (110 - 44));
+        var b = Math.round(110 - pct * (110 - 27));
         var bg = 'rgba(' + r + ',' + g + ',' + b + ',0.18)';
         var border = 'rgba(' + r + ',' + g + ',' + b + ',0.35)';
         stripHtml += '<div class="season-month" style="background:' + bg + ';border:1px solid ' + border + '">';
@@ -1659,10 +2256,25 @@
     initVolatility();
     initExecutive();
 
+    // ─── Sidebar hover expand/collapse (desktop) ───
+    (function() {
+      var sidebar = document.getElementById('sidebar');
+      var mql = window.matchMedia('(min-width: 769px)');
+
+      sidebar.addEventListener('mouseenter', function() {
+        if (mql.matches) sidebar.classList.add('expanded');
+      });
+      sidebar.addEventListener('mouseleave', function() {
+        if (mql.matches) sidebar.classList.remove('expanded');
+      });
+    })();
+
     // Mobile sidebar toggle
     function toggleSidebar() {
-      document.querySelector(".sidebar").classList.toggle("open");
-      document.getElementById("sidebar-overlay").classList.toggle("open");
+      var sidebar = document.querySelector('.sidebar');
+      var overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
     }
   </script>
 </body>
