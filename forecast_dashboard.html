@@ -398,7 +398,7 @@ function buildKPIs() {
   const fcItems = Object.keys(lgbFcData);
   const evalValid = evalData.filter(d => d.MAPE_lgb !== 'N/A' && d.MAPE_lgb !== null);
   const mapes = evalValid.map(d => +d.MAPE_lgb).sort((a,b)=>a-b);
-  const medMape = mapes[Math.floor(mapes.length/2)].toFixed(1);
+  const avgMape = (mapes.reduce((a,b)=>a+b,0) / mapes.length).toFixed(1);
   const under15 = mapes.filter(m => m < 15).length;
 
   const summLatest = [...summaryData].sort((a,b) => b['Expected Change (%)'] - a['Expected Change (%)']);
@@ -406,7 +406,7 @@ function buildKPIs() {
 
   document.getElementById('kpi-grid').innerHTML = `
     <div class="kpi-card"><div class="kpi-label">Items Forecasted</div><div class="kpi-value">${fcItems.length}</div><div class="kpi-sub">Jan 2025 → Dec 2026</div></div>
-    <div class="kpi-card"><div class="kpi-label">Median MAPE (★ LightGBM)</div><div class="kpi-value" style="color:#2D6A6A">${medMape}%</div><div class="kpi-sub">Best model · 2024 hold-out</div></div>
+    <div class="kpi-card"><div class="kpi-label">Average MAPE (★ LightGBM)</div><div class="kpi-value" style="color:#2D6A6A">${avgMape}%</div><div class="kpi-sub">Best model · 2024 hold-out</div></div>
     <div class="kpi-card"><div class="kpi-label">< 15% MAPE</div><div class="kpi-value">${under15} / ${mapes.length}</div><div class="kpi-sub">LightGBM items within target</div></div>
     <div class="kpi-card"><div class="kpi-label">Highest Forecasted Rise</div><div class="kpi-value" style="font-size:1.1rem">${(topItem['Expected Change (%)']+'%')}</div><div class="kpi-sub">${topItem['Food Item']}</div></div>
   `;
@@ -547,18 +547,18 @@ function initEvaluation() {
 function buildEvalKPIs() {
   const valid = evalData.filter(d => d.MAPE_prophet !== null && d.MAPE_prophet !== 'N/A');
   const lgbValid = evalData.filter(d => d.MAPE_lgb !== null && d.MAPE_lgb !== 'N/A');
-  const propMed = [...valid.map(d=>d.MAPE_prophet)].sort((a,b)=>a-b);
-  const lgbMed  = [...lgbValid.map(d=>d.MAPE_lgb)].sort((a,b)=>a-b);
-  const pMape = propMed[Math.floor(propMed.length/2)].toFixed(1);
-  const lMape = lgbMed[Math.floor(lgbMed.length/2)].toFixed(1);
+  const propVals = valid.map(d=>d.MAPE_prophet);
+  const lgbVals  = lgbValid.map(d=>d.MAPE_lgb);
+  const pMape = (propVals.reduce((a,b)=>a+b,0) / propVals.length).toFixed(1);
+  const lMape = (lgbVals.reduce((a,b)=>a+b,0) / lgbVals.length).toFixed(1);
   const propWins = evalData.filter(d =>
     d.MAPE_prophet !== null && d.MAPE_lgb !== null &&
     d.MAPE_prophet !== 'N/A' && d.MAPE_lgb !== 'N/A' &&
     d.MAPE_prophet <= d.MAPE_lgb
   ).length;
   document.getElementById('eval-kpi-grid').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Median MAPE — Prophet</div><div class="kpi-value">${pMape}%</div><div class="kpi-sub">2024 hold-out</div></div>
-    <div class="kpi-card"><div class="kpi-label">Median MAPE — LightGBM</div><div class="kpi-value">${lMape}%</div><div class="kpi-sub">2024 hold-out</div></div>
+    <div class="kpi-card"><div class="kpi-label">Average MAPE — Prophet</div><div class="kpi-value">${pMape}%</div><div class="kpi-sub">2024 hold-out</div></div>
+    <div class="kpi-card"><div class="kpi-label">Average MAPE — LightGBM</div><div class="kpi-value">${lMape}%</div><div class="kpi-sub">2024 hold-out</div></div>
     <div class="kpi-card"><div class="kpi-label">Prophet Wins</div><div class="kpi-value">${propWins} / ${valid.length}</div><div class="kpi-sub">Items where Prophet ≤ LightGBM</div></div>
   `;
 }
