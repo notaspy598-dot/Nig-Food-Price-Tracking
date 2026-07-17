@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nigerian Food Price Tracker — Analytics Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BE%3C/text%3E%3C/svg%3E">
   <meta name="description"
     content="Comprehensive analytics dashboard tracking Nigerian food prices across 37 states, featuring geographic arbitrage, seasonal trends, volatility analysis, and executive insights.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -199,6 +200,10 @@
     .nav-item:hover {
       background: rgba(45, 106, 106, 0.06);
       color: var(--text)
+    }
+
+    a.nav-item {
+      text-decoration: none
     }
 
     .nav-item.active {
@@ -442,13 +447,13 @@
     }
 
     .stat-card.purple .stat-value {
-      background: linear-gradient(135deg, var(--accent3), #E87400);
+      background: linear-gradient(135deg, var(--accent3), #F28C00);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent
     }
 
     .stat-card.purple::after {
-      background: linear-gradient(90deg, var(--accent3), #E87400)
+      background: linear-gradient(90deg, var(--accent3), #F28C00)
     }
 
     /* ═══ CHART CONTAINERS ═══ */
@@ -951,7 +956,7 @@
     }
 
     .metric-card.metric-purple::after {
-      background: linear-gradient(90deg, var(--accent3), #E87400)
+      background: linear-gradient(90deg, var(--accent3), #F28C00)
     }
 
     .metric-card.metric-stable::after {
@@ -1349,8 +1354,8 @@
           <path d="M15 26v-6h6v6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
           <defs>
             <linearGradient id="lg" x1="0" y1="0" x2="36" y2="36">
-              <stop stop-color="#E87400" />
-              <stop offset="1" stop-color="#2C6E6E" />
+              <stop stop-color="#F28C00" />
+              <stop offset="1" stop-color="#2D6A6A" />
             </linearGradient>
           </defs>
         </svg>
@@ -1385,6 +1390,31 @@
         </svg>
         <span class="nav-text">Executive Overview</span>
       </div>
+      <div class="nav-label">Explore</div>
+      <a class="nav-item" href="./index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+        <span class="nav-text">Intelligence Hub</span>
+      </a>
+      <a class="nav-item" href="./forecast_dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+        <span class="nav-text">Forecast Dashboard</span>
+      </a>
+      <a class="nav-item" href="./data_story.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" />
+        </svg>
+        <span class="nav-text">Data Story</span>
+      </a>
+      <a class="nav-item" href="./forecast_story.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5z" />
+        </svg>
+        <span class="nav-text">Forecast Story</span>
+      </a>
     </nav>
     <div class="sidebar-footer">
       <p>Data: NBS Nigeria<br>2016 — 2024</p>
@@ -1401,6 +1431,7 @@
           <line x1="3" y1="18" x2="21" y2="18" />
         </svg></button>
       <span class="topbar-title">Nigerian Food Price Analysis</span>
+      <span class="topbar-badge">2016–2024</span>
     </header>
     <div class="content">
 
@@ -1824,7 +1855,7 @@
     const plotlyLayout = {
       paper_bgcolor: 'transparent',
       plot_bgcolor: 'transparent',
-      font: { color: '#6E8088', family: 'Fira Sans, system-ui, sans-serif' },
+      font: { color: '#6E8088', family: "'Fira Code', monospace", size: 12 },
       margin: { l: 180, r: 30, t: 40, b: 60 },
       xaxis: { gridcolor: 'rgba(189,205,210,0.4)' },
       yaxis: { gridcolor: 'rgba(189,205,210,0.4)' },
@@ -1994,7 +2025,7 @@
         textfont: { size: 10 },
         marker: {
           color: top15.map(d => d["Spread (%)"]),
-          colorscale: [[0, '#2D6A6A'], [0.5, '#F28C00'], [1, '#6B3521']],
+          colorscale: [[0, '#F5DEB3'], [0.5, '#F28C00'], [1, '#6B3521']],
         },
       }], {
         ...plotlyLayout,
@@ -2148,7 +2179,7 @@
         textfont: { size: 9 },
         marker: {
           color: sorted.map(d => d["CV (%)"]),
-          colorscale: 'YlOrRd',
+          colorscale: [[0, '#F5DEB3'], [0.5, '#F28C00'], [1, '#6B3521']],
         },
       }], {
         ...plotlyLayout,
@@ -2162,7 +2193,7 @@
         z: volHeatmap.values,
         x: volHeatmap.states,
         y: volHeatmap.items,
-        colorscale: 'YlOrRd',
+        colorscale: [[0, '#FBF6EE'], [0.5, '#F5A832'], [1, '#6B3521']],
         colorbar: { title: 'CV (%)' },
         hovertemplate: '%{y}<br>%{x}<br>CV: %{z:.1f}%<extra></extra>',
       }], {

@@ -7,7 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BE%3C/text%3E%3C/svg%3E">
     <!-- Deferred: none of this is needed to paint the story text, and the
          charts are built lazily as they scroll into view. -->
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -17,18 +18,24 @@
         :root {
             --navy: #0C2233;
             --teal: #2D6A6A;
+            --teal-mid: #3D8A8A;
             --cream: #FBF6EE;
             --orange: #F28C00;
             --brown: #6B3521;
             --navy-light: #1A2E38;
             --teal-light: #5BAAAA;
+            --teal-100: #D0E8E8;
+            --teal-50: #E8F3F3;
             --cream-dark: #F5DEB3;
             --orange-light: #F5A832;
             --brown-light: #FCEEE4;
-            --text-primary: #FBF6EE;
-            --text-secondary: rgba(251, 246, 238, 0.7);
-            --card-bg: rgba(45, 106, 106, 0.08);
-            --card-border: rgba(45, 106, 106, 0.25);
+            --text-primary: #1A2E38;
+            --text-secondary: #6E8088;
+            --border: #BDCDD2;
+            --surface: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --card-border: rgba(189, 205, 210, 0.95);
+            --shadow-soft: 0 4px 24px rgba(45, 106, 106, 0.10);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,39 +45,63 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--navy);
+            font-family: 'Fira Sans', sans-serif;
+            background: var(--cream);
             color: var(--text-primary);
             line-height: 1.7;
             overflow-x: hidden;
         }
 
-        /* ─── NAVIGATION ─── */
-        .nav {
+        a:focus-visible, button:focus-visible, select:focus-visible {
+            outline: 3px solid rgba(242, 140, 0, 0.55);
+            outline-offset: 2px;
+        }
+
+        /* ─── SCROLL PROGRESS ─── */
+        #progress-bar {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
+            height: 3px;
+            width: 0;
+            background: linear-gradient(90deg, var(--teal), var(--orange));
+            z-index: 1001;
+            transition: width 0.1s ease;
+        }
+
+        /* ─── NAVIGATION ─── */
+        .nav {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(1040px, calc(100% - 24px));
             z-index: 1000;
-            background: rgba(12, 34, 51, 0.92);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--card-border);
-            padding: 0 2rem;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            box-shadow: 0 4px 24px rgba(45, 106, 106, 0.14);
+            padding: 0 16px;
             transition: transform 0.3s ease;
         }
         .nav-inner {
-            max-width: 1200px;
-            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 60px;
+            gap: 12px;
+            height: 48px;
         }
         .nav-logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            color: var(--orange);
-            font-weight: 800;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: var(--teal);
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
         }
         .nav-links {
             display: flex;
@@ -80,15 +111,15 @@
             color: var(--text-secondary);
             text-decoration: none;
             font-size: 0.75rem;
-            font-weight: 500;
+            font-weight: 600;
             padding: 0.4rem 0.7rem;
-            border-radius: 6px;
+            border-radius: 999px;
             transition: all 0.2s;
             letter-spacing: 0.02em;
         }
         .nav-links a:hover, .nav-links a.active {
-            color: var(--orange);
-            background: rgba(242, 140, 0, 0.1);
+            color: var(--teal);
+            background: var(--teal-50);
         }
 
         /* ─── HERO ─── */
@@ -102,6 +133,7 @@
             padding: 6rem 2rem 4rem;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(135deg, #0C2233 0%, #1A3D4A 50%, #2D6A6A 100%);
         }
         .hero::before {
             content: '';
@@ -110,8 +142,8 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 30% 40%, rgba(45, 106, 106, 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(242, 140, 0, 0.08) 0%, transparent 50%);
+            background: radial-gradient(circle at 30% 40%, rgba(91, 170, 170, 0.18) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(245, 168, 50, 0.10) 0%, transparent 50%);
             animation: heroGlow 15s ease-in-out infinite alternate;
         }
         @keyframes heroGlow {
@@ -121,10 +153,11 @@
         .hero-content { position: relative; z-index: 1; max-width: 900px; }
         .hero-badge {
             display: inline-block;
-            background: rgba(242, 140, 0, 0.15);
-            border: 1px solid rgba(242, 140, 0, 0.3);
-            color: var(--orange);
-            font-size: 0.75rem;
+            background: rgba(242, 140, 0, 0.16);
+            border: 1px solid rgba(242, 140, 0, 0.4);
+            color: var(--orange-light);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.72rem;
             font-weight: 600;
             padding: 0.4rem 1.2rem;
             border-radius: 50px;
@@ -133,14 +166,15 @@
             text-transform: uppercase;
         }
         .hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
-            font-weight: 900;
-            line-height: 1.1;
+            font-family: 'Fira Code', monospace;
+            font-size: clamp(2.3rem, 5.5vw, 4rem);
+            font-weight: 700;
+            line-height: 1.12;
             margin-bottom: 1.5rem;
+            color: #FFFFFF;
         }
         .hero h1 .highlight {
-            color: var(--orange);
+            color: var(--orange-light);
             position: relative;
         }
         .hero h1 .highlight::after {
@@ -150,13 +184,13 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: var(--orange);
+            background: var(--orange-light);
             opacity: 0.4;
             border-radius: 2px;
         }
         .hero-subtitle {
             font-size: 1.2rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.78);
             max-width: 700px;
             margin: 0 auto 2.5rem;
             font-weight: 300;
@@ -172,25 +206,26 @@
             text-align: center;
         }
         .hero-stat-value {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: var(--orange);
+            font-family: 'Fira Code', monospace;
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: var(--orange-light);
             line-height: 1;
         }
         .hero-stat-label {
             font-size: 0.8rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.68);
             margin-top: 0.3rem;
             font-weight: 500;
         }
         .hero-quote {
-            background: rgba(45, 106, 106, 0.12);
-            border-left: 4px solid var(--teal);
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-left: 4px solid var(--orange-light);
             padding: 1.5rem 2rem;
             border-radius: 0 12px 12px 0;
             font-size: 1.05rem;
-            color: var(--cream);
+            color: rgba(255, 255, 255, 0.88);
             font-style: italic;
             max-width: 700px;
             margin: 0 auto;
@@ -203,7 +238,7 @@
             animation: bounce 2s infinite;
             z-index: 1;
         }
-        .scroll-indicator svg { width: 24px; height: 24px; fill: var(--text-secondary); }
+        .scroll-indicator svg { width: 24px; height: 24px; fill: rgba(255, 255, 255, 0.55); }
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
             40% { transform: translateX(-50%) translateY(-10px); }
@@ -221,27 +256,32 @@
             margin-bottom: 4rem;
         }
         .section-number {
-            font-family: 'Playfair Display', serif;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--orange);
-            letter-spacing: 0.15em;
+            display: inline-block;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--teal);
+            background: var(--teal-100);
+            padding: 0.3rem 0.9rem;
+            border-radius: 100px;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            margin-bottom: 0.8rem;
+            margin-bottom: 1rem;
         }
         .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(1.8rem, 4vw, 2.8rem);
-            font-weight: 800;
+            font-family: 'Fira Code', monospace;
+            font-size: clamp(1.7rem, 4vw, 2.6rem);
+            font-weight: 700;
             margin-bottom: 1rem;
             line-height: 1.2;
+            color: var(--navy);
         }
         .section-subtitle {
             font-size: 1.05rem;
             color: var(--text-secondary);
             max-width: 650px;
             margin: 0 auto;
-            font-weight: 300;
+            font-weight: 400;
         }
 
         /* ─── DIVIDER ─── */
@@ -252,7 +292,7 @@
         }
         .divider-line {
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
         }
 
         /* ─── CARDS ─── */
@@ -262,32 +302,36 @@
             border-radius: 16px;
             padding: 2rem;
             margin-bottom: 2rem;
+            box-shadow: var(--shadow-soft);
             transition: border-color 0.3s;
         }
         .card:hover {
-            border-color: rgba(45, 106, 106, 0.5);
+            border-color: var(--teal-light);
         }
         .card-title {
-            font-size: 1.15rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: var(--cream);
+            color: var(--navy);
         }
 
         /* ─── CHART CONTAINERS ─── */
         .chart-container {
-            background: rgba(21, 45, 62, 0.5);
+            background: var(--surface);
             border: 1px solid var(--card-border);
             border-radius: 16px;
             padding: 2rem;
             margin-bottom: 2rem;
+            box-shadow: var(--shadow-soft);
             position: relative;
         }
         .chart-title {
-            font-size: 1.1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.05rem;
             font-weight: 700;
             margin-bottom: 0.3rem;
-            color: var(--cream);
+            color: var(--navy);
         }
         .chart-description {
             font-size: 0.85rem;
@@ -296,9 +340,10 @@
         }
         .chart-annotation {
             position: absolute;
-            background: rgba(242, 140, 0, 0.15);
+            background: rgba(242, 140, 0, 0.10);
             border: 1px solid rgba(242, 140, 0, 0.4);
-            color: var(--orange);
+            color: var(--brown);
+            font-family: 'Fira Code', monospace;
             font-size: 0.72rem;
             font-weight: 600;
             padding: 0.35rem 0.8rem;
@@ -334,17 +379,18 @@
             border-radius: 14px;
             padding: 1.8rem;
             text-align: center;
+            box-shadow: var(--shadow-soft);
             transition: transform 0.2s, border-color 0.3s;
         }
         .stat-card:hover {
             transform: translateY(-3px);
-            border-color: var(--orange);
+            border-color: var(--orange-light);
         }
         .stat-card .stat-value {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Fira Code', monospace;
             font-size: 2.4rem;
-            font-weight: 900;
-            color: var(--orange);
+            font-weight: 700;
+            color: var(--teal);
             line-height: 1;
             margin-bottom: 0.4rem;
         }
@@ -366,8 +412,12 @@
             font-size: 0.85rem;
         }
         .data-table thead th {
-            background: rgba(45, 106, 106, 0.2);
-            color: var(--cream);
+            background: #E3ECEE;
+            color: var(--text-primary);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
             font-weight: 600;
             padding: 0.8rem 1rem;
             text-align: left;
@@ -378,15 +428,15 @@
         .data-table thead th:last-child { border-radius: 0 10px 0 0; }
         .data-table tbody td {
             padding: 0.7rem 1rem;
-            border-bottom: 1px solid rgba(45, 106, 106, 0.1);
+            border-bottom: 1px solid rgba(189, 205, 210, 0.5);
             color: var(--text-secondary);
         }
         .data-table tbody tr:hover td {
-            background: rgba(45, 106, 106, 0.08);
-            color: var(--cream);
+            background: var(--teal-50);
+            color: var(--text-primary);
         }
-        .data-table .val-up { color: var(--orange); font-weight: 700; }
-        .data-table .val-down { color: var(--teal-light); font-weight: 700; }
+        .data-table .val-up { color: var(--brown); font-weight: 700; }
+        .data-table .val-down { color: var(--teal); font-weight: 700; }
 
         /* ─── GEO MAP VISUALIZATION ─── */
         .geo-grid {
@@ -400,26 +450,27 @@
             padding: 1.8rem;
         }
         .geo-box.cheap {
-            background: rgba(45, 106, 106, 0.12);
+            background: var(--teal-50);
             border: 1px solid rgba(45, 106, 106, 0.3);
         }
         .geo-box.expensive {
-            background: rgba(242, 140, 0, 0.08);
-            border: 1px solid rgba(242, 140, 0, 0.3);
+            background: var(--brown-light);
+            border: 1px solid rgba(242, 140, 0, 0.35);
         }
         .geo-box h4 {
+            font-family: 'Fira Code', monospace;
             font-size: 0.9rem;
             font-weight: 700;
             margin-bottom: 1rem;
         }
-        .geo-box.cheap h4 { color: var(--teal-light); }
-        .geo-box.expensive h4 { color: var(--orange); }
+        .geo-box.cheap h4 { color: var(--teal); }
+        .geo-box.expensive h4 { color: var(--brown); }
         .geo-state {
             display: flex;
             align-items: center;
             gap: 0.6rem;
             padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(189, 205, 210, 0.45);
         }
         .geo-dot {
             width: 8px;
@@ -427,9 +478,9 @@
             border-radius: 50%;
             flex-shrink: 0;
         }
-        .geo-box.cheap .geo-dot { background: var(--teal-light); }
+        .geo-box.cheap .geo-dot { background: var(--teal); }
         .geo-box.expensive .geo-dot { background: var(--orange); }
-        .geo-state-name { font-size: 0.85rem; font-weight: 500; }
+        .geo-state-name { font-size: 0.85rem; font-weight: 500; color: var(--text-primary); }
         .geo-state-note { font-size: 0.72rem; color: var(--text-secondary); margin-left: auto; }
 
         /* ─── CALLOUT ─── */
@@ -447,21 +498,22 @@
             flex-shrink: 0;
         }
         .callout.warning {
-            background: rgba(242, 140, 0, 0.1);
-            border: 1px solid rgba(242, 140, 0, 0.3);
+            background: rgba(242, 140, 0, 0.08);
+            border: 1px solid rgba(242, 140, 0, 0.35);
         }
         .callout.insight {
-            background: rgba(45, 106, 106, 0.1);
+            background: rgba(45, 106, 106, 0.07);
             border: 1px solid rgba(45, 106, 106, 0.3);
         }
         .callout.danger {
-            background: rgba(107, 53, 33, 0.15);
-            border: 1px solid rgba(107, 53, 33, 0.4);
+            background: var(--brown-light);
+            border: 1px solid rgba(107, 53, 33, 0.35);
         }
         .callout-title {
             font-weight: 700;
             font-size: 0.95rem;
             margin-bottom: 0.3rem;
+            color: var(--navy);
         }
         .callout-text {
             font-size: 0.88rem;
@@ -477,11 +529,11 @@
             margin-bottom: 1.5rem;
         }
         .controls button {
-            background: rgba(45, 106, 106, 0.12);
-            border: 1px solid var(--card-border);
+            background: var(--surface);
+            border: 1px solid var(--border);
             color: var(--text-secondary);
-            font-family: 'Inter', sans-serif;
-            font-size: 0.78rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
             font-weight: 500;
             padding: 0.45rem 1rem;
             border-radius: 8px;
@@ -490,12 +542,12 @@
         }
         .controls button:hover {
             border-color: var(--teal);
-            color: var(--cream);
+            color: var(--teal);
         }
         .controls button.active {
-            background: rgba(242, 140, 0, 0.15);
-            border-color: var(--orange);
-            color: var(--orange);
+            background: var(--teal);
+            border-color: var(--teal);
+            color: #FFFFFF;
         }
 
         /* ─── PROGRESS BAR ANIMATION ─── */
@@ -511,16 +563,17 @@
         .bar-label {
             font-size: 0.82rem;
             font-weight: 500;
-            color: var(--cream);
+            color: var(--text-primary);
         }
         .bar-value {
+            font-family: 'Fira Code', monospace;
             font-size: 0.82rem;
             font-weight: 700;
-            color: var(--orange);
+            color: var(--brown);
         }
         .bar-track {
             height: 10px;
-            background: rgba(45, 106, 106, 0.15);
+            background: var(--teal-50);
             border-radius: 6px;
             overflow: hidden;
         }
@@ -544,9 +597,10 @@
             border: 1px solid var(--card-border);
             border-radius: 14px;
             padding: 2rem;
-            transition: transform 0.2s;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.2s, border-color 0.3s;
         }
-        .rec-card:hover { transform: translateY(-3px); }
+        .rec-card:hover { transform: translateY(-3px); border-color: var(--teal-light); }
         .rec-card-icon {
             width: 48px;
             height: 48px;
@@ -557,14 +611,15 @@
             font-size: 1.3rem;
             margin-bottom: 1rem;
         }
-        .rec-card.policy .rec-card-icon { background: rgba(45, 106, 106, 0.2); }
-        .rec-card.business .rec-card-icon { background: rgba(242, 140, 0, 0.15); }
-        .rec-card.household .rec-card-icon { background: rgba(107, 53, 33, 0.2); }
+        .rec-card.policy .rec-card-icon { background: var(--teal-100); }
+        .rec-card.business .rec-card-icon { background: var(--cream-dark); }
+        .rec-card.household .rec-card-icon { background: var(--brown-light); }
         .rec-card h4 {
+            font-family: 'Fira Code', monospace;
             font-size: 1rem;
             font-weight: 700;
             margin-bottom: 0.6rem;
-            color: var(--cream);
+            color: var(--navy);
         }
         .rec-card p {
             font-size: 0.85rem;
@@ -574,27 +629,29 @@
 
         /* ─── BOTTOM LINE ─── */
         .bottom-line {
-            background: linear-gradient(135deg, rgba(45, 106, 106, 0.15), rgba(242, 140, 0, 0.08));
-            border: 1px solid var(--card-border);
+            background: linear-gradient(135deg, var(--teal) 0%, var(--teal-mid) 100%);
+            border: none;
             border-radius: 20px;
             padding: 3rem;
             text-align: center;
             margin: 3rem 0;
+            box-shadow: 0 20px 64px rgba(12, 34, 51, 0.18);
         }
         .bottom-line h3 {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Fira Code', monospace;
             font-size: 1.6rem;
             margin-bottom: 1.2rem;
+            color: #FFFFFF;
         }
         .bottom-line p {
             font-size: 1rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.88);
             max-width: 700px;
             margin: 0 auto;
             line-height: 1.8;
         }
         .bottom-line .emphasis {
-            color: var(--orange);
+            color: var(--orange-light);
             font-weight: 700;
         }
 
@@ -602,11 +659,12 @@
         .footer {
             text-align: center;
             padding: 3rem 2rem;
-            border-top: 1px solid var(--card-border);
+            border-top: 1px solid rgba(189, 205, 210, 0.75);
+            font-family: 'Fira Code', monospace;
             font-size: 0.78rem;
             color: var(--text-secondary);
         }
-        .footer a { color: var(--teal-light); text-decoration: none; }
+        .footer a { color: var(--teal); text-decoration: none; }
         .footer a:hover { color: var(--orange); }
 
         /* ─── FADE-IN ANIMATION ─── */
@@ -623,6 +681,7 @@
         /* ─── RESPONSIVE ─── */
         @media (max-width: 768px) {
             .nav-links { display: none; }
+            .nav-inner { justify-content: center; }
             .geo-grid { grid-template-columns: 1fr; }
             .hero-stat-row { gap: 1.2rem; }
             .hero-stat-value { font-size: 2rem; }
@@ -630,17 +689,28 @@
             .chart-container { padding: 1.2rem; }
         }
 
+        /* ─── REDUCED MOTION ─── */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+            .fade-in { opacity: 1; transform: none; }
+        }
+
         /* ─── TOOLTIP ─── */
         .tooltip-custom {
             position: absolute;
-            background: var(--navy-light);
-            border: 1px solid var(--card-border);
+            background: var(--navy);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             padding: 0.8rem 1rem;
             pointer-events: none;
             z-index: 100;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 32px rgba(12, 34, 51, 0.35);
             font-size: 0.8rem;
+            color: var(--cream);
             max-width: 220px;
             opacity: 0;
             transition: opacity 0.15s;
@@ -668,29 +738,33 @@
 
         /* ─── SELECT DROPDOWN ─── */
         select.chart-select {
-            background: rgba(45, 106, 106, 0.15);
-            border: 1px solid var(--card-border);
-            color: var(--cream);
-            font-family: 'Inter', sans-serif;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'Fira Sans', sans-serif;
             font-size: 0.82rem;
             padding: 0.5rem 1rem;
             border-radius: 8px;
             cursor: pointer;
             outline: none;
             margin-bottom: 1rem;
+            transition: border-color 0.2s;
         }
+        select.chart-select:hover { border-color: var(--teal); }
         select.chart-select option {
-            background: var(--navy);
-            color: var(--cream);
+            background: var(--surface);
+            color: var(--text-primary);
         }
     </style>
 </head>
 <body>
 
 <!-- ═══════ NAVIGATION ═══════ -->
+<div id="progress-bar"></div>
+
 <nav class="nav" id="mainNav">
     <div class="nav-inner">
-        <div class="nav-logo">NFPT</div>
+        <a class="nav-logo" href="./index.html" title="Back to Intelligence Hub">NFPT · Data Story</a>
         <div class="nav-links">
             <a href="#hero" class="active">Overview</a>
             <a href="#inflation">Inflation</a>
@@ -802,7 +876,7 @@
         <div class="chart-title">Top Geographic Price Gaps</div>
         <div class="chart-description">Average price comparison between the cheapest and most expensive state for each item. Interactive — hover for details.</div>
         <div class="comparison-legend">
-            <div class="legend-item"><div class="legend-dot" style="background: var(--teal-light);"></div> Cheapest State Price</div>
+            <div class="legend-item"><div class="legend-dot" style="background: var(--teal);"></div> Cheapest State Price</div>
             <div class="legend-item"><div class="legend-dot" style="background: var(--orange);"></div> Most Expensive State Price</div>
         </div>
         <div class="chart-canvas-wrap" style="height: clamp(300px, 52vh, 450px);">
@@ -881,11 +955,11 @@
     <!-- Volatility ranking -->
     <div class="grid-2 fade-in">
         <div class="card">
-            <div class="card-title" style="color: var(--orange);">🔥 Most Volatile (CV > 95%)</div>
+            <div class="card-title" style="color: var(--brown);">🔥 Most Volatile (CV > 95%)</div>
             <div id="highVolBars"></div>
         </div>
         <div class="card">
-            <div class="card-title" style="color: var(--teal-light);">🧊 Most Stable (CV < 65%)</div>
+            <div class="card-title" style="color: var(--teal);">🧊 Most Stable (CV < 65%)</div>
             <div id="lowVolBars"></div>
         </div>
     </div>
@@ -911,7 +985,7 @@
 
     <div class="grid-2 fade-in">
         <div class="stat-card" style="border-color: var(--teal);">
-            <div class="stat-value" style="color: var(--teal-light);">38 / 43</div>
+            <div class="stat-value" style="color: var(--teal);">38 / 43</div>
             <div class="stat-label">Items cheapest in January</div>
         </div>
         <div class="stat-card" style="border-color: var(--orange);">
@@ -938,9 +1012,9 @@
                     <tr><th>Food Item</th><th>Cheapest Month</th><th>Most Expensive Month</th><th>Why?</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Irish Potato</td><td style="color: var(--teal-light);">January</td><td class="val-up">June</td><td>Rainy season supply disruption</td></tr>
-                    <tr><td>Tomato</td><td style="color: var(--teal-light);">January</td><td class="val-up">June</td><td>Flooding & poor road conditions</td></tr>
-                    <tr><td>Onion Bulb</td><td style="color: var(--teal-light);">March</td><td class="val-up">December</td><td>Delayed harvest cycle</td></tr>
+                    <tr><td>Irish Potato</td><td style="color: var(--teal); font-weight: 700;">January</td><td class="val-up">June</td><td>Rainy season supply disruption</td></tr>
+                    <tr><td>Tomato</td><td style="color: var(--teal); font-weight: 700;">January</td><td class="val-up">June</td><td>Flooding & poor road conditions</td></tr>
+                    <tr><td>Onion Bulb</td><td style="color: var(--teal); font-weight: 700;">March</td><td class="val-up">December</td><td>Delayed harvest cycle</td></tr>
                 </tbody>
             </table>
         </div>
@@ -960,13 +1034,13 @@
     <!-- Model Comparison -->
     <div class="grid-2 fade-in">
         <div class="stat-card" style="border-color: var(--teal);">
-            <div class="stat-value" style="color: var(--teal-light); font-size: 1.5rem;">LightGBM</div>
-            <div class="stat-label" style="font-size: 1rem; color: var(--cream); margin-top: 0.5rem;">~7.3% Avg. MAPE</div>
+            <div class="stat-value" style="color: var(--teal); font-size: 1.5rem;">LightGBM</div>
+            <div class="stat-label" style="font-size: 1rem; color: var(--text-primary); margin-top: 0.5rem;">~7.3% Avg. MAPE</div>
             <div class="stat-label">Primary forecast model</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" style="color: var(--text-secondary); font-size: 1.5rem;">Prophet</div>
-            <div class="stat-label" style="font-size: 1rem; color: var(--cream); margin-top: 0.5rem;">~24.5% Avg. MAPE</div>
+            <div class="stat-label" style="font-size: 1rem; color: var(--text-primary); margin-top: 0.5rem;">~24.5% Avg. MAPE</div>
             <div class="stat-label">Secondary / comparison</div>
         </div>
     </div>
@@ -974,7 +1048,7 @@
     <!-- Model Accuracy Chart -->
     <div class="chart-container fade-in" style="margin-top: 2rem;">
         <div class="chart-title">Model Accuracy Comparison (MAPE %)</div>
-        <div class="chart-description">Mean Absolute Percentage Error for each item. Lower = better. LightGBM (teal) vs Prophet (cream) on 12-month holdout.</div>
+        <div class="chart-description">Mean Absolute Percentage Error for each item. Lower = better. LightGBM (amber) vs Prophet (teal) on 12-month holdout.</div>
         <div class="controls" id="forecastModelControls">
             <button class="active" data-show="both">Both Models</button>
             <button data-show="lgb">LightGBM Only</button>
@@ -1052,7 +1126,7 @@
     </div>
 
     <!-- Recommendation Cards -->
-    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; text-align: center; margin-bottom: 2rem;" class="fade-in">Recommendations</h3>
+    <h3 style="font-family: 'Fira Code', monospace; font-size: 1.5rem; text-align: center; margin-bottom: 2rem; color: var(--navy);" class="fade-in">Recommendations</h3>
 
     <div class="rec-grid fade-in">
         <div class="rec-card policy">
@@ -1115,8 +1189,9 @@ const COLORS = {
     orangeLight: '#F5A832',
     brownLight: '#FCEEE4',
     creamDark: '#F5DEB3',
-    grid: 'rgba(251, 246, 238,0.07)',
-    gridText: 'rgba(251, 246, 238,0.45)',
+    ink: '#1A2E38',
+    grid: 'rgba(189, 205, 210, 0.4)',
+    gridText: '#6E8088',
 };
 
 // Chart.js defaults — applied on DOMContentLoaded because chart.umd.js is
@@ -1124,7 +1199,7 @@ const COLORS = {
 function applyChartDefaults() {
     Chart.defaults.color = COLORS.gridText;
     Chart.defaults.borderColor = COLORS.grid;
-    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.family = "'Fira Code', monospace";
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(12, 34, 51,0.95)';
     Chart.defaults.plugins.tooltip.borderColor = COLORS.teal;
     Chart.defaults.plugins.tooltip.borderWidth = 1;
@@ -1383,10 +1458,7 @@ lazyChart('topRisersChart', function() {
             labels: top7.map(d => d.item),
             datasets: [{
                 data: top7.map(d => d.change),
-                backgroundColor: top7.map((_, i) => {
-                    const colors = [COLORS.orange, COLORS.orangeLight, COLORS.cream, COLORS.tealLight, COLORS.teal, COLORS.brownLight, COLORS.brown];
-                    return colors[i] + 'CC';
-                }),
+                backgroundColor: COLORS.orange + 'CC',
                 borderColor: 'transparent',
                 borderRadius: 6,
                 barThickness: 32,
@@ -1412,7 +1484,7 @@ lazyChart('topRisersChart', function() {
                             type: 'line',
                             xMin: 430,
                             xMax: 430,
-                            borderColor: COLORS.cream + '40',
+                            borderColor: 'rgba(26, 46, 56, 0.35)',
                             borderWidth: 1,
                             borderDash: [6, 4],
                             label: {
@@ -1435,7 +1507,7 @@ lazyChart('topRisersChart', function() {
                 },
                 y: {
                     grid: { display: false },
-                    ticks: { color: COLORS.cream, font: { weight: '500' } }
+                    ticks: { color: COLORS.ink, font: { weight: '500' } }
                 }
             }
         }
@@ -1515,7 +1587,7 @@ lazyChart('geoGapChart', function() {
                 },
                 y: {
                     grid: { display: false },
-                    ticks: { color: COLORS.cream, font: { size: 11, weight: '500' } }
+                    ticks: { color: COLORS.ink, font: { size: 11, weight: '500' } }
                 }
             }
         }
@@ -1537,7 +1609,7 @@ lazyChart('geoItemChart', function() {
         const d = fullGeoData.find(g => g.item === itemName);
         if (!d) return;
         const ann = document.getElementById('geoItemAnnotation');
-        ann.innerHTML = `<strong style="color: var(--orange);">₦${(d.expPrice - d.cheapPrice).toLocaleString()}</strong> price difference per unit · ${d.spread}% spread between <strong>${d.cheap}</strong> → <strong>${d.expensive}</strong>`;
+        ann.innerHTML = `<strong style="color: var(--brown);">₦${(d.expPrice - d.cheapPrice).toLocaleString()}</strong> price difference per unit · ${d.spread}% spread between <strong>${d.cheap}</strong> → <strong>${d.expensive}</strong>`;
         
         if (chart) chart.destroy();
         chart = new Chart(document.getElementById('geoItemChart'), {
@@ -1546,7 +1618,7 @@ lazyChart('geoItemChart', function() {
                 labels: [d.cheap, d.expensive],
                 datasets: [{
                     data: [d.cheapPrice, d.expPrice],
-                    backgroundColor: [COLORS.tealLight + 'CC', COLORS.orange + 'CC'],
+                    backgroundColor: [COLORS.teal + 'CC', COLORS.orange + 'CC'],
                     borderRadius: 8,
                     barThickness: 60,
                 }]
@@ -1569,7 +1641,7 @@ lazyChart('geoItemChart', function() {
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { color: COLORS.cream, font: { weight: '600', size: 13 } }
+                        ticks: { color: COLORS.ink, font: { weight: '600', size: 13 } }
                     }
                 }
             }
@@ -1598,8 +1670,8 @@ lazyChart('volatilityChart', function() {
             datasets: [{
                 label: 'Food Items',
                 data: data,
-                backgroundColor: data.map(d => d.y > 95 ? COLORS.orange + '88' : d.y > 70 ? COLORS.cream + '55' : COLORS.tealLight + '66'),
-                borderColor: data.map(d => d.y > 95 ? COLORS.orange : d.y > 70 ? COLORS.cream + '77' : COLORS.tealLight),
+                backgroundColor: data.map(d => d.y > 95 ? COLORS.orange + '88' : d.y > 70 ? COLORS.orangeLight + '77' : COLORS.tealLight + '66'),
+                borderColor: data.map(d => d.y > 95 ? COLORS.orange : d.y > 70 ? COLORS.orangeLight : COLORS.tealLight),
                 borderWidth: 1.5,
             }]
         },
@@ -1670,7 +1742,7 @@ lazyChart('monthlyClimbChart', function() {
                 data: monthlyClimbData.map(d => d.slope),
                 backgroundColor: monthlyClimbData.map((d, i) => {
                     const t = i / (monthlyClimbData.length - 1);
-                    return i < 5 ? COLORS.orange + 'CC' : i < 10 ? COLORS.cream + '88' : COLORS.tealLight + '77';
+                    return i < 5 ? COLORS.orange + 'CC' : i < 10 ? COLORS.orangeLight + 'AA' : COLORS.tealLight + '77';
                 }),
                 borderRadius: 6,
                 barThickness: 24,
@@ -1716,7 +1788,7 @@ lazyChart('monthlyClimbChart', function() {
                 },
                 y: {
                     grid: { display: false },
-                    ticks: { color: COLORS.cream, font: { size: 11 } }
+                    ticks: { color: COLORS.ink, font: { size: 11 } }
                 }
             }
         }
@@ -1734,14 +1806,14 @@ lazyChart('modelAccuracyChart', function() {
                 {
                     label: 'LightGBM MAPE',
                     data: sorted.map(d => d.mape_l),
-                    backgroundColor: COLORS.tealLight + 'BB',
+                    backgroundColor: COLORS.orange + 'CC',
                     borderRadius: 3,
                     barPercentage: 0.7,
                 },
                 {
                     label: 'Prophet MAPE',
                     data: sorted.map(d => d.mape_p),
-                    backgroundColor: COLORS.cream + '55',
+                    backgroundColor: COLORS.teal + 'CC',
                     borderRadius: 3,
                     barPercentage: 0.7,
                 }
@@ -1754,7 +1826,7 @@ lazyChart('modelAccuracyChart', function() {
             plugins: {
                 legend: {
                     position: 'top',
-                    labels: { color: COLORS.cream, usePointStyle: true, pointStyle: 'rectRounded', padding: 16 }
+                    labels: { color: COLORS.ink, usePointStyle: true, pointStyle: 'rectRounded', padding: 16 }
                 },
                 tooltip: {
                     callbacks: {
@@ -1767,14 +1839,14 @@ lazyChart('modelAccuracyChart', function() {
                             type: 'line',
                             xMin: 10,
                             xMax: 10,
-                            borderColor: COLORS.tealLight + '55',
+                            borderColor: COLORS.teal + '77',
                             borderWidth: 1,
                             borderDash: [4, 3],
                             label: {
                                 display: true,
                                 content: '10% MAPE',
                                 position: 'start',
-                                color: COLORS.tealLight,
+                                color: COLORS.teal,
                                 font: { size: 10 },
                                 backgroundColor: 'transparent',
                             }
@@ -1790,7 +1862,7 @@ lazyChart('modelAccuracyChart', function() {
                 },
                 y: {
                     grid: { display: false },
-                    ticks: { color: COLORS.cream, font: { size: 9 } }
+                    ticks: { color: COLORS.ink, font: { size: 9 } }
                 }
             }
         }
@@ -1836,7 +1908,7 @@ lazyChart('forecastLineChart', function() {
                         label: 'Prophet 80% Upper',
                         data: d.upper,
                         borderColor: 'transparent',
-                        backgroundColor: COLORS.cream + '15',
+                        backgroundColor: 'rgba(45, 106, 106, 0.10)',
                         fill: '+1',
                         pointRadius: 0,
                         order: 3,
@@ -1853,23 +1925,23 @@ lazyChart('forecastLineChart', function() {
                     {
                         label: 'Prophet Forecast',
                         data: d.prophet,
-                        borderColor: COLORS.cream + 'AA',
+                        borderColor: COLORS.teal,
                         backgroundColor: 'transparent',
                         borderWidth: 2,
                         borderDash: [6, 3],
                         pointRadius: 2,
-                        pointBackgroundColor: COLORS.cream,
+                        pointBackgroundColor: COLORS.teal,
                         tension: 0.3,
                         order: 2,
                     },
                     {
                         label: 'LightGBM Forecast',
                         data: d.lgb,
-                        borderColor: COLORS.tealLight,
+                        borderColor: COLORS.orange,
                         backgroundColor: 'transparent',
                         borderWidth: 3,
                         pointRadius: 3,
-                        pointBackgroundColor: COLORS.tealLight,
+                        pointBackgroundColor: COLORS.orange,
                         tension: 0.3,
                         order: 1,
                     },
@@ -1883,7 +1955,7 @@ lazyChart('forecastLineChart', function() {
                     legend: {
                         position: 'top',
                         labels: {
-                            color: COLORS.cream,
+                            color: COLORS.ink,
                             usePointStyle: true,
                             filter: (item) => !item.text.includes('80%'),
                             padding: 16,
@@ -1973,6 +2045,8 @@ function measureSections() {
     sectionOffsets = Array.from(sections).map(sec => ({ id: sec.id, top: sec.offsetTop - 100 }));
 }
 
+const progressBar = document.getElementById('progress-bar');
+
 function updateActiveNav() {
     let current = '';
     for (const sec of sectionOffsets) {
@@ -1981,6 +2055,10 @@ function updateActiveNav() {
     navLinks.forEach(link => {
         link.classList.toggle('active', link.getAttribute('href') === '#' + current);
     });
+    if (progressBar) {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        progressBar.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + '%';
+    }
     navTicking = false;
 }
 
