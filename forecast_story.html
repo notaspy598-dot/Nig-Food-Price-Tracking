@@ -7,7 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<!-- Deferred: the story text paints without it, and the first chart is built on
+     DOMContentLoaded. -->
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --blue-900: #0C2233;
@@ -685,7 +688,7 @@
 
   .canvas-wrap {
     position: relative;
-    height: 320px;
+    height: clamp(260px, 42vh, 320px);
   }
 
   .chart-panel { display: none; }
@@ -1764,13 +1767,46 @@
 
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script>
-// ── Progress bar ──
+// ── Progress bar + navbar active state ──
+// Previously two separate unthrottled scroll listeners: one read
+// document.body.scrollHeight and the other read offsetTop for every section, so
+// each scroll event forced synchronous layout twice. Both now share a single
+// rAF-coalesced pass over cached measurements.
+const progressBar = document.getElementById('progress-bar');
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('.nav-links a');
+let sectionOffsets = [];
+let docHeight = 0;
+let scrollTicking = false;
+
+function measureDoc() {
+  docHeight = document.body.scrollHeight - window.innerHeight;
+  sectionOffsets = Array.from(sections).map(sec => ({ id: sec.id, top: sec.offsetTop - 100 }));
+}
+
+function onScrollFrame() {
+  // Clamped: scrollHeight can shift after layout settles, which let the bar
+  // overshoot 100% and spill past its track.
+  const pct = docHeight > 0 ? Math.min(100, Math.max(0, (window.scrollY / docHeight) * 100)) : 0;
+  progressBar.style.width = pct + '%';
+
+  let current = '';
+  for (const sec of sectionOffsets) {
+    if (window.scrollY >= sec.top) current = sec.id;
+  }
+  navLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+  });
+  scrollTicking = false;
+}
+
 window.addEventListener('scroll', () => {
-  const scrollTop = window.scrollY;
-  const docHeight = document.body.scrollHeight - window.innerHeight;
-  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-  document.getElementById('progress-bar').style.width = pct + '%';
-});
+  if (scrollTicking) return;
+  scrollTicking = true;
+  requestAnimationFrame(onScrollFrame);
+}, { passive: true });
+
+window.addEventListener('resize', measureDoc, { passive: true });
 
 // ── Fade-up per element (each .fade-in reveals individually on scroll) ──
 const observer = new IntersectionObserver((entries) => {
@@ -1787,26 +1823,7 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-// ── Navbar active state on scroll (mirrors data_story.html flow) ──
-const sections = document.querySelectorAll('section');
-const navLinks = document.querySelectorAll('.nav-links a');
-
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(sec => {
-    const top = sec.offsetTop - 100;
-    if (window.scrollY >= top) current = sec.id;
-  });
-
-  navLinks.forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('href') === '#' + current) {
-      link.classList.add('active');
-    }
-  });
-});
-
-window.dispatchEvent(new Event('scroll'));
+// Navbar active state is handled by onScrollFrame above.
 
 // ── Counter animation ──
 function animateCounter(el) {
@@ -2029,8 +2046,13 @@ function switchChart(id) {
   if (!chartInstances[id]) buildChart(id);
 }
 
-// Build initial chart
-buildChart('yam');
+// ── Bootstrap ──
+// Chart.js is deferred, so it is only guaranteed present on DOMContentLoaded.
+document.addEventListener('DOMContentLoaded', () => {
+  measureDoc();
+  onScrollFrame();
+  buildChart('yam');
+});
 </script>
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -9,10 +9,12 @@
     content="Comprehensive analytics dashboard tracking Nigerian food prices across 37 states, featuring geographic arbitrage, seasonal trends, volatility analysis, and executive insights.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.plot.ly" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <!-- Cartesian bundle only: this page uses bar, scatter and heatmap traces (~1.3MB vs ~3.5MB full build). -->
+  <script defer src="https://cdn.plot.ly/plotly-cartesian-2.27.0.min.js"></script>
   <style>
     *,
     *::before,
@@ -489,6 +491,21 @@
       grid-column: 1/-1
     }
 
+    /* Chart heights scale with the viewport instead of being pinned in px —
+       a 700px plot taller than the phone screen it renders on is unreadable.
+       The max values preserve the original desktop sizing. */
+    .plot {
+      height: clamp(300px, 48vh, 400px)
+    }
+
+    .plot-md {
+      height: clamp(320px, 56vh, 500px)
+    }
+
+    .plot-lg {
+      height: clamp(420px, 78vh, 700px)
+    }
+
     /* ═══ SELECTS ═══ */
     .select-wrap {
       display: flex;
@@ -545,6 +562,7 @@
     .table-toolbar {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 12px;
       padding: 14px 16px;
       border-bottom: 1px solid var(--border)
@@ -794,6 +812,24 @@
       select {
         width: 100%;
         min-width: 0
+      }
+    }
+
+    @media(max-width:430px) {
+
+      /* Two stat columns squeeze the 24px monospace values into ~2 chars per
+         line on a small phone. */
+      .stats-row {
+        grid-template-columns: 1fr
+      }
+
+      .search-box,
+      .search-box input {
+        width: 100%
+      }
+
+      .content {
+        padding: 16px 12px
       }
     }
 
@@ -1409,7 +1445,7 @@
             <div class="chart-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 20V10M18 20V4M6 20v-4" />
               </svg>Top 15 Arbitrage Opportunities</div>
-            <div id="arb-chart" style="height:500px"></div>
+            <div id="arb-chart" class="plot-md"></div>
           </div>
           <div class="chart-card">
             <div class="chart-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1418,7 +1454,7 @@
               </svg>Price by State</div>
             <div class="select-wrap"><label>Select Item</label><select id="arb-item-select"
                 onchange="updateArbDetail()"></select></div>
-            <div id="arb-detail-chart" style="height:500px"></div>
+            <div id="arb-detail-chart" class="plot-md"></div>
           </div>
         </div>
         <div class="table-wrap">
@@ -1464,7 +1500,7 @@
               </svg>Price Trend Over Time</div>
             <div class="select-wrap"><label>Item</label><select id="trend-item-select"
                 onchange="updateTrendChart()"></select></div>
-            <div id="trend-chart" style="height:400px"></div>
+            <div id="trend-chart" class="plot"></div>
           </div>
           <div class="chart-card">
             <div class="chart-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1473,14 +1509,14 @@
               </svg>Seasonal Pattern</div>
             <div class="select-wrap"><label>Item</label><select id="season-item-select"
                 onchange="updateSeasonChart()"></select></div>
-            <div id="season-chart" style="height:400px"></div>
+            <div id="season-chart" class="plot"></div>
           </div>
         </div>
         <div class="chart-card chart-full">
           <div class="chart-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 20V10M18 20V4M6 20v-4" />
             </svg>Month-over-Month Price Change (%)</div>
-          <div id="mom-chart" style="height:700px"></div>
+          <div id="mom-chart" class="plot-lg"></div>
         </div>
         <div class="table-wrap">
           <div class="table-toolbar">
@@ -1523,13 +1559,13 @@
             <div class="chart-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 20V10M18 20V4M6 20v-4" />
               </svg>Volatility by Item (CV%)</div>
-            <div id="vol-bar-chart" style="height:700px"></div>
+            <div id="vol-bar-chart" class="plot-lg"></div>
           </div>
           <div class="chart-card">
             <div class="chart-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
               </svg>State × Item Volatility Heatmap</div>
-            <div id="vol-heatmap" style="height:700px"></div>
+            <div id="vol-heatmap" class="plot-lg"></div>
           </div>
         </div>
         <div class="table-wrap">
@@ -1624,7 +1660,7 @@
             </div>
           </div>
           <div class="chart-card" style="border-color:rgba(107,44,27,0.15)">
-            <div id="exec-acceleration-chart" style="height:440px"></div>
+            <div id="exec-acceleration-chart" class="plot-md"></div>
           </div>
         </div>
 
@@ -1639,7 +1675,7 @@
             </div>
           </div>
           <div class="chart-card">
-            <div id="exec-top5-chart" style="height:380px"></div>
+            <div id="exec-top5-chart" class="plot"></div>
           </div>
         </div>
 
@@ -1796,6 +1832,60 @@
 
     const plotlyConfig = { responsive: true, displayModeBar: false };
 
+    // ─── Responsive plotting ───
+    // Every chart goes through plot(). It keeps the desktop layout as the source
+    // of truth and derives a narrow-viewport variant from it, so a phone rotation
+    // re-derives margins instead of keeping the desktop gutter.
+    const NARROW = 768;
+    const plotRegistry = new Map();
+
+    function fitLayout(layout) {
+      if (window.innerWidth >= NARROW) return layout;
+      // A fixed 180-200px left gutter for long food-item labels leaves almost no
+      // plot area on a phone. Cap it against viewport width instead.
+      const base = layout.margin || {};
+      const cap = Math.max(56, Math.round(window.innerWidth * 0.32));
+      const out = {
+        ...layout,
+        margin: { ...base, l: Math.min(base.l ?? 80, cap), r: Math.min(base.r ?? 30, 16) },
+        xaxis: { ...layout.xaxis, tickfont: { size: 9 }, automargin: true },
+        yaxis: { ...layout.yaxis, tickfont: { size: 9 }, automargin: true },
+      };
+      if (layout.showlegend !== false) {
+        out.legend = { orientation: 'h', x: 0, y: -0.18, font: { size: 10 }, ...layout.legend };
+      }
+      return out;
+    }
+
+    function plot(id, traces, layout) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      plotRegistry.set(id, { traces, layout });
+      // react() diffs against the existing figure — cheaper than newPlot when a
+      // dropdown change re-renders the same chart.
+      Plotly.react(el, traces, fitLayout(layout), plotlyConfig);
+    }
+
+    // Re-derive layouts when crossing the narrow breakpoint (rotation, resize).
+    (function () {
+      let wasNarrow = window.innerWidth < NARROW;
+      let timer;
+      window.addEventListener('resize', function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          const isNarrow = window.innerWidth < NARROW;
+          if (isNarrow === wasNarrow) return;
+          wasNarrow = isNarrow;
+          plotRegistry.forEach(function (entry, id) {
+            const el = document.getElementById(id);
+            if (el && el.offsetParent !== null) {
+              Plotly.react(el, entry.traces, fitLayout(entry.layout), plotlyConfig);
+            }
+          });
+        }, 200);
+      }, { passive: true });
+    })();
+
     // ─── Tab switching ───
     function switchSection(sectionId) {
       var sections = document.querySelectorAll(".section");
@@ -1810,6 +1900,9 @@
       if (sb) sb.classList.remove("open");
       var ov = document.getElementById("sidebar-overlay");
       if (ov) ov.classList.remove("open");
+      // Build on first view, re-measure on later views — the container only has
+      // a real width once .active has been applied above.
+      ensureSection(sectionId);
     }
 
     // ─── Table rendering ───
@@ -1891,7 +1984,7 @@
 
       // Top 15 horizontal bar
       const top15 = arbData.slice(0, 15);
-      Plotly.newPlot('arb-chart', [{
+      plot('arb-chart', [{
         type: 'bar',
         orientation: 'h',
         y: top15.map(d => d["Food Item"]),
@@ -1907,7 +2000,7 @@
         ...plotlyLayout,
         yaxis: { ...plotlyLayout.yaxis, autorange: 'reversed' },
         xaxis: { ...plotlyLayout.xaxis, title: 'Price Spread (%)' },
-      }, plotlyConfig);
+      });
 
       // Item dropdown
       const allItems = arbData.map(d => d["Food Item"]);
@@ -1933,7 +2026,7 @@
         return '#F28C00';
       });
 
-      Plotly.newPlot('arb-detail-chart', [{
+      plot('arb-detail-chart', [{
         type: 'bar',
         orientation: 'h',
         y: d.states,
@@ -1948,7 +2041,7 @@
         yaxis: { ...plotlyLayout.yaxis },
         xaxis: { ...plotlyLayout.xaxis, title: 'Average Price (₦)' },
         title: { text: item + ' — Price by State', font: { size: 14 } },
-      }, plotlyConfig);
+      });
     }
 
     // ─── Trend Charts ───
@@ -1966,7 +2059,7 @@
       updateSeasonChart();
 
       // MoM bar chart
-      Plotly.newPlot('mom-chart', [{
+      plot('mom-chart', [{
         type: 'bar',
         orientation: 'h',
         y: sorted.map(d => d["Food Item"]),
@@ -1979,7 +2072,7 @@
         yaxis: { ...plotlyLayout.yaxis, autorange: 'reversed' },
         xaxis: { ...plotlyLayout.xaxis, title: 'MoM % Change' },
         shapes: [{ type: 'line', x0: 0, x1: 0, y0: -0.5, y1: sorted.length - 0.5, line: { color: '#2D6A6A', width: 1 } }],
-      }, plotlyConfig);
+      });
 
       renderTable('trend-table', trendData, [
         'Food Item', 'Avg Monthly Price (₦)', 'MoM Slope (₦)', 'MoM Change (%)',
@@ -1991,7 +2084,7 @@
       const item = document.getElementById('trend-item-select').value;
       const d = monthlyData[item];
       if (!d) return;
-      Plotly.newPlot('trend-chart', [{
+      plot('trend-chart', [{
         type: 'scatter',
         mode: 'lines',
         x: d.dates,
@@ -2004,7 +2097,7 @@
         xaxis: { ...plotlyLayout.xaxis, title: 'Period' },
         yaxis: { ...plotlyLayout.yaxis, title: 'Average Price (₦)' },
         title: { text: item, font: { size: 14 } },
-      }, plotlyConfig);
+      });
     }
 
     function updateSeasonChart() {
@@ -2012,7 +2105,7 @@
       const d = seasonData[item];
       if (!d) return;
       const avg = d.prices.reduce((a, b) => a + b) / d.prices.length;
-      Plotly.newPlot('season-chart', [{
+      plot('season-chart', [{
         type: 'bar',
         x: d.months,
         y: d.prices,
@@ -2033,7 +2126,7 @@
         yaxis: { ...plotlyLayout.yaxis, title: 'Avg Price (₦)' },
         title: { text: item + ' — Seasonal Pattern', font: { size: 14 } },
         showlegend: false,
-      }, plotlyConfig);
+      });
     }
 
     // ─── Volatility Charts ───
@@ -2045,7 +2138,7 @@
       document.getElementById('vol-avg-cv').textContent = avgCv.toFixed(1) + '%';
 
       // Bar chart
-      Plotly.newPlot('vol-bar-chart', [{
+      plot('vol-bar-chart', [{
         type: 'bar',
         orientation: 'h',
         y: sorted.map(d => d["Food Item"]),
@@ -2061,10 +2154,10 @@
         ...plotlyLayout,
         yaxis: { ...plotlyLayout.yaxis, autorange: 'reversed' },
         xaxis: { ...plotlyLayout.xaxis, title: 'CV (%)' },
-      }, plotlyConfig);
+      });
 
       // Heatmap
-      Plotly.newPlot('vol-heatmap', [{
+      plot('vol-heatmap', [{
         type: 'heatmap',
         z: volHeatmap.values,
         x: volHeatmap.states,
@@ -2077,7 +2170,7 @@
         margin: { l: 200, r: 30, t: 40, b: 100 },
         xaxis: { ...plotlyLayout.xaxis, tickangle: 90, tickfont: { size: 9 } },
         yaxis: { ...plotlyLayout.yaxis, tickfont: { size: 9 } },
-      }, plotlyConfig);
+      });
 
       renderTable('vol-table', volData, [
         'Food Item', 'Mean Price', 'Std Dev', 'CV (%)', 'Most Volatile State', 'Max State CV (%)'
@@ -2143,7 +2236,7 @@
 
       var maxIdx = avgPriceIndex.reduce((mI, v, i, arr) => v > arr[mI] ? i : mI, 0);
 
-      Plotly.newPlot('exec-acceleration-chart', [
+      plot('exec-acceleration-chart', [
         {
           type: 'scatter', mode: 'lines',
           x: allDates, y: avgPriceIndex,
@@ -2171,7 +2264,7 @@
             fillcolor: 'rgba(45,106,106,0.04)', line: { width: 0 }
           }
         ]
-      }, plotlyConfig);
+      });
 
 
       // 3. Top 5 Most Inflated Items
@@ -2193,7 +2286,7 @@
         };
       });
 
-      Plotly.newPlot('exec-top5-chart', [{
+      plot('exec-top5-chart', [{
         type: 'bar', orientation: 'h',
         y: top5.map(function (d) { return d['Food Item']; }),
         x: top5.map(function (d) { return d['Total Change (%)']; }),
@@ -2208,7 +2301,7 @@
         yaxis: { ...plotlyLayout.yaxis, autorange: 'reversed' },
         xaxis: { ...plotlyLayout.xaxis, title: 'Total Price Change (%) Since 2016' },
         annotations: top5Annotations
-      }, plotlyConfig);
+      });
 
 
       // 4. Seasonal Calendar Strip (average across all items)
@@ -2251,10 +2344,38 @@
     }
 
     // ─── Init ───
-    initArbitrage();
-    initTrends();
-    initVolatility();
-    initExecutive();
+    // Charts are built per section on first view. Plotly cannot measure a
+    // display:none container, so building all four up front both wasted work
+    // and produced mis-sized charts on every tab except the visible one.
+    var sectionInit = {
+      arbitrage: initArbitrage,
+      trends: initTrends,
+      volatility: initVolatility,
+      executive: initExecutive
+    };
+    var initialized = {};
+
+    function ensureSection(sectionId) {
+      var section = document.getElementById('sec-' + sectionId);
+      if (!section) return;
+      if (!initialized[sectionId]) {
+        initialized[sectionId] = true;
+        sectionInit[sectionId]();
+        return;
+      }
+      // Already built while hidden or at a different viewport — re-measure.
+      resizeSection(section);
+    }
+
+    function resizeSection(section) {
+      var plots = section.querySelectorAll('.js-plotly-plot');
+      for (var i = 0; i < plots.length; i++) Plotly.Plots.resize(plots[i]);
+    }
+
+    // Plotly is deferred, so it is guaranteed loaded by DOMContentLoaded.
+    document.addEventListener('DOMContentLoaded', function () {
+      ensureSection('arbitrage');
+    });
 
     // ─── Sidebar hover expand/collapse (desktop) ───
     (function() {
