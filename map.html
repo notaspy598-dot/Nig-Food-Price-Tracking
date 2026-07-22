@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Price Map — Where Food Costs What in Nigeria</title>
+    <meta name="description" content="An extruded 3D map of Nigerian food prices by state, with arbitrage arcs tracing the biggest cheap-state to expensive-state price gaps.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%97%BA%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <script defer src="https://cdn.jsdelivr.net/npm/deck.gl@9.0.36/dist.min.js"></script>
+    <style>
+        :root {
+            --navy: #0C2233;
+            --teal: #2D6A6A;
+            --cream: #FBF6EE;
+            --orange: #F28C00;
+            --teal-light: #5BAAAA;
+            --teal-50: #E8F3F3;
+            --text-primary: #1A2E38;
+            --text-secondary: #6E8088;
+            --border: #BDCDD2;
+            --surface: #FFFFFF;
+            --card-border: rgba(189, 205, 210, 0.95);
+            --shadow-soft: 0 4px 24px rgba(45, 106, 106, 0.10);
+
+            /* Map surface. The extruded columns need a dark ground to read as
+               solids rather than as stains, and it matches the navy hero panel
+               the hub page already uses. */
+            --map-bg: #0C2233;
+
+            /* Sequential ramp for the selected metric — one hue, monotone
+               lightness, validated against the navy map surface. Mapped
+               brightest = highest: on a dark ground the eye reads luminance as
+               magnitude, so the usual light-to-dark choropleth direction would
+               sink the expensive states into the background. */
+            --ramp-1: #9A5C00;
+            --ramp-2: #C07300;
+            --ramp-3: #E4901D;
+            --ramp-4: #F5AF52;
+            --ramp-5: #FBCE8E;
+            --ramp-6: #FFE7C4;
+
+            /* Arc endpoints. Two hues that read as opposite — cool where food
+               is cheap, warm where it is dear — so the direction of the flow is
+               legible without following the animation. */
+            --arc-cheap: #4FC3B4;
+            --arc-dear: #FF7A45;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Fira Sans', sans-serif;
+            background: var(--cream);
+            color: var(--text-primary);
+            line-height: 1.65;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3 { font-family: 'Fira Code', monospace; color: var(--navy); }
+
+        /* ─── NAV ─── */
+        .nav {
+            position: sticky;
+            top: 12px;
+            z-index: 100;
+            width: min(1180px, calc(100% - 24px));
+            margin: 12px auto 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            box-shadow: 0 4px 24px rgba(45, 106, 106, 0.14);
+            padding: 0 16px;
+        }
+        .nav-inner {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; height: 48px;
+        }
+        .nav-logo {
+            font-family: 'Fira Code', monospace;
+            font-size: 12px; letter-spacing: 0.6px; text-transform: uppercase;
+            color: var(--teal); font-weight: 700; text-decoration: none; white-space: nowrap;
+        }
+        .nav-links { display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
+        .nav-links a {
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.75rem; font-weight: 600;
+            padding: 0.4rem 0.7rem; border-radius: 999px; transition: all 0.2s;
+        }
+        .nav-links a:hover { color: var(--teal); background: var(--teal-50); }
+
+        /* ─── HERO ─── */
+        .hero { max-width: 1180px; margin: 0 auto; padding: 3.5rem 1.5rem 1.5rem; text-align: center; }
+        .hero-badge {
+            display: inline-block;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+            color: var(--orange); background: rgba(242, 140, 0, 0.12);
+            border: 1px solid rgba(242, 140, 0, 0.35); border-radius: 999px;
+            padding: 0.3rem 0.85rem; margin-bottom: 1rem;
+        }
+        .hero h1 { font-size: clamp(1.8rem, 4.6vw, 3rem); line-height: 1.12; margin-bottom: 0.75rem; }
+        .hero h1 .highlight { color: var(--orange); }
+        .hero p { max-width: 64ch; margin: 0 auto; color: var(--text-secondary); font-size: 1rem; }
+
+        .stage { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+        /* ─── MAP PANEL ─── */
+        .map-panel {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(91, 170, 170, 0.35);
+            box-shadow: 0 20px 60px rgba(12, 34, 51, 0.28);
+            background: var(--map-bg);
+        }
+        #deckContainer { position: relative; width: 100%; height: 660px; }
+        #deckContainer canvas { border-radius: 0; outline: none; }
+        @media (max-width: 700px) { #deckContainer { height: 480px; } }
+
+        .map-overlay {
+            position: absolute;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .map-overlay > * { pointer-events: auto; }
+
+        .panel-title {
+            top: 18px; left: 18px; right: 18px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 1rem; flex-wrap: wrap;
+        }
+        .panel-title h2 {
+            color: #fff; font-size: 1rem; letter-spacing: 0.2px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+        }
+        .panel-title p {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.78rem; max-width: 44ch;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        /* ─── LEGEND ─── */
+        .map-legend {
+            bottom: 18px; left: 18px;
+            background: rgba(12, 34, 51, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 0.75rem 0.9rem;
+            font-family: 'Fira Code', monospace;
+        }
+        .legend-title {
+            font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.8px;
+            color: rgba(255, 255, 255, 0.62); margin-bottom: 0.45rem;
+        }
+        .ramp { display: flex; gap: 2px; margin-bottom: 0.3rem; }
+        .ramp span { width: 26px; height: 10px; border-radius: 2px; }
+        .ramp-scale {
+            display: flex; justify-content: space-between;
+            font-size: 0.62rem; color: rgba(255, 255, 255, 0.72);
+            font-variant-numeric: tabular-nums;
+        }
+        .legend-arcs {
+            margin-top: 0.7rem; padding-top: 0.6rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 0.66rem; color: rgba(255, 255, 255, 0.75);
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .arc-chip {
+            width: 34px; height: 4px; border-radius: 2px;
+            background: linear-gradient(90deg, var(--arc-cheap), var(--arc-dear));
+            flex: none;
+        }
+
+        .map-hint {
+            bottom: 18px; right: 18px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.64rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: right;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        /* ─── TOOLTIP ─── */
+        #tooltip {
+            position: absolute;
+            z-index: 20;
+            pointer-events: none;
+            display: none;
+            background: rgba(12, 34, 51, 0.96);
+            border: 1px solid var(--teal-light);
+            border-radius: 10px;
+            padding: 0.6rem 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.72rem;
+            color: #fff;
+            max-width: 260px;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+        }
+        #tooltip .tt-title { font-weight: 700; margin-bottom: 0.3rem; font-size: 0.78rem; }
+        #tooltip .tt-row { display: flex; justify-content: space-between; gap: 1rem; color: rgba(255, 255, 255, 0.8); }
+        #tooltip .tt-row b { color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; }
+        #tooltip .tt-note { margin-top: 0.35rem; color: var(--orange); font-size: 0.68rem; }
+
+        /* ─── CONTROLS ─── */
+        .controls {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 0.85rem 1rem;
+            margin-top: 1rem;
+            box-shadow: var(--shadow-soft);
+        }
+        .control-group {
+            display: flex; align-items: center; gap: 0.45rem;
+            font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-secondary);
+        }
+        .control-group select, .control-group input[type="range"] {
+            font-family: 'Fira Code', monospace; font-size: 0.75rem;
+            border: 1px solid var(--border); border-radius: 8px;
+            background: var(--surface); color: var(--text-primary);
+            padding: 0.35rem 0.5rem; cursor: pointer;
+        }
+        .control-group input[type="range"] { padding: 0; accent-color: var(--orange); width: 110px; }
+        .control-group select:focus-visible,
+        .control-group input:focus-visible,
+        .btn:focus-visible { outline: 3px solid rgba(242, 140, 0, 0.55); outline-offset: 2px; }
+        .toggle { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+        .toggle input { accent-color: var(--orange); cursor: pointer; width: 15px; height: 15px; }
+        .btn {
+            font-family: 'Fira Code', monospace; font-size: 0.78rem; font-weight: 600;
+            border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);
+            border-radius: 999px; padding: 0.45rem 0.95rem; cursor: pointer; transition: all 0.18s;
+        }
+        .btn:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-50); }
+
+        /* ─── TABLES ─── */
+        .grid-2 {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1rem; margin-top: 1rem;
+        }
+        .card {
+            background: var(--surface); border: 1px solid var(--card-border);
+            border-radius: 16px; box-shadow: var(--shadow-soft);
+            padding: 1.2rem 1.35rem 1.4rem;
+        }
+        .card h3 { font-size: 0.95rem; margin-bottom: 0.15rem; }
+        .card .sub { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.9rem; }
+        .table-scroll { overflow-x: auto; max-height: 420px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
+        th {
+            font-family: 'Fira Code', monospace; font-size: 0.66rem;
+            text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);
+            font-weight: 600; position: sticky; top: 0; background: var(--surface); z-index: 1;
+        }
+        td.num { text-align: right; font-family: 'Fira Code', monospace; font-variant-numeric: tabular-nums; }
+        td .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 0.5rem; }
+        .route { font-family: 'Fira Code', monospace; font-size: 0.72rem; }
+        .route .from { color: var(--teal); font-weight: 600; }
+        .route .to { color: var(--orange); font-weight: 600; }
+        tr.hi td { background: rgba(242, 140, 0, 0.09); }
+
+        .notes { margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+        .note {
+            background: var(--surface); border: 1px solid var(--card-border);
+            border-left: 3px solid var(--teal); border-radius: 12px; padding: 1rem 1.15rem;
+        }
+        .note.accent { border-left-color: var(--orange); }
+        .note h3 { font-size: 0.9rem; margin-bottom: 0.35rem; }
+        .note p { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .load-error {
+            border: 1px solid rgba(242, 140, 0, 0.4); background: rgba(242, 140, 0, 0.08);
+            border-radius: 12px; padding: 1.1rem 1.25rem; font-size: 0.85rem; margin-top: 1rem;
+        }
+        .load-error code {
+            font-family: 'Fira Code', monospace; background: rgba(12, 34, 51, 0.07);
+            padding: 0.1rem 0.35rem; border-radius: 4px;
+        }
+
+        .footer {
+            text-align: center; padding: 2.5rem 1.5rem 3rem;
+            border-top: 1px solid rgba(189, 205, 210, 0.75);
+            font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-secondary);
+        }
+        .footer a { color: var(--teal); text-decoration: none; }
+        .footer a:hover { color: var(--orange); }
+
+        .visually-hidden {
+            position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+            overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+        }
+
+        @media (max-width: 900px) {
+            .nav { position: relative; top: 0; }
+            .nav-inner { height: auto; flex-direction: column; padding: 0.6rem 0; }
+            .panel-title p { display: none; }
+        }
+        @media (max-width: 560px) {
+            .hero { padding: 2.5rem 1.1rem 1.2rem; }
+            .stage { padding: 0 1.1rem 2.5rem; }
+            .map-legend { left: 12px; bottom: 12px; padding: 0.6rem 0.7rem; }
+            .ramp span { width: 18px; }
+            .map-hint { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a class="nav-logo" href="./index.html" title="Back to Intelligence Hub">NFPT · Price Map</a>
+        <div class="nav-links">
+            <a href="./index.html">Hub</a>
+            <a href="./basket.html">Basket</a>
+            <a href="./race.html">Price Race</a>
+            <a href="./data_story.html">Data Story</a>
+            <a href="./dashboard_v2.html">Dashboard</a>
+            <a href="./forecast_dashboard.html">Forecasts</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="hero-badge">37 states · 43 foods · 2016 → 2024</div>
+    <h1>The same food, <span class="highlight">five times the price</span>, one country</h1>
+    <p>Each column is a state, raised by what food costs there. Each arc runs from the cheapest state for one
+       food to the most expensive — the price gaps a trader, or a hungry household, actually faces.</p>
+</header>
+
+<main class="stage">
+    <section class="map-panel" aria-label="Extruded map of Nigerian food prices by state">
+        <div id="deckContainer">
+            <div id="tooltip" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="map-overlay panel-title">
+            <div>
+                <h2 id="metricTitle">Relative price level, 2024</h2>
+                <p id="metricBlurb">Column height and colour show how a state's food prices compare with the national average.</p>
+            </div>
+        </div>
+
+        <div class="map-overlay map-legend">
+            <div class="legend-title" id="legendTitle">National average = 100</div>
+            <div class="ramp" id="legendRamp"></div>
+            <div class="ramp-scale"><span id="legendMin">—</span><span id="legendMax">—</span></div>
+            <div class="legend-arcs" id="legendArcs">
+                <span class="arc-chip"></span>
+                <span>cheapest state → dearest state</span>
+            </div>
+        </div>
+
+        <div class="map-overlay map-hint">drag to rotate · scroll to zoom</div>
+    </section>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="metricSelect">Colour &amp; height</label>
+            <select id="metricSelect">
+                <option value="index" selected>Relative price level (2024)</option>
+                <option value="basket2024">Staple basket cost (2024)</option>
+                <option value="change">Increase since 2016</option>
+                <option value="cv">Price volatility</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label class="toggle" for="arcsToggle">
+                <input type="checkbox" id="arcsToggle" checked>
+                <span>Arbitrage arcs</span>
+            </label>
+        </div>
+
+        <div class="control-group">
+            <label for="arcCount">Routes</label>
+            <input type="range" id="arcCount" min="1" max="24" value="12" step="1">
+            <span id="arcCountLabel" style="min-width:1.6rem">12</span>
+        </div>
+
+        <button type="button" class="btn" id="resetView">↺ Reset view</button>
+        <button type="button" class="btn" id="flatToggle">Flatten</button>
+    </div>
+
+    <div id="loadError"></div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h3>Every state, ranked</h3>
+            <p class="sub" id="stateTableSub">By relative price level, 2024. Hover a row to find it on the map.</p>
+            <div class="table-scroll">
+                <table>
+                    <caption class="visually-hidden">Nigerian states ranked by the selected food price metric</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">State</th>
+                            <th scope="col" style="text-align:right" id="stateMetricHead">Index</th>
+                            <th scope="col" style="text-align:right" id="stateCtxHeadA">Basket</th>
+                            <th scope="col" style="text-align:right" id="stateCtxHeadB">vs 2016</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stateTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>The widest price gaps</h3>
+            <p class="sub">Full-period average price for one food in its cheapest and dearest state. Hover a row to light up its arc.</p>
+            <div class="table-scroll">
+                <table>
+                    <caption class="visually-hidden">Food items ranked by the price gap between their cheapest and most expensive state</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Food</th>
+                            <th scope="col">Route</th>
+                            <th scope="col" style="text-align:right">Cheap</th>
+                            <th scope="col" style="text-align:right">Dear</th>
+                            <th scope="col" style="text-align:right">Gap</th>
+                        </tr>
+                    </thead>
+                    <tbody id="arcTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="notes">
+        <div class="note accent">
+            <h3>The south-east pays most</h3>
+            <p>Anambra, Imo, Edo and Rivers sit at the top on almost every metric, while the northern
+               producing states — Borno, Katsina, Zamfara — sit at the bottom.</p>
+        </div>
+        <div class="note">
+            <h3>Arcs are gaps, not shipments</h3>
+            <p>An arc shows that the same food costs several times more at one end than the other. It is a
+               measure of market fragmentation, not a record of trade actually flowing.</p>
+        </div>
+        <div class="note">
+            <h3>Read the index, not the naira</h3>
+            <p>The staple basket adds one unit each of eight foods priced in mixed units, so it is a
+               comparative yardstick between states rather than a real weekly shop.</p>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <p>Prices: ObservationData (Jan 2016 – Dec 2024, 43 items × 37 states) ·
+       Boundaries: <a href="https://www.geoboundaries.org/" rel="noopener">geoBoundaries</a> gbOpen NGA ADM1
+       (source: GRID3), CC BY 4.0</p>
+    <p style="margin-top:0.4rem;"><a href="./index.html">← Back to the Intelligence Hub</a></p>
+</footer>
+
+<script>
+// ─── Metric definitions ───
+// Everything that differs between the four views lives here, so switching
+// metric is a data lookup rather than four branches scattered through the code.
+const METRICS = {
+    index: {
+        title: 'Relative price level, 2024',
+        blurb: "Column height and colour show how a state's food prices compare with the national average.",
+        legend: 'National average = 100',
+        head: 'Index',
+        format: (v) => v.toFixed(1),
+    },
+    basket2024: {
+        title: 'Staple basket cost, 2024',
+        blurb: 'One unit each of rice, beans, gari, yam, palm oil, tomato, onion and a crate of eggs.',
+        legend: 'Naira, 2024 average',
+        head: 'Basket',
+        format: (v) => '₦' + Math.round(v).toLocaleString('en-NG'),
+    },
+    change: {
+        title: 'Increase since 2016',
+        blurb: 'How much more the same staple basket costs in 2024 than it did in 2016.',
+        legend: 'Percent increase',
+        head: 'Change',
+        format: (v) => '+' + v.toFixed(0) + '%',
+    },
+    cv: {
+        title: 'Price volatility',
+        blurb: 'Average coefficient of variation across all 43 foods — how jumpy prices are, not how high.',
+        legend: 'Coefficient of variation',
+        head: 'CV',
+        format: (v) => v.toFixed(1) + '%',
+    },
+};
+
+const MAX_ELEVATION = 260000;   // metres at the tallest column, tuned by eye against Nigeria's width
+const FLAT_ELEVATION = 12000;   // every state the same low slab, for the top-down choropleth
+
+const els = {
+    container: document.getElementById('deckContainer'),
+    tooltip: document.getElementById('tooltip'),
+    metric: document.getElementById('metricSelect'),
+    arcsToggle: document.getElementById('arcsToggle'),
+    arcCount: document.getElementById('arcCount'),
+    arcCountLabel: document.getElementById('arcCountLabel'),
+    reset: document.getElementById('resetView'),
+    flat: document.getElementById('flatToggle'),
+    title: document.getElementById('metricTitle'),
+    blurb: document.getElementById('metricBlurb'),
+    legendTitle: document.getElementById('legendTitle'),
+    legendRamp: document.getElementById('legendRamp'),
+    legendMin: document.getElementById('legendMin'),
+    legendMax: document.getElementById('legendMax'),
+    legendArcs: document.getElementById('legendArcs'),
+    stateTable: document.getElementById('stateTable'),
+    stateTableSub: document.getElementById('stateTableSub'),
+    stateMetricHead: document.getElementById('stateMetricHead'),
+    stateCtxHeadA: document.getElementById('stateCtxHeadA'),
+    stateCtxHeadB: document.getElementById('stateCtxHeadB'),
+    arcTable: document.getElementById('arcTable'),
+    error: document.getElementById('loadError'),
+};
+
+// Centred slightly south of Nigeria's mid-latitude: the pitch tips the far
+// (northern) edge away from the camera, so an evenly-centred view leaves a
+// band of empty ground along the bottom.
+const INITIAL_VIEW = {
+    longitude: 8.7,
+    latitude: 8.9,
+    zoom: 5.6,
+    pitch: 48,
+    bearing: -12,
+};
+
+let RAMP = [];
+let ARC_CHEAP, ARC_DEAR;
+let deckgl = null;
+let geo = null;
+let data = null;
+let byState = new Map();
+let metric = 'index';
+let flat = false;
+let hoveredState = null;
+let hoveredArc = null;
+
+/** '#rrggbb' → [r, g, b], the only colour form deck.gl accessors take. */
+function hexToRgb(hex) {
+    const h = hex.trim().replace('#', '');
+    return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
+}
+
+function readPalette() {
+    const css = getComputedStyle(document.documentElement);
+    RAMP = ['--ramp-1', '--ramp-2', '--ramp-3', '--ramp-4', '--ramp-5', '--ramp-6']
+        .map(v => css.getPropertyValue(v).trim());
+    ARC_CHEAP = hexToRgb(css.getPropertyValue('--arc-cheap'));
+    ARC_DEAR = hexToRgb(css.getPropertyValue('--arc-dear'));
+}
+
+/** Min and max of the active metric, for both the ramp and the elevations. */
+function metricRange() {
+    const vals = data.states.map(s => s[metric]);
+    return [Math.min(...vals), Math.max(...vals)];
+}
+
+function normalise(v) {
+    const [lo, hi] = metricRange();
+    return hi === lo ? 0.5 : (v - lo) / (hi - lo);
+}
+
+/** Snap a state's value onto one of the six ramp steps. */
+function rampColor(v) {
+    const i = Math.min(RAMP.length - 1, Math.floor(normalise(v) * RAMP.length));
+    return hexToRgb(RAMP[i]);
+}
+
+// ─── Layers ───
+function buildLayers() {
+    const { GeoJsonLayer, ArcLayer } = deck;
+    const n = Number(els.arcCount.value);
+    const arcs = els.arcsToggle.checked ? data.arcs.slice(0, n) : [];
+
+    const polygons = new GeoJsonLayer({
+        id: 'states',
+        data: geo,
+        // Always extruded, even flat. A non-extruded GeoJsonLayer under a
+        // LightingEffect shades each tesselation triangle separately and the
+        // map breaks up into dark shards; flat mode instead gives every state
+        // the same low elevation and drops the camera to pitch 0, so you look
+        // straight down on equal slabs and read a plain choropleth.
+        extruded: true,
+        wireframe: false,
+        filled: true,
+        stroked: true,
+        getFillColor: (f) => {
+            const s = byState.get(f.properties.name);
+            if (!s) return [60, 80, 95];
+            const c = rampColor(s[metric]);
+            return hoveredState && hoveredState !== f.properties.name ? [...c, 130] : [...c, 255];
+        },
+        getLineColor: (f) => f.properties.name === hoveredState ? [255, 255, 255, 230] : [12, 34, 51, 190],
+        getLineWidth: (f) => f.properties.name === hoveredState ? 2200 : 900,
+        lineWidthUnits: 'meters',
+        getElevation: (f) => {
+            const s = byState.get(f.properties.name);
+            if (!s) return 0;
+            if (flat) return FLAT_ELEVATION;
+            // A floor of 8% keeps the cheapest state a visible slab rather than
+            // a flat patch that reads as missing data.
+            return (0.08 + 0.92 * normalise(s[metric])) * MAX_ELEVATION;
+        },
+        material: { ambient: 0.55, diffuse: 0.6, shininess: 24, specularColor: [255, 232, 200] },
+        pickable: true,
+        autoHighlight: false,
+        // deck.gl caches accessor results; these tell it exactly when to redo
+        // them instead of re-evaluating 37 polygons every frame.
+        updateTriggers: {
+            getFillColor: [metric, hoveredState, flat],
+            getElevation: [metric, flat],
+            getLineColor: [hoveredState],
+            getLineWidth: [hoveredState],
+        },
+        transitions: { getElevation: 450, getFillColor: 300 },
+        onHover: (info) => {
+            hoveredState = info.object ? info.object.properties.name : null;
+            hoveredArc = null;
+            showStateTooltip(info);
+            render();
+        },
+    });
+
+    const arcLayer = new ArcLayer({
+        id: 'arbitrage',
+        data: arcs,
+        // The z on each endpoint lifts the arcs clear of the columns they
+        // connect, or a tall state swallows the arc that lands on it.
+        getSourcePosition: (d) => [d.fromLon, d.fromLat, flat ? 0 : 40000],
+        getTargetPosition: (d) => [d.toLon, d.toLat, flat ? 0 : 40000],
+        getSourceColor: (d) => dimArc(d, ARC_CHEAP),
+        getTargetColor: (d) => dimArc(d, ARC_DEAR),
+        // Width by spread, so the routes worth acting on are the ones that
+        // physically dominate the frame.
+        getWidth: (d) => 1.2 + (d.spread / 120),
+        getHeight: 0.55,
+        greatCircle: false,
+        pickable: true,
+        updateTriggers: {
+            getSourceColor: [hoveredArc],
+            getTargetColor: [hoveredArc],
+            getSourcePosition: [flat],
+            getTargetPosition: [flat],
+        },
+        onHover: (info) => {
+            hoveredArc = info.object ? info.object.item : null;
+            if (info.object) hoveredState = null;
+            showArcTooltip(info);
+            render();
+        },
+    });
+
+    return [polygons, arcLayer];
+}
+
+/** Fade every arc but the hovered one, so one route can be followed at a time. */
+function dimArc(d, rgb) {
+    if (!hoveredArc) return [...rgb, 190];
+    return d.item === hoveredArc ? [...rgb, 255] : [...rgb, 40];
+}
+
+function render() {
+    deckgl.setProps({ layers: buildLayers() });
+}
+
+// ─── Tooltip ───
+function placeTooltip(info) {
+    const t = els.tooltip;
+    t.style.display = 'block';
+    // Flip to the other side of the cursor near the right/bottom edge so the
+    // tooltip never hangs outside the panel.
+    const w = els.container.clientWidth, h = els.container.clientHeight;
+    const box = t.getBoundingClientRect();
+    t.style.left = (info.x + box.width + 24 > w ? info.x - box.width - 14 : info.x + 14) + 'px';
+    t.style.top = (info.y + box.height + 24 > h ? info.y - box.height - 14 : info.y + 14) + 'px';
+}
+
+function showStateTooltip(info) {
+    if (!info.object) { els.tooltip.style.display = 'none'; return; }
+    const s = byState.get(info.object.properties.name);
+    if (!s) { els.tooltip.style.display = 'none'; return; }
+    els.tooltip.innerHTML = `
+        <div class="tt-title">${s.name}</div>
+        <div class="tt-row"><span>Price level</span><b>${s.index.toFixed(1)}</b></div>
+        <div class="tt-row"><span>Basket 2024</span><b>₦${s.basket2024.toLocaleString('en-NG')}</b></div>
+        <div class="tt-row"><span>Basket 2016</span><b>₦${s.basket2016.toLocaleString('en-NG')}</b></div>
+        <div class="tt-row"><span>Increase</span><b>+${s.change.toFixed(0)}%</b></div>
+        <div class="tt-row"><span>Volatility</span><b>${s.cv.toFixed(1)}%</b></div>`;
+    placeTooltip(info);
+}
+
+function showArcTooltip(info) {
+    if (!info.object) { els.tooltip.style.display = 'none'; return; }
+    const a = info.object;
+    els.tooltip.innerHTML = `
+        <div class="tt-title">${a.item}</div>
+        <div class="tt-row"><span>${a.from}</span><b>₦${a.fromPrice.toLocaleString('en-NG')}</b></div>
+        <div class="tt-row"><span>${a.to}</span><b>₦${a.toPrice.toLocaleString('en-NG')}</b></div>
+        <div class="tt-note">+${a.spread.toFixed(0)}% more expensive</div>`;
+    placeTooltip(info);
+}
+
+// ─── Chrome ───
+function renderLegend() {
+    const [lo, hi] = metricRange();
+    const m = METRICS[metric];
+    els.title.textContent = m.title;
+    els.blurb.textContent = m.blurb;
+    els.legendTitle.textContent = m.legend;
+    els.legendMin.textContent = m.format(lo);
+    els.legendMax.textContent = m.format(hi);
+    els.legendRamp.innerHTML = RAMP.map(c => `<span style="background:${c}"></span>`).join('');
+    els.legendArcs.hidden = !els.arcsToggle.checked;
+}
+
+function renderStateTable() {
+    const m = METRICS[metric];
+    // The two context columns are whichever metrics are not currently ranked,
+    // so switching to "Increase since 2016" does not print the same percentage
+    // twice across the row.
+    const [ctxA, ctxB] = ['index', 'basket2024', 'change', 'cv'].filter(k => k !== metric);
+
+    els.stateMetricHead.textContent = m.head;
+    els.stateCtxHeadA.textContent = METRICS[ctxA].head;
+    els.stateCtxHeadB.textContent = METRICS[ctxB].head;
+    els.stateTableSub.textContent = `By ${m.title.toLowerCase()}. Hover a row to find it on the map.`;
+
+    const rows = [...data.states].sort((a, b) => b[metric] - a[metric]);
+    els.stateTable.innerHTML = rows.map((s, i) => `
+        <tr data-state="${s.name}">
+            <td class="num">${i + 1}</td>
+            <td><span class="swatch" style="background:rgb(${rampColor(s[metric]).join(',')})"></span>${s.name}</td>
+            <td class="num">${m.format(s[metric])}</td>
+            <td class="num">${METRICS[ctxA].format(s[ctxA])}</td>
+            <td class="num">${METRICS[ctxB].format(s[ctxB])}</td>
+        </tr>`).join('');
+}
+
+function renderArcTable() {
+    const n = Number(els.arcCount.value);
+    els.arcTable.innerHTML = data.arcs.map((a, i) => `
+        <tr data-arc="${a.item}" class="${i < n && els.arcsToggle.checked ? 'shown' : 'dimmed'}" style="${i < n && els.arcsToggle.checked ? '' : 'opacity:.45'}">
+            <td>${a.item}</td>
+            <td class="route"><span class="from">${a.from}</span> → <span class="to">${a.to}</span></td>
+            <td class="num">₦${a.fromPrice.toLocaleString('en-NG')}</td>
+            <td class="num">₦${a.toPrice.toLocaleString('en-NG')}</td>
+            <td class="num">+${a.spread.toFixed(0)}%</td>
+        </tr>`).join('');
+}
+
+function refresh() {
+    renderLegend();
+    renderStateTable();
+    renderArcTable();
+    render();
+}
+
+// ─── Events ───
+els.metric.addEventListener('change', () => { metric = els.metric.value; refresh(); });
+els.arcsToggle.addEventListener('change', refresh);
+els.arcCount.addEventListener('input', () => {
+    els.arcCountLabel.textContent = els.arcCount.value;
+    refresh();
+});
+els.reset.addEventListener('click', () => {
+    deckgl.setProps({ initialViewState: { ...INITIAL_VIEW, transitionDuration: 600 } });
+});
+els.flat.addEventListener('click', () => {
+    flat = !flat;
+    els.flat.textContent = flat ? 'Extrude' : 'Flatten';
+    deckgl.setProps({
+        initialViewState: {
+            ...INITIAL_VIEW,
+            pitch: flat ? 0 : INITIAL_VIEW.pitch,
+            // Pitching down to 0 un-foreshortens the country and it outgrows
+            // the panel at the zoom the tilted view is framed for.
+            zoom: flat ? INITIAL_VIEW.zoom - 0.45 : INITIAL_VIEW.zoom,
+            latitude: flat ? 9.1 : INITIAL_VIEW.latitude,
+            transitionDuration: 600,
+        },
+    });
+    render();
+});
+
+// Hovering a table row is the keyboard-and-touch-friendly way to pick a state
+// or route out of a crowded map.
+els.stateTable.addEventListener('mouseover', (e) => {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    hoveredState = tr.dataset.state;
+    hoveredArc = null;
+    render();
+});
+els.stateTable.addEventListener('mouseleave', () => { hoveredState = null; render(); });
+
+els.arcTable.addEventListener('mouseover', (e) => {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    hoveredArc = tr.dataset.arc;
+    hoveredState = null;
+    render();
+});
+els.arcTable.addEventListener('mouseleave', () => { hoveredArc = null; render(); });
+
+// ─── Boot ───
+function boot() {
+    readPalette();
+
+    const { DeckGL, LightingEffect, AmbientLight, DirectionalLight } = deck;
+
+    // Two lights, not deck.gl's default one: the ambient keeps the column
+    // sides from going black, and a single strong directional gives every
+    // column the same shadowed face, which is what makes height readable.
+    const lighting = new LightingEffect({
+        ambient: new AmbientLight({ color: [255, 250, 240], intensity: 1.5 }),
+        sun: new DirectionalLight({
+            color: [255, 245, 230],
+            intensity: 1.6,
+            direction: [-1.2, -2.4, -1],
+        }),
+    });
+
+    deckgl = new DeckGL({
+        container: els.container,
+        initialViewState: INITIAL_VIEW,
+        controller: { dragRotate: true, touchRotate: true },
+        effects: [lighting],
+        parameters: { clearColor: [0.047, 0.133, 0.2, 1] },   // matches --map-bg
+        layers: [],
+        onHover: (info) => {
+            // Leaving every layer at once — deck.gl fires per-layer, so the
+            // top-level hook is the only place that reliably sees "nothing".
+            if (!info.layer) {
+                els.tooltip.style.display = 'none';
+                if (hoveredState || hoveredArc) { hoveredState = hoveredArc = null; render(); }
+            }
+        },
+    });
+
+    fetch('./nigeria_states.geojson')
+        .then(r => { if (!r.ok) throw new Error(`geojson HTTP ${r.status}`); return r.json(); })
+        .then(g => {
+            geo = g;
+            return fetch('./map_data.json');
+        })
+        .then(r => { if (!r.ok) throw new Error(`map_data HTTP ${r.status}`); return r.json(); })
+        .then(d => {
+            data = d;
+            byState = new Map(data.states.map(s => [s.name, s]));
+
+            const missing = geo.features
+                .map(f => f.properties.name)
+                .filter(n => !byState.has(n));
+            if (missing.length) console.warn('States on the map with no price data:', missing);
+
+            els.arcCount.max = String(data.arcs.length);
+            els.arcCountLabel.textContent = els.arcCount.value;
+            refresh();
+        })
+        .catch(err => {
+            els.error.innerHTML = `
+                <div class="load-error">
+                    <strong>The map data did not load (${err.message}).</strong><br>
+                    Opening this file straight from disk blocks both requests. Serve the folder instead —
+                    <code>python -m http.server</code> — then visit <code>localhost:8000/map.html</code>.
+                </div>`;
+        });
+}
+
+// deck.gl is deferred, so it is not defined while this script is parsed.
+if (window.deck) boot();
+else window.addEventListener('DOMContentLoaded', boot);
+</script>
+<script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+</body>
+</html>

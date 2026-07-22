@@ -400,6 +400,24 @@
       cursor: pointer;
     }
 
+    /* The calculator is the one destination you interact with rather than read,
+       so it gets the full width of the grid's first row. */
+    .launch-card.featured {
+      grid-column: 1 / -1;
+      background:
+        linear-gradient(120deg, rgba(45, 106, 106, 0.10) 0%, rgba(242, 140, 0, 0.10) 100%),
+        rgba(255, 255, 255, 0.92);
+      border-color: var(--blue-400);
+    }
+
+    .launch-card.featured::before {
+      opacity: 1;
+    }
+
+    .launch-card.featured h3 {
+      font-size: 24px;
+    }
+
     .launch-card::before {
       content: "";
       position: absolute;
@@ -607,6 +625,9 @@
     <nav class="top-nav" aria-label="Primary">
       <a class="brand" href="#top">NFPT Hub</a>
       <div class="nav-links">
+        <a class="nav-link" href="./basket.html">Basket Calculator</a>
+        <a class="nav-link" href="./race.html">Price Race</a>
+        <a class="nav-link" href="./map.html">Price Map</a>
         <a class="nav-link" href="./dashboard_v2.html"> Data Dashboard</a>
         <a class="nav-link" href="./data_story.html">Data Story</a>
         <a class="nav-link" href="./forecast_dashboard.html">Forecast Dashboard</a>
@@ -620,7 +641,7 @@
           <div class="hero-grid">
             <div>
               <p class="eyebrow">Nigeria Food Price Intelligence</p>
-              <h1 id="hero-title">One gateway to <span class="accent">four views</span> of food price reality.</h1>
+              <h1 id="hero-title">One gateway to <span class="accent">seven views</span> of food price reality.</h1>
               <p class="hero-sub">
                 Track inflation dynamics, compare state-level opportunities, inspect model performance, and brief
                 stakeholders faster from a single launch page.
@@ -670,13 +691,52 @@
         <div class="section-head reveal">
           <div>
             <p class="section-kicker">Choose your lens</p>
-            <h2>Four destination experiences</h2>
+            <h2>Seven destination experiences</h2>
             <p>Each page is purpose-built for a different decision context, from high-level storytelling to detailed
               analytical investigation.</p>
           </div>
         </div>
 
         <section class="launch-grid" aria-label="Destination links">
+          <a class="launch-card featured reveal" href="./basket.html">
+            <span class="card-tag">Try It Yourself</span>
+            <h3>My Food Basket Calculator</h3>
+            <p>Pick five foods and a state, then see the receipt: what that basket cost in 2016, what it costs now, and
+              where the 2026 forecast puts it. Built to be screenshotted.</p>
+            <div class="card-meta">
+              <span class="chip">Interactive</span>
+              <span class="chip">37 States + FCT</span>
+              <span class="chip">Shareable</span>
+            </div>
+            <span class="card-cta">Build your basket</span>
+          </a>
+
+          <a class="launch-card reveal" href="./race.html">
+            <span class="card-tag">Watch It Happen</span>
+            <h3>The Price Race: 108 Months in 16 Seconds</h3>
+            <p>All 43 foods race each other from January 2016 to December 2024, ranked by national average price
+              every month. The axis runs away faster than any of them.</p>
+            <div class="card-meta">
+              <span class="chip">Animated</span>
+              <span class="chip">43 Items</span>
+              <span class="chip">Scrubable</span>
+            </div>
+            <span class="card-cta">Start the race</span>
+          </a>
+
+          <a class="launch-card reveal" href="./map.html">
+            <span class="card-tag">Geography in 3D</span>
+            <h3>The Price Map</h3>
+            <p>Every state raised by what food costs there, with arcs tracing the widest cheap-to-expensive gaps.
+              Irish potato runs 571% dearer in Anambra than in Borno.</p>
+            <div class="card-meta">
+              <span class="chip">3D Map</span>
+              <span class="chip">37 States</span>
+              <span class="chip">Arbitrage</span>
+            </div>
+            <span class="card-cta">Explore the map</span>
+          </a>
+
           <a class="launch-card reveal" href="./data_story.html">
             <span class="card-tag">Narrative Insight</span>
             <h3>The Cost of Eating in Nigeria</h3>

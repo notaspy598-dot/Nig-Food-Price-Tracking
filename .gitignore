@@ -14,8 +14,11 @@ output/
 
 # Analysis and build scripts (kept locally, not deployed)
 analysis.py
+build_nigeria_geojson.py
 create_excel_report.py
 eda_analysis.py
+extract_basket_data.py
+extract_viz_data.py
 forecast.py
 replace_colors.py
 fix_v2.ps1

@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine Years in Sixteen Seconds — Nigeria Food Price Race</title>
+    <meta name="description" content="Watch 43 Nigerian food items race across 108 months, from January 2016 to December 2024, ranked by national average price.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%81%3C/text%3E%3C/svg%3E">
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --navy: #0C2233;
+            --teal: #2D6A6A;
+            --cream: #FBF6EE;
+            --orange: #F28C00;
+            --navy-light: #1A2E38;
+            --teal-light: #5BAAAA;
+            --teal-100: #D0E8E8;
+            --teal-50: #E8F3F3;
+            --text-primary: #1A2E38;
+            --text-secondary: #6E8088;
+            --border: #BDCDD2;
+            --surface: #FFFFFF;
+            --card-border: rgba(189, 205, 210, 0.95);
+            --shadow-soft: 0 4px 24px rgba(45, 106, 106, 0.10);
+
+            /* Categorical series slots. Assigned in this fixed order and never
+               cycled or reordered — a category keeps its hue whatever rank its
+               items reach, so a reader who learns "teal is fish" keeps it.
+               Validated as a set for CVD separation and chroma against a white
+               chart surface; three slots sit under 3:1 contrast, which is why
+               every bar carries a direct label and the standings table exists. */
+            --series-grains: #E2711D;
+            --series-fish: #00998C;
+            --series-oils: #C9930A;
+            --series-dairy: #7A4FBF;
+            --series-produce: #2E7D32;
+            --series-meat: #D14D72;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Fira Sans', sans-serif;
+            background: var(--cream);
+            color: var(--text-primary);
+            line-height: 1.65;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3 { font-family: 'Fira Code', monospace; color: var(--navy); }
+
+        /* ─── NAV ─── */
+        .nav {
+            position: sticky;
+            top: 12px;
+            z-index: 100;
+            width: min(1180px, calc(100% - 24px));
+            margin: 12px auto 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            box-shadow: 0 4px 24px rgba(45, 106, 106, 0.14);
+            padding: 0 16px;
+        }
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            height: 48px;
+        }
+        .nav-logo {
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: var(--teal);
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .nav-links { display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover { color: var(--teal); background: var(--teal-50); }
+
+        /* ─── HERO ─── */
+        .hero {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 3.5rem 1.5rem 1.5rem;
+            text-align: center;
+        }
+        .hero-badge {
+            display: inline-block;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--orange);
+            background: rgba(242, 140, 0, 0.12);
+            border: 1px solid rgba(242, 140, 0, 0.35);
+            border-radius: 999px;
+            padding: 0.3rem 0.85rem;
+            margin-bottom: 1rem;
+        }
+        .hero h1 {
+            font-size: clamp(1.8rem, 4.6vw, 3rem);
+            line-height: 1.12;
+            margin-bottom: 0.75rem;
+        }
+        .hero h1 .highlight { color: var(--orange); }
+        .hero p {
+            max-width: 62ch;
+            margin: 0 auto;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* ─── STAGE ─── */
+        .stage { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            box-shadow: var(--shadow-soft);
+            padding: 1.4rem 1.5rem 1.6rem;
+        }
+
+        /* ─── CONTROLS ─── */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.1rem;
+            padding-bottom: 1.1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .btn {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
+            border-radius: 999px;
+            padding: 0.45rem 0.95rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+        .btn:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-50); }
+        .btn:focus-visible { outline: 3px solid rgba(242, 140, 0, 0.55); outline-offset: 2px; }
+        .btn-primary {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: #fff;
+            min-width: 6.5rem;
+        }
+        .btn-primary:hover { background: #d97e00; border-color: #d97e00; color: #fff; }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+        .control-group select {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        .control-group select:focus-visible { outline: 3px solid rgba(242, 140, 0, 0.55); outline-offset: 1px; }
+
+        .scrub-row { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.2rem; }
+        .scrub-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--orange);
+            cursor: pointer;
+            min-width: 0;
+        }
+        .scrub-row input[type="range"]:focus-visible { outline: 3px solid rgba(242, 140, 0, 0.55); outline-offset: 4px; }
+
+        /* ─── READOUT ─── */
+        .readout {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.9rem;
+        }
+        .readout-date {
+            font-family: 'Fira Code', monospace;
+            font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+        }
+        .readout-stats { display: flex; gap: 1.6rem; flex-wrap: wrap; }
+        .readout-stat .value {
+            display: block;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--teal);
+            font-variant-numeric: tabular-nums;
+            line-height: 1.2;
+        }
+        .readout-stat .value.up { color: var(--orange); }
+        .readout-stat .label {
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-secondary);
+        }
+
+        .chart-shell { position: relative; height: 620px; }
+        @media (max-width: 700px) { .chart-shell { height: 520px; } }
+
+        /* ─── LEGEND ─── */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 1.1rem;
+            margin-top: 1.1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--card-border);
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            font-family: 'Fira Code', monospace;
+        }
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex: none;
+        }
+
+        /* ─── STANDINGS TABLE ─── */
+        /* The accessible twin of the chart, and the relief the palette's
+           low-contrast slots require: every value is legible as text here, in
+           ink rather than in a series colour. */
+        .table-wrap { margin-top: 1.5rem; }
+        .table-scroll { overflow-x: auto; }
+        table.standings {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        table.standings caption {
+            text-align: left;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            padding-bottom: 0.6rem;
+        }
+        table.standings th, table.standings td {
+            text-align: left;
+            padding: 0.45rem 0.7rem;
+            border-bottom: 1px solid var(--card-border);
+            white-space: nowrap;
+        }
+        table.standings th {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        table.standings td.num {
+            text-align: right;
+            font-family: 'Fira Code', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+        table.standings td .dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
+            margin-right: 0.5rem;
+            vertical-align: baseline;
+        }
+
+        /* ─── NOTES ─── */
+        .notes {
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+        .note {
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-left: 3px solid var(--teal);
+            border-radius: 12px;
+            padding: 1rem 1.15rem;
+        }
+        .note h3 { font-size: 0.9rem; margin-bottom: 0.35rem; }
+        .note p { font-size: 0.85rem; color: var(--text-secondary); }
+        .note.accent { border-left-color: var(--orange); }
+
+        .load-error {
+            border: 1px solid rgba(242, 140, 0, 0.4);
+            background: rgba(242, 140, 0, 0.08);
+            border-radius: 12px;
+            padding: 1.1rem 1.25rem;
+            font-size: 0.85rem;
+        }
+        .load-error code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(12, 34, 51, 0.07);
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            text-align: center;
+            padding: 2.5rem 1.5rem 3rem;
+            border-top: 1px solid rgba(189, 205, 210, 0.75);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .footer a { color: var(--teal); text-decoration: none; }
+        .footer a:hover { color: var(--orange); }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px; height: 1px;
+            margin: -1px; padding: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (max-width: 900px) {
+            .nav { position: relative; top: 0; }
+            .nav-inner { height: auto; flex-direction: column; padding: 0.6rem 0; }
+        }
+        @media (max-width: 560px) {
+            .hero { padding: 2.5rem 1.1rem 1.2rem; }
+            .stage { padding: 0 1.1rem 2.5rem; }
+            .card { padding: 1.1rem 1rem 1.3rem; }
+            .readout-stats { gap: 1.1rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a class="nav-logo" href="./index.html" title="Back to Intelligence Hub">NFPT · Price Race</a>
+        <div class="nav-links">
+            <a href="./index.html">Hub</a>
+            <a href="./basket.html">Basket</a>
+            <a href="./map.html">Price Map</a>
+            <a href="./data_story.html">Data Story</a>
+            <a href="./dashboard_v2.html">Dashboard</a>
+            <a href="./forecast_dashboard.html">Forecasts</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="hero-badge">108 months · 43 foods · Jan 2016 → Dec 2024</div>
+    <h1>Nine years of food inflation, in <span class="highlight">sixteen seconds</span></h1>
+    <p>Every bar is one food item at its national average price. Watch which foods overtake which — and
+       watch the axis itself run away as the naira loses its grip.</p>
+</header>
+
+<main class="stage">
+    <section class="card" aria-label="Animated price race">
+        <div class="controls">
+            <button type="button" class="btn btn-primary" id="playBtn" aria-label="Play or pause the race">▶ Play</button>
+            <button type="button" class="btn" id="restartBtn">↻ Restart</button>
+
+            <div class="control-group">
+                <label for="speedSelect">Speed</label>
+                <select id="speedSelect">
+                    <option value="300">0.5×</option>
+                    <option value="150" selected>1×</option>
+                    <option value="75">2×</option>
+                    <option value="40">4×</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="topSelect">Show</label>
+                <select id="topSelect">
+                    <option value="10">Top 10</option>
+                    <option value="15" selected>Top 15</option>
+                    <option value="20">Top 20</option>
+                    <option value="43">All 43</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="catSelect">Group</label>
+                <select id="catSelect">
+                    <option value="">All groups</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="scrub-row">
+            <label class="visually-hidden" for="scrub">Scrub through months</label>
+            <input type="range" id="scrub" min="0" max="107" value="0" step="1">
+        </div>
+
+        <div class="readout">
+            <div class="readout-date" id="readoutDate">Jan 2016</div>
+            <div class="readout-stats">
+                <div class="readout-stat">
+                    <span class="value" id="statLeader">—</span>
+                    <span class="label">Priciest item</span>
+                </div>
+                <div class="readout-stat">
+                    <span class="value" id="statAvg">—</span>
+                    <span class="label">Average of all 43</span>
+                </div>
+                <div class="readout-stat">
+                    <span class="value up" id="statSince">—</span>
+                    <span class="label">Since Jan 2016</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-shell">
+            <canvas id="raceChart" role="img" aria-label="Horizontal bar chart racing 43 food items by national average price. The standings table below carries the same figures."></canvas>
+        </div>
+
+        <div class="legend" id="legend"></div>
+
+        <div id="loadError"></div>
+    </section>
+
+    <div class="table-wrap card">
+        <div class="table-scroll">
+            <table class="standings">
+                <caption id="tableCaption">Standings at Jan 2016 — national average price per item</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Food item</th>
+                        <th scope="col">Group</th>
+                        <th scope="col" style="text-align:right">Price</th>
+                        <th scope="col" style="text-align:right">Since Jan 2016</th>
+                    </tr>
+                </thead>
+                <tbody id="standingsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="notes">
+        <div class="note accent">
+            <h3>The axis is the story</h3>
+            <p>Watch the scale at the bottom. It stretches from roughly ₦2,000 to well past ₦9,000 —
+               the race is run on ground that keeps moving.</p>
+        </div>
+        <div class="note">
+            <h3>Fish start ahead and stay ahead</h3>
+            <p>Dried and smoked fish lead from the first frame, but they climb slowest in percentage terms.
+               The fastest climbers are grains and tubers starting far down the field.</p>
+        </div>
+        <div class="note">
+            <h3>Prices, not baskets</h3>
+            <p>Each item is priced in its own unit — a bottle of oil, a crate of eggs, a kilo of rice —
+               so the ranking compares items to themselves over time, not shopping-cart value.</p>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <p>Source: ObservationData (Jan 2016 – Dec 2024, 43 items × 37 states) · national figures are the mean across all 37 states</p>
+    <p style="margin-top:0.4rem;"><a href="./index.html">← Back to the Intelligence Hub</a></p>
+</footer>
+
+<script>
+// ─── Category colours ───
+// Read from CSS custom properties so the palette lives in exactly one place.
+// Keys must match the `category` field in race_data.json.
+const CATEGORY_COLORS = {};
+const CATEGORY_VARS = {
+    'Grains & Tubers': '--series-grains',
+    'Fish': '--series-fish',
+    'Oils': '--series-oils',
+    'Dairy & Bakery': '--series-dairy',
+    'Produce': '--series-produce',
+    'Meat & Poultry': '--series-meat',
+};
+{
+    const css = getComputedStyle(document.documentElement);
+    for (const [cat, varName] of Object.entries(CATEGORY_VARS)) {
+        CATEGORY_COLORS[cat] = css.getPropertyValue(varName).trim();
+    }
+}
+
+const TICK_DEFAULT = 150;
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const els = {
+    play: document.getElementById('playBtn'),
+    restart: document.getElementById('restartBtn'),
+    speed: document.getElementById('speedSelect'),
+    top: document.getElementById('topSelect'),
+    cat: document.getElementById('catSelect'),
+    scrub: document.getElementById('scrub'),
+    date: document.getElementById('readoutDate'),
+    leader: document.getElementById('statLeader'),
+    avg: document.getElementById('statAvg'),
+    since: document.getElementById('statSince'),
+    legend: document.getElementById('legend'),
+    standings: document.getElementById('standingsBody'),
+    caption: document.getElementById('tableCaption'),
+    error: document.getElementById('loadError'),
+};
+
+let DATA = null;
+let chart = null;
+let frame = 0;
+let timer = null;
+let tickMs = TICK_DEFAULT;
+let axisMax = [];        // precomputed per frame, see computeAxisMax
+let baselineAvg = 0;
+
+const naira = (v) => '₦' + Math.round(v).toLocaleString('en-NG');
+
+/** Items passing the current group filter. */
+function activeItems() {
+    const cat = els.cat.value;
+    return cat ? DATA.items.filter(i => i.category === cat) : DATA.items;
+}
+
+/**
+ * Rank the active items at one frame, priciest first.
+ *
+ * Rebuilt from the source array every tick rather than mutated in place, so a
+ * bar's colour is looked up from its own item on every frame. That is what
+ * keeps a hue attached to the food rather than to the rank it happens to hold.
+ */
+function standingsAt(f) {
+    return activeItems()
+        .map(it => ({
+            name: it.name,
+            category: it.category,
+            value: it.series[f],
+            start: it.series[0],
+            color: CATEGORY_COLORS[it.category] || '#6E8088',
+        }))
+        .sort((a, b) => b.value - a.value);
+}
+
+/**
+ * Freeze the x-axis ceiling for every frame up front.
+ *
+ * Recomputing a ceiling from the visible bars each tick makes the axis twitch
+ * on every overtake. Precomputing across the whole run — and never letting the
+ * ceiling fall — gives one smooth outward stretch that reads as the inflation
+ * it is. Depends on the group filter and the Top-N, so it is redone whenever
+ * either changes.
+ */
+function computeAxisMax() {
+    const items = activeItems();
+    const n = Number(els.top.value);
+    axisMax = [];
+    let running = 0;
+    for (let f = 0; f < DATA.periods.length; f++) {
+        const visible = items.map(it => it.series[f]).sort((a, b) => b - a).slice(0, n);
+        running = Math.max(running, visible[0] || 0);
+        // Round up to a clean step so the gridline labels stay readable.
+        const step = running > 4000 ? 1000 : running > 1500 ? 500 : 200;
+        axisMax.push(Math.ceil((running * 1.08) / step) * step);
+    }
+}
+
+/** Draws each bar's value at its tip — the direct label the palette requires. */
+const valueLabels = {
+    id: 'valueLabels',
+    afterDatasetsDraw(c) {
+        const meta = c.getDatasetMeta(0);
+        const ctx = c.ctx;
+        ctx.save();
+        ctx.font = '600 11px "Fira Code", monospace';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#1A2E38';
+        meta.data.forEach((bar, i) => {
+            const v = c.data.datasets[0].data[i];
+            if (v == null) return;
+            const label = naira(v);
+            const room = c.chartArea.right - bar.x;
+            // Sit the label outside the bar when there is room, inside it when
+            // the bar reaches the edge, so it is never clipped.
+            if (room > ctx.measureText(label).width + 12) {
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#1A2E38';
+                ctx.fillText(label, bar.x + 7, bar.y);
+            } else {
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillText(label, bar.x - 7, bar.y);
+            }
+        });
+        ctx.restore();
+    },
+};
+
+function buildChart() {
+    Chart.defaults.color = '#6E8088';
+    Chart.defaults.borderColor = 'rgba(189, 205, 210, 0.4)';
+    Chart.defaults.font.family = "'Fira Code', monospace";
+
+    chart = new Chart(document.getElementById('raceChart'), {
+        type: 'bar',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 4, borderSkipped: 'start' }] },
+        plugins: [valueLabels],
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            // Matching the animation to the tick interval is what turns 108
+            // discrete frames into continuous motion: each bar is still gliding
+            // toward its last target when the next one arrives. Linear easing
+            // because an eased curve would restart a visible ramp every tick.
+            animation: REDUCED_MOTION ? false : { duration: tickMs, easing: 'linear' },
+            animations: REDUCED_MOTION ? {} : { colors: false },
+            layout: { padding: { right: 64, left: 4 } },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(189, 205, 210, 0.4)', drawTicks: false },
+                    border: { display: false },
+                    ticks: {
+                        font: { size: 11 },
+                        padding: 6,
+                        callback: (v) => v >= 1000 ? '₦' + (v / 1000) + 'k' : '₦' + v,
+                    },
+                },
+                y: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { font: { size: 11.5, weight: '500' }, color: '#1A2E38', padding: 6, autoSkip: false },
+                },
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(12, 34, 51, 0.95)',
+                    borderColor: '#2D6A6A',
+                    borderWidth: 1,
+                    cornerRadius: 10,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        title: (ctx) => ctx[0].label,
+                        label: (ctx) => {
+                            const row = standingsAt(frame)[ctx.dataIndex];
+                            const growth = ((row.value / row.start - 1) * 100).toFixed(0);
+                            return [
+                                `${naira(row.value)} · ${DATA.periods[frame]}`,
+                                `${row.category}`,
+                                `+${growth}% since Jan 2016`,
+                            ];
+                        },
+                    },
+                },
+            },
+        },
+    });
+}
+
+function render(f) {
+    frame = f;
+    const rows = standingsAt(f).slice(0, Number(els.top.value));
+
+    chart.data.labels = rows.map(r => r.name);
+    chart.data.datasets[0].data = rows.map(r => r.value);
+    chart.data.datasets[0].backgroundColor = rows.map(r => r.color);
+    chart.options.scales.x.max = axisMax[f];
+    chart.update();
+
+    // ─── Readout ───
+    const all = activeItems().map(it => it.series[f]);
+    const avg = all.reduce((t, v) => t + v, 0) / all.length;
+    els.date.textContent = DATA.periods[f];
+    els.leader.textContent = rows.length ? `${rows[0].name} · ${naira(rows[0].value)}` : '—';
+    els.avg.textContent = naira(avg);
+    els.since.textContent = '+' + ((avg / baselineAvg - 1) * 100).toFixed(0) + '%';
+    els.scrub.value = String(f);
+    els.scrub.setAttribute('aria-valuetext', DATA.periods[f]);
+
+    renderStandings(rows, f);
+}
+
+function renderStandings(rows, f) {
+    els.caption.textContent = `Standings at ${DATA.periods[f]} — national average price per item`;
+    els.standings.innerHTML = rows.map((r, i) => {
+        const growth = ((r.value / r.start - 1) * 100).toFixed(0);
+        return `<tr>
+            <td class="num">${i + 1}</td>
+            <td><span class="dot" style="background:${r.color}"></span>${r.name}</td>
+            <td>${r.category}</td>
+            <td class="num">${naira(r.value)}</td>
+            <td class="num">+${growth}%</td>
+        </tr>`;
+    }).join('');
+}
+
+function renderLegend() {
+    // Only the groups actually on screen, so the legend never advertises a
+    // colour the filtered chart cannot show.
+    const shown = new Set(activeItems().map(i => i.category));
+    els.legend.innerHTML = DATA.categories
+        .filter(c => shown.has(c))
+        .map(c => `<span class="legend-item"><span class="legend-swatch" style="background:${CATEGORY_COLORS[c]}"></span>${c}</span>`)
+        .join('');
+}
+
+// ─── Playback ───
+function play() {
+    if (timer) return;
+    if (frame >= DATA.periods.length - 1) frame = 0;
+    els.play.textContent = '❚❚ Pause';
+    timer = setInterval(() => {
+        if (frame >= DATA.periods.length - 1) { pause(); return; }
+        render(frame + 1);
+    }, tickMs);
+}
+
+function pause() {
+    clearInterval(timer);
+    timer = null;
+    els.play.textContent = frame >= DATA.periods.length - 1 ? '↻ Replay' : '▶ Play';
+}
+
+function togglePlay() { timer ? pause() : play(); }
+
+function refit() {
+    computeAxisMax();
+    renderLegend();
+    render(Math.min(frame, DATA.periods.length - 1));
+}
+
+// ─── Events ───
+els.play.addEventListener('click', togglePlay);
+els.restart.addEventListener('click', () => { pause(); render(0); play(); });
+
+els.speed.addEventListener('change', () => {
+    tickMs = Number(els.speed.value);
+    if (!REDUCED_MOTION) chart.options.animation.duration = tickMs;
+    if (timer) { pause(); play(); }        // restart the interval at the new rate
+});
+
+els.top.addEventListener('change', refit);
+els.cat.addEventListener('change', refit);
+
+els.scrub.addEventListener('input', () => {
+    pause();
+    render(Number(els.scrub.value));
+});
+
+// ─── Boot ───
+function boot() {
+fetch('./race_data.json')
+    .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+    })
+    .then(data => {
+        DATA = data;
+        els.scrub.max = String(DATA.periods.length - 1);
+        els.cat.innerHTML = '<option value="">All groups</option>' +
+            DATA.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+
+        baselineAvg = DATA.items.reduce((t, it) => t + it.series[0], 0) / DATA.items.length;
+
+        buildChart();
+        computeAxisMax();
+        renderLegend();
+        render(0);
+
+        // Autoplay only where motion is welcome. With reduced motion the page
+        // is a scrubable chart that happens to have a play button.
+        if (!REDUCED_MOTION) setTimeout(play, 700);
+    })
+    .catch(err => {
+        els.error.innerHTML = `
+            <div class="load-error">
+                <strong>The race could not start (${err.message}).</strong><br>
+                If the data file is the problem: opening this page straight from disk blocks the request.
+                Serve the folder instead — <code>python -m http.server</code> — then visit
+                <code>localhost:8000/race.html</code>.
+            </div>`;
+    });
+}
+
+// Chart.js is deferred, so it is undefined while this script is being parsed —
+// and race_data.json is small enough to come back first, which would leave
+// buildChart() calling a Chart that does not exist yet. DOMContentLoaded fires
+// only after every deferred script has run, so it is the earliest safe moment.
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+</script>
+<script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+</body>
+</html>

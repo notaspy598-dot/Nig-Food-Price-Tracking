@@ -7,10 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BE%3C/text%3E%3C/svg%3E">
-    <!-- Deferred: none of this is needed to paint the story text, and the
-         charts are built lazily as they scroll into view. -->
+    <!-- Deferred: none of this is needed to paint the story text. Scrollama
+         drives the pinned chart in Parts 01–06; if it fails to load the boot
+         code falls back to a plain IntersectionObserver. -->
+    <script defer src="https://unpkg.com/scrollama@3.2.0/build/scrollama.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
@@ -284,6 +287,103 @@
             font-weight: 400;
         }
 
+        /* ─── SCROLLYTELLING ─── */
+        /* Parts 01–06 share one pinned chart that morphs as each step scrolls
+           past. The figure is written first in the DOM so the mobile layout can
+           drop to a plain block flow and still stick it above the prose. */
+        .scrolly {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 3rem;
+            align-items: start;
+        }
+        .scrolly-steps { order: 1; min-width: 0; }
+        .scrolly-figure {
+            order: 2;
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 110px);
+            align-self: start;
+        }
+
+        .figure-card {
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            padding: 1.5rem;
+            margin: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .figure-head { flex: 0 0 auto; }
+        .figure-eyebrow {
+            display: inline-block;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--teal);
+            background: var(--teal-100);
+            padding: 0.2rem 0.7rem;
+            border-radius: 100px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+        .figure-title {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.35;
+        }
+        .figure-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-top: 0.25rem;
+        }
+        .figure-canvas-wrap {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 0;
+            margin-top: 0.9rem;
+        }
+        .figure-note {
+            flex: 0 0 auto;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 0.7rem;
+            min-height: 1.2em;
+        }
+        .figure-note:empty { min-height: 0; }
+
+        .scroll-step {
+            padding: 4.5rem 0;
+            min-height: 72vh;
+            opacity: 0.34;
+            transition: opacity 0.45s ease;
+        }
+        .scroll-step:first-child { min-height: 82vh; }
+        .scroll-step.is-active { opacity: 1; }
+        .scroll-step .section-header { text-align: left; margin-bottom: 2.2rem; }
+        .scroll-step .section-subtitle { margin: 0; max-width: none; }
+        .scroll-step .card,
+        .scroll-step .callout { margin-bottom: 1.6rem; }
+        .scroll-step .grid-2,
+        .scroll-step .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+            gap: 1rem;
+        }
+        .scroll-step .stat-card { padding: 1.3rem; }
+        .scroll-step .stat-card .stat-value { font-size: 1.9rem; }
+
         /* ─── DIVIDER ─── */
         .divider {
             max-width: 1200px;
@@ -370,6 +470,86 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
             gap: 1.5rem;
+        }
+
+        /* Body copy inside a card, for the places a section has to explain
+           itself in sentences rather than in a chart. */
+        .card-prose {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            margin-bottom: 1rem;
+        }
+        .card-prose:last-child { margin-bottom: 0; }
+        .card-prose strong { color: var(--text-primary); font-weight: 600; }
+
+        /* ─── SEASONAL SPIRAL (Part 04) ─── */
+        .sr-only {
+            position: absolute;
+            width: 1px; height: 1px;
+            margin: -1px; padding: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        /* Stacked, not side by side. The story's content column is capped near
+           600px, so two charts abreast left the spiral about 295px wide and its
+           month labels illegible. Full width each, with the smaller seasonal
+           ring reined in so it does not tower over the spiral. */
+        .spiral-wrap {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        .spiral-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
+        .spiral-ring-holder { max-width: 420px; margin: 0 auto; }
+        .spiral-ring-holder .spiral-caption { text-align: left; }
+        .spiral-axis { stroke: rgba(189, 205, 210, 0.75); fill: none; }
+        .spiral-ring-label,
+        .spiral-month-label {
+            font-family: 'Fira Code', monospace;
+            fill: var(--text-secondary);
+            font-size: 10px;
+        }
+        .spiral-month-label { font-size: 11px; }
+        .spiral-month-label.is-peak { fill: var(--orange); font-weight: 700; }
+        .spiral-seg { fill: none; stroke-linecap: round; }
+
+        .spiral-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .spiral-controls button {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
+            border-radius: 999px;
+            padding: 0.4rem 0.9rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-width: 5.5rem;
+        }
+        .spiral-controls button:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-50); }
+        .spiral-controls input[type="range"] { flex: 1; min-width: 120px; accent-color: var(--orange); cursor: pointer; }
+        .spiral-readout {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .spiral-readout b { color: var(--orange); }
+        .spiral-caption {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.6rem;
+            line-height: 1.5;
         }
 
         /* ─── STAT CARDS ─── */
@@ -679,6 +859,30 @@
         }
 
         /* ─── RESPONSIVE ─── */
+        @media (max-width: 1024px) {
+            /* Below two comfortable columns, fall back to block flow: a sticky
+               grid item only sticks inside its own row, so the figure has to
+               leave the grid to stay pinned across all six steps. */
+            .scrolly { display: block; padding: 0 1.2rem; }
+            .scrolly-figure {
+                position: sticky;
+                top: 62px;
+                height: min(50vh, 380px);
+                z-index: 5;
+                padding: 0.6rem 0;
+                margin-bottom: 1rem;
+                background: var(--cream);
+            }
+            .figure-card { padding: 1rem; }
+            .figure-desc { display: none; }
+            .scroll-step {
+                opacity: 1;
+                padding: 2.5rem 0;
+                min-height: 0;
+            }
+            .scroll-step:first-child { min-height: 0; }
+        }
+
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .nav-inner { justify-content: center; }
@@ -812,8 +1016,30 @@
 
 <div class="divider"><div class="divider-line"></div></div>
 
-<!-- ═══════ PART 1: INFLATION ═══════ -->
-<section class="section" id="inflation">
+<!-- ═══════ PARTS 01–06 · SCROLLYTELLING ═══════ -->
+<div class="scrolly">
+
+<!-- The pinned figure is written before the steps because the sub-1024px layout
+     drops to block flow, where a sticky element only stays pinned if it precedes
+     what scrolls past it. On desktop `order` puts it back on the right. -->
+<div class="scrolly-figure">
+    <figure class="figure-card">
+        <div class="figure-head">
+            <div class="figure-eyebrow" id="figureEyebrow">Part 01</div>
+            <div class="figure-title" id="figureTitle">The Fastest-Rising Foods</div>
+            <div class="figure-desc" id="figureDesc">Total percentage price change, 2016–2024.</div>
+        </div>
+        <div class="figure-canvas-wrap">
+            <canvas id="storyChart"></canvas>
+        </div>
+        <figcaption class="figure-note" id="figureNote"></figcaption>
+    </figure>
+</div>
+
+<div class="scrolly-steps">
+
+<!-- ─── Beat 1 · Part 01: Inflation ─── -->
+<section class="scroll-step is-active" id="inflation" data-step="0">
     <div class="section-header fade-in">
         <div class="section-number">Part 01</div>
         <h2 class="section-title">A Nation Under Price Pressure</h2>
@@ -836,16 +1062,7 @@
         </div>
     </div>
 
-    <!-- Top Price Risers Bar Chart -->
-    <div class="chart-container fade-in" style="margin-top: 2.5rem;">
-        <div class="chart-title">The Fastest-Rising Foods (2016–2024)</div>
-        <div class="chart-description">Total percentage price change over the 8-year period. Staple foods — root crops, grains, and legumes — lead the surge.</div>
-        <div class="chart-canvas-wrap" style="height: clamp(280px, 46vh, 400px);">
-            <canvas id="topRisersChart"></canvas>
-        </div>
-    </div>
-
-    <div class="callout warning fade-in">
+    <div class="callout warning fade-in" style="margin-top: 2.5rem;">
         <div class="callout-icon">⚠️</div>
         <div>
             <div class="callout-title">The "best case" is still alarming</div>
@@ -861,27 +1078,20 @@
     </div>
 </section>
 
-<div class="divider"><div class="divider-line"></div></div>
-
-<!-- ═══════ PART 2: GEOGRAPHY ═══════ -->
-<section class="section" id="geography">
+<!-- ─── Beat 2 · Part 02: Geography ─── -->
+<section class="scroll-step" id="geography" data-step="1">
     <div class="section-header fade-in">
         <div class="section-number">Part 02</div>
         <h2 class="section-title">Geography Is Destiny</h2>
         <p class="section-subtitle">Where you live determines what you pay. The same item can cost up to 571% more depending on which state you're in.</p>
     </div>
 
-    <!-- Geographic Price Gap Chart -->
-    <div class="chart-container fade-in">
-        <div class="chart-title">Top Geographic Price Gaps</div>
-        <div class="chart-description">Average price comparison between the cheapest and most expensive state for each item. Interactive — hover for details.</div>
-        <div class="comparison-legend">
-            <div class="legend-item"><div class="legend-dot" style="background: var(--teal);"></div> Cheapest State Price</div>
-            <div class="legend-item"><div class="legend-dot" style="background: var(--orange);"></div> Most Expensive State Price</div>
-        </div>
-        <div class="chart-canvas-wrap" style="height: clamp(300px, 52vh, 450px);">
-            <canvas id="geoGapChart"></canvas>
-        </div>
+    <!-- Drives the pinned chart: the overview option shows the ten widest gaps,
+         any single item swaps it for that item's cheapest-vs-dearest pair. -->
+    <div class="card fade-in">
+        <div class="card-title">Explore: Price Spread by Food Item</div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Pick an item to redraw the chart with its cheapest and most expensive state.</p>
+        <select class="chart-select" id="geoItemSelect" style="margin-bottom: 0;"></select>
     </div>
 
     <!-- Cheap vs Expensive Belt -->
@@ -916,22 +1126,10 @@
         </div>
     </div>
 
-    <!-- Interactive: Pick an item to see state spread -->
-    <div class="chart-container fade-in">
-        <div class="chart-title">Explore: Price Spread by Food Item</div>
-        <div class="chart-description">Select a food item to see the cheapest vs. most expensive state and the price spread.</div>
-        <select class="chart-select" id="geoItemSelect"></select>
-        <div class="chart-canvas-wrap" style="height: clamp(240px, 36vh, 300px);">
-            <canvas id="geoItemChart"></canvas>
-        </div>
-        <div id="geoItemAnnotation" style="text-align: center; margin-top: 0.8rem; font-size: 0.85rem; color: var(--text-secondary);"></div>
-    </div>
 </section>
 
-<div class="divider"><div class="divider-line"></div></div>
-
-<!-- ═══════ PART 3: VOLATILITY ═══════ -->
-<section class="section" id="volatility">
+<!-- ─── Beat 3 · Part 03: Volatility ─── -->
+<section class="scroll-step" id="volatility" data-step="2">
     <div class="section-header fade-in">
         <div class="section-number">Part 03</div>
         <h2 class="section-title">Prices Don't Just Rise — They Swing Wildly</h2>
@@ -941,15 +1139,6 @@
     <div class="stat-card fade-in" style="max-width: 500px; margin: 0 auto 2rem; border-color: var(--orange);">
         <div class="stat-value">512.6%</div>
         <div class="stat-label">Egg prices CV in Lagos — the standard deviation exceeds the mean by 5×</div>
-    </div>
-
-    <!-- Volatility Scatter/Bubble Chart -->
-    <div class="chart-container fade-in">
-        <div class="chart-title">Volatility vs. Average Price</div>
-        <div class="chart-description">Coefficient of Variation (CV%) vs. average price. Larger bubbles = higher volatility. Items in the top-left are cheap but unstable; top-right are expensive AND unstable.</div>
-        <div class="chart-canvas-wrap" style="height: clamp(290px, 48vh, 420px);">
-            <canvas id="volatilityChart"></canvas>
-        </div>
     </div>
 
     <!-- Volatility ranking -->
@@ -973,58 +1162,110 @@
     </div>
 </section>
 
-<div class="divider"><div class="divider-line"></div></div>
-
-<!-- ═══════ PART 4: SEASONAL ═══════ -->
-<section class="section" id="seasonal">
+<!-- ─── Beat 4 · Part 04: Seasonal ─── -->
+<section class="scroll-step" id="seasonal" data-step="3">
     <div class="section-header fade-in">
         <div class="section-number">Part 04</div>
-        <h2 class="section-title">The Seasonal Rhythm</h2>
-        <p class="section-subtitle">When you buy matters. January is the cheapest month, December the most expensive — an overwhelming seasonal pattern.</p>
+        <h2 class="section-title">Prices Never Fall</h2>
+        <p class="section-subtitle">There is a season in this data, but it is far smaller than it first looks — and it is not the one the calendar suggests.</p>
     </div>
 
-    <div class="grid-2 fade-in">
-        <div class="stat-card" style="border-color: var(--teal);">
-            <div class="stat-value" style="color: var(--teal);">38 / 43</div>
-            <div class="stat-label">Items cheapest in January</div>
-        </div>
+    <!-- The spiral. Nine turns, one per year: radius is the price level, angle
+         is the month. If season mattered, the coil would bulge. It does not. -->
+    <div class="card fade-in" style="margin-top: 2rem;">
+        <div class="card-title">Nine Years, Nine Turns</div>
+        <p class="section-subtitle" style="margin: 0 0 1rem; font-size: 0.9rem;">
+            Each loop is one year, starting at January at the top and running clockwise. The distance from the
+            centre is the price level — all 43 foods averaged, with 2016 set to 100. Drag through the years, or
+            let it draw itself.
+        </p>
+        <div id="spiralFigure"></div>
+    </div>
+
+    <div class="grid-2 fade-in" style="margin-top: 2rem;">
         <div class="stat-card" style="border-color: var(--orange);">
-            <div class="stat-value">37 / 43</div>
-            <div class="stat-label">Items most expensive in December</div>
+            <div class="stat-value">3.6 pts</div>
+            <div class="stat-label">Total seasonal swing, once the climb is removed — against a 571-point rise</div>
+        </div>
+        <div class="stat-card" style="border-color: var(--teal);">
+            <div class="stat-value" style="color: var(--teal);">19 / 43</div>
+            <div class="stat-label">Items whose real seasonal peak is June, the lean season before harvest</div>
         </div>
     </div>
 
-    <!-- Seasonal heatmap-style chart -->
-    <div class="chart-container fade-in" style="margin-top: 2rem;">
-        <div class="chart-title">Monthly Price Slopes — Who's Climbing Fastest?</div>
-        <div class="chart-description">Monthly absolute price increase (₦/month). Protein items show the steepest absolute increases.</div>
-        <div class="chart-canvas-wrap" style="height: clamp(270px, 44vh, 380px);">
-            <canvas id="monthlyClimbChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Notable Exceptions -->
-    <div class="card fade-in">
-        <div class="card-title">Notable Seasonal Exceptions</div>
+    <!-- Why the obvious reading is wrong. This section used to lead on "38 of 43
+         items are cheapest in January", which is what a raw calendar-month mean
+         says and is an artifact of the trend running through it. -->
+    <div class="card fade-in" style="margin-top: 2rem;">
+        <div class="card-title">Why January Only Looks Cheap</div>
+        <p class="card-prose">
+            Line up all nine Januaries against all nine Decembers and January wins almost every time. Forty-two
+            of the 43 foods come out cheapest in January, and 37 come out most expensive in December. Both
+            counts are correct. The thing everyone concludes from them is not.
+        </p>
+        <p class="card-prose">
+            Think about measuring a child's height on the first of every month. January will always give you the
+            smallest number and December the largest. Nothing about the season is making the child short. The
+            child is growing, and January is just the reading you took first. Nigerian food prices do the same
+            thing. They rise by around 1.8% a month, every month, so a December price has eleven rounds of
+            increases sitting on top of the January price next to it. That puts December roughly 20% higher
+            before the season gets any say at all.
+        </p>
+        <p class="card-prose">
+            So if you want to know whether the calendar matters, you have to take the growing out first. Compare
+            each month against the average of the year around it and the climb cancels out, leaving only the
+            wobble. Do that and January turns out to be an ordinary month, and the real peak moves to June.
+        </p>
         <div class="data-table-wrap">
             <table class="data-table">
                 <thead>
-                    <tr><th>Food Item</th><th>Cheapest Month</th><th>Most Expensive Month</th><th>Why?</th></tr>
+                    <tr><th>What you measure</th><th>Cheapest</th><th>Dearest</th><th>What it shows</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Irish Potato</td><td style="color: var(--teal); font-weight: 700;">January</td><td class="val-up">June</td><td>Rainy season supply disruption</td></tr>
-                    <tr><td>Tomato</td><td style="color: var(--teal); font-weight: 700;">January</td><td class="val-up">June</td><td>Flooding & poor road conditions</td></tr>
-                    <tr><td>Onion Bulb</td><td style="color: var(--teal); font-weight: 700;">March</td><td class="val-up">December</td><td>Delayed harvest cycle</td></tr>
+                    <tr>
+                        <td>Prices as they came</td>
+                        <td style="color: var(--teal); font-weight: 700;">January (42/43)</td>
+                        <td class="val-up">December (37/43)</td>
+                        <td>Inflation, sorted by month</td>
+                    </tr>
+                    <tr>
+                        <td>Same prices, climb removed</td>
+                        <td style="color: var(--teal); font-weight: 700;">December (9/43)</td>
+                        <td class="val-up">June (19/43)</td>
+                        <td>The season, about ±2%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- The old "notable exceptions" table listed produce as the odd ones out.
+         Detrended, they are the only items with real seasonality at all. -->
+    <div class="card fade-in" style="margin-top: 2rem;">
+        <div class="card-title">Where Season Still Bites</div>
+        <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+            Seasonality survives in exactly the foods you would expect — the perishable ones that cannot be
+            stored across a harvest. Everything processed, imported or frozen is essentially seasonless.
+        </p>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Food Item</th><th>Seasonal swing</th><th>Peak</th><th>Trough</th><th>Why?</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Tomato</td><td class="val-up">23.3 pts</td><td class="val-up">June</td><td style="color: var(--teal); font-weight: 700;">February</td><td>Rains ruin the crop and the roads to market</td></tr>
+                    <tr><td>Yam Tuber</td><td class="val-up">16.4 pts</td><td class="val-up">June</td><td style="color: var(--teal); font-weight: 700;">February</td><td>Old stores run out before the new harvest lands</td></tr>
+                    <tr><td>Onion Bulb</td><td class="val-up">15.7 pts</td><td class="val-up">December</td><td style="color: var(--teal); font-weight: 700;">July</td><td>Northern dry-season crop, cheapest just after lifting</td></tr>
+                    <tr><td>Irish Potato</td><td class="val-up">12.4 pts</td><td class="val-up">June</td><td style="color: var(--teal); font-weight: 700;">September</td><td>Jos plateau harvest arrives late in the year</td></tr>
+                    <tr><td>Iced Sardine</td><td>1.2 pts</td><td>November</td><td>September</td><td>Frozen and imported — no season left to speak of</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </section>
 
-<div class="divider"><div class="divider-line"></div></div>
-
-<!-- ═══════ PART 5: FORECAST ═══════ -->
-<section class="section" id="forecast">
+<!-- ─── Beat 5 · Part 05: Forecast ─── -->
+<section class="scroll-step" id="forecast" data-step="4">
     <div class="section-header fade-in">
         <div class="section-number">Part 05</div>
         <h2 class="section-title">What's Coming in 2025–2026</h2>
@@ -1045,27 +1286,16 @@
         </div>
     </div>
 
-    <!-- Model Accuracy Chart -->
-    <div class="chart-container fade-in" style="margin-top: 2rem;">
-        <div class="chart-title">Model Accuracy Comparison (MAPE %)</div>
-        <div class="chart-description">Mean Absolute Percentage Error for each item. Lower = better. LightGBM (amber) vs Prophet (teal) on 12-month holdout.</div>
-        <div class="controls" id="forecastModelControls">
+    <!-- Both control groups redraw the pinned forecast chart. -->
+    <div class="card fade-in" style="margin-top: 2rem;">
+        <div class="card-title">Price Forecast Through 2026</div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.2rem;">Pick a food item to plot Prophet (with its 80% confidence band) against LightGBM through December 2026.</p>
+        <div class="controls" id="forecastItemBtns"></div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 1.4rem 0 0.8rem;">Or isolate a single model:</p>
+        <div class="controls" id="forecastModelControls" style="margin-bottom: 0;">
             <button class="active" data-show="both">Both Models</button>
             <button data-show="lgb">LightGBM Only</button>
             <button data-show="prophet">Prophet Only</button>
-        </div>
-        <div class="chart-canvas-wrap" style="height: clamp(320px, 58vh, 500px);">
-            <canvas id="modelAccuracyChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Interactive Forecast Line Charts -->
-    <div class="chart-container fade-in">
-        <div class="chart-title">Price Forecast Through 2026</div>
-        <div class="chart-description">Select a food item to see Prophet (with 80% confidence interval) vs. LightGBM forecasts through December 2026.</div>
-        <div class="controls" id="forecastItemBtns"></div>
-        <div class="chart-canvas-wrap" style="height: clamp(270px, 44vh, 380px);">
-            <canvas id="forecastLineChart"></canvas>
         </div>
     </div>
 
@@ -1077,15 +1307,8 @@
                 <thead>
                     <tr><th>Food Item</th><th>2024 Avg Price</th><th>2026 Forecast</th><th>Expected Change</th></tr>
                 </thead>
-                <tbody>
-                    <tr><td>Agric eggs (per unit)</td><td>₦161.93</td><td>₦498.35</td><td class="val-up">+207.8%</td></tr>
-                    <tr><td>Agric eggs (crate)</td><td>₦1,659.32</td><td>₦3,834.53</td><td class="val-up">+131.1%</td></tr>
-                    <tr><td>Palm oil (1 bottle)</td><td>₦1,802.05</td><td>₦3,569.03</td><td class="val-up">+98.1%</td></tr>
-                    <tr><td>Imported rice (high quality)</td><td>₦1,562.46</td><td>₦3,024.78</td><td class="val-up">+93.6%</td></tr>
-                    <tr><td>Vegetable oil (1 bottle)</td><td>₦2,171.55</td><td>₦4,210.14</td><td class="val-up">+93.9%</td></tr>
-                    <tr><td>Groundnut oil (1 bottle)</td><td>₦2,250.07</td><td>₦4,222.15</td><td class="val-up">+87.6%</td></tr>
-                    <tr><td>Chicken Wings</td><td>₦2,692.59</td><td>₦4,785.81</td><td class="val-up">+77.7%</td></tr>
-                </tbody>
+                <!-- Rendered from forecastMovers, which beat 6 also charts. -->
+                <tbody id="forecastMoversBody"></tbody>
             </table>
         </div>
     </div>
@@ -1099,18 +1322,16 @@
     </div>
 </section>
 
-<div class="divider"><div class="divider-line"></div></div>
-
-<!-- ═══════ PART 6: TAKEAWAYS & RECOMMENDATIONS ═══════ -->
-<section class="section" id="recommendations">
+<!-- ─── Beat 6 · Part 06: Takeaways ─── -->
+<section class="scroll-step" id="recommendations" data-step="5">
     <div class="section-header fade-in">
         <div class="section-number">Part 06</div>
         <h2 class="section-title">What This Data Tells Us</h2>
-        <p class="section-subtitle">Three critical takeaways and actionable recommendations.</p>
+        <p class="section-subtitle">Three critical takeaways, and then what to do about them.</p>
     </div>
 
     <!-- Three Takeaways -->
-    <div class="grid-3 fade-in" style="margin-bottom: 3rem;">
+    <div class="grid-3 fade-in">
         <div class="card" style="border-left: 4px solid var(--orange);">
             <div class="card-title">1. Structural, Not Cyclical</div>
             <p style="font-size: 0.85rem; color: var(--text-secondary);">Every food item shows sustained 1.5–2.1% monthly increases for 9 years. Root causes: currency depreciation (naira lost ~75%), rising energy costs, climate disruption, and insecurity.</p>
@@ -1124,7 +1345,15 @@
             <p style="font-size: 0.85rem; color: var(--text-secondary);">Eggs projected to nearly <strong>triple</strong> by 2026, cooking oils to nearly double. These daily essentials represent a severe threat to household food security.</p>
         </div>
     </div>
+</section>
 
+</div><!-- /.scrolly-steps -->
+</div><!-- /.scrolly -->
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══════ RECOMMENDATIONS ═══════ -->
+<section class="section" id="playbook">
     <!-- Recommendation Cards -->
     <h3 style="font-family: 'Fira Code', monospace; font-size: 1.5rem; text-align: center; margin-bottom: 2rem; color: var(--navy);" class="fade-in">Recommendations</h3>
 
@@ -1152,7 +1381,7 @@
         <div class="rec-card business">
             <div class="rec-card-icon">📅</div>
             <h4>Time Your Purchases</h4>
-            <p><strong>Buy and store during Q1</strong> (January–March) when seasonal prices are at annual lows. The pattern is overwhelming across 38 of 43 items.</p>
+            <p><strong>Buy perishables at harvest, not in January.</strong> Waiting for a cheap month does not work when every month rises — but tomato, yam and Irish potato still swing 12–23 points around their own trend, and all three peak in June. Buy them out of the late-year harvest.</p>
         </div>
         <div class="rec-card household">
             <div class="rec-card-icon">🏠</div>
@@ -1207,36 +1436,6 @@ function applyChartDefaults() {
     Chart.defaults.plugins.tooltip.padding = 12;
     Chart.defaults.plugins.tooltip.titleFont = { weight: '600', size: 13 };
     Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
-}
-
-// ━━━ LAZY CHART RENDERING ━━━
-// This is a long-scroll story: building all seven charts at load blocked the
-// main thread for charts most readers never reach. Each one is built when it
-// gets within a screen of the viewport instead.
-const pendingCharts = [];
-
-function lazyChart(canvasId, build) {
-    pendingCharts.push({ canvasId, build });
-}
-
-function startLazyCharts() {
-    if (!('IntersectionObserver' in window)) {
-        pendingCharts.forEach(c => c.build());
-        return;
-    }
-    const io = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-            obs.unobserve(entry.target);
-            const pending = pendingCharts.find(c => c.canvasId === entry.target.id);
-            if (pending) pending.build();
-        });
-    }, { rootMargin: '100% 0px' });
-
-    pendingCharts.forEach(c => {
-        const el = document.getElementById(c.canvasId);
-        if (el) io.observe(el); else c.build();
-    });
 }
 
 // ━━━ DATA ━━━
@@ -1435,6 +1634,19 @@ const fullGeoData = [
     {item:'Agric eggs (crate)',cheap:'Borno',cheapPrice:644.42,expensive:'Enugu',expPrice:824.9,spread:28.0},
 ];
 
+// Biggest 2024 → 2026 movers under LightGBM. Beat 6 charts these and the Part 05
+// table is rendered from them, so the two can never drift apart.
+const forecastMovers = [
+    {item: 'Agric eggs (per unit)',        p2024: 161.93,  f2026: 498.35},
+    {item: 'Agric eggs (crate)',           p2024: 1659.32, f2026: 3834.53},
+    {item: 'Palm oil (1 bottle)',          p2024: 1802.05, f2026: 3569.03},
+    {item: 'Vegetable oil (1 bottle)',     p2024: 2171.55, f2026: 4210.14},
+    {item: 'Imported rice (high quality)', p2024: 1562.46, f2026: 3024.78},
+    {item: 'Groundnut oil (1 bottle)',     p2024: 2250.07, f2026: 4222.15},
+    {item: 'Chicken Wings',                p2024: 2692.59, f2026: 4785.81},
+    {item: 'Tomato',                       p2024: 850.90,  f2026: 741.34},
+].map(d => ({ ...d, change: ((d.f2026 - d.p2024) / d.p2024) * 100 }));
+
 // Forecast time series data
 const forecastTS = {
     "Irish potato": {"dates":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],"prophet":[1343.31,1406.91,1308.14,1387.25,1508.53,1542.96,1519.37,1509.81,1499.33,1532.31,1540.42,1593.47,1720.66,1820.37,1830.0,1875.73,1946.23,2011.4,1964.26,1944.61,1912.82,1981.83,1972.74,2108.95],"lgb":[1116.43,1123.11,1142.17,1154.08,1167.71,1189.31,1189.02,1210.24,1227.2,1231.91,1236.07,1259.46,1276.45,1272.23,1274.67,1276.32,1281.36,1296.54,1303.97,1321.85,1343.46,1363.68,1375.95,1412.65],"lower":[1312.09,1373.91,1273.9,1353.2,1472.03,1498.27,1476.05,1462.0,1446.55,1470.22,1476.37,1511.28,1630.97,1714.18,1715.34,1752.16,1809.71,1865.56,1812.69,1774.92,1742.33,1794.72,1777.69,1886.54],"upper":[1376.7,1440.36,1340.25,1421.86,1548.15,1585.19,1564.37,1561.72,1555.96,1599.0,1608.31,1673.5,1816.7,1927.26,1942.71,2005.23,2087.53,2176.92,2138.32,2133.72,2102.26,2188.25,2192.51,2343.81]},
@@ -1446,82 +1658,17 @@ const forecastTS = {
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// CHARTS
+// STATIC LISTS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// ── 1. Top Risers Horizontal Bar Chart ──
-lazyChart('topRisersChart', function() {
-    const top7 = priceChangeData.slice(0, 7);
-    new Chart(document.getElementById('topRisersChart'), {
-        type: 'bar',
-        data: {
-            labels: top7.map(d => d.item),
-            datasets: [{
-                data: top7.map(d => d.change),
-                backgroundColor: COLORS.orange + 'CC',
-                borderColor: 'transparent',
-                borderRadius: 6,
-                barThickness: 32,
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const d = top7[ctx.dataIndex];
-                            return [`+${d.change}% total increase`, `${d.mom}%/month avg.`, `Prices double every ~3 years`];
-                        }
-                    }
-                },
-                annotation: {
-                    annotations: {
-                        line1: {
-                            type: 'line',
-                            xMin: 430,
-                            xMax: 430,
-                            borderColor: 'rgba(26, 46, 56, 0.35)',
-                            borderWidth: 1,
-                            borderDash: [6, 4],
-                            label: {
-                                display: true,
-                                content: '430% average',
-                                position: 'start',
-                                color: COLORS.gridText,
-                                font: { size: 11 },
-                                backgroundColor: 'transparent',
-                            }
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { color: COLORS.grid },
-                    ticks: { callback: v => v + '%', color: COLORS.gridText },
-                    title: { display: true, text: 'Total Price Change (%)', color: COLORS.gridText }
-                },
-                y: {
-                    grid: { display: false },
-                    ticks: { color: COLORS.ink, font: { weight: '500' } }
-                }
-            }
-        }
-    });
-});
+const naira = v => '₦' + Math.round(v).toLocaleString();
 
-// ── 2. All Items Animated Bars ──
-(function() {
+// Part 01 — every tracked item, ranked.
+(function renderAllItemBars() {
     const container = document.getElementById('allItemsBars');
     const maxChange = priceChangeData[0].change;
-    priceChangeData.forEach((d, i) => {
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        row.innerHTML = `
+    container.innerHTML = priceChangeData.map((d, i) => `
+        <div class="bar-row">
             <div class="bar-label-row">
                 <span class="bar-label">${d.item}</span>
                 <span class="bar-value">+${d.change}%</span>
@@ -1529,491 +1676,550 @@ lazyChart('topRisersChart', function() {
             <div class="bar-track">
                 <div class="bar-fill" data-width="${(d.change / maxChange * 100)}" style="transition-delay: ${i * 30}ms;"></div>
             </div>
-        `;
-        container.appendChild(row);
-    });
+        </div>`).join('');
 })();
 
-// ── 3. Geographic Price Gap Chart ──
-lazyChart('geoGapChart', function() {
-    const ctx = document.getElementById('geoGapChart');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: geoData.map(d => d.item),
-            datasets: [
-                {
-                    label: 'Cheapest State',
-                    data: geoData.map(d => d.cheapPrice),
-                    backgroundColor: COLORS.tealLight + 'BB',
-                    borderRadius: 4,
-                    barPercentage: 0.7,
-                    categoryPercentage: 0.8,
-                },
-                {
-                    label: 'Most Expensive State',
-                    data: geoData.map(d => d.expPrice),
-                    backgroundColor: COLORS.orange + 'BB',
-                    borderRadius: 4,
-                    barPercentage: 0.7,
-                    categoryPercentage: 0.8,
-                }
-            ]
+// Part 03 — the volatility leaderboards flanking the bubble chart.
+(function renderVolatilityBars() {
+    const row = (d, denominator, gradient) => `
+        <div class="bar-row">
+            <div class="bar-label-row"><span class="bar-label">${d.item}</span><span class="bar-value">${d.cv}%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-width="${d.cv / denominator * 100}" style="background: linear-gradient(90deg, ${gradient});"></div></div>
+        </div>`;
+
+    document.getElementById('highVolBars').innerHTML = volatilityData
+        .filter(d => d.cv >= 95).sort((a, b) => b.cv - a.cv)
+        .map(d => row(d, 182, `${COLORS.orange}, ${COLORS.brown}`)).join('');
+
+    document.getElementById('lowVolBars').innerHTML = volatilityData
+        .filter(d => d.cv < 65).sort((a, b) => a.cv - b.cv)
+        .map(d => row(d, 65, `${COLORS.teal}, ${COLORS.tealLight}`)).join('');
+})();
+
+// Part 05 — the same movers beat 6 charts.
+(function renderMoversTable() {
+    document.getElementById('forecastMoversBody').innerHTML = forecastMovers
+        .filter(d => d.change > 0)
+        .map(d => `<tr>
+                <td>${d.item}</td>
+                <td>₦${d.p2024.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td>₦${d.f2026.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td class="val-up">+${d.change.toFixed(1)}%</td>
+            </tr>`).join('');
+})();
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// THE PINNED STORY CHART
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Parts 01–06 share a single Chart.js instance that morphs as each step
+// scrolls into place. Every beat below returns a complete spec — type, data,
+// options and the surrounding caption text — which drawBeat() applies wholesale.
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const GEO_OVERVIEW = '__overview__';
+
+// The controls that live inside steps 2 and 5 write here, then ask for a redraw.
+const controls = {
+    geoItem: GEO_OVERVIEW,
+    forecastItem: 'Irish potato',
+    forecastModels: 'both',
+};
+
+function baseOptions() {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: reduceMotion ? false : { duration: 650 },
+        plugins: {
+            legend: { display: false },
+            // chartjs-plugin-datalabels registers itself globally; the pinned
+            // chart is too dense for value labels on any beat.
+            datalabels: { display: false },
+            annotation: { annotations: {} },
         },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        afterTitle: (items) => {
-                            const d = geoData[items[0].dataIndex];
-                            return `${d.spread}% price spread`;
-                        },
-                        label: (ctx) => {
-                            const d = geoData[ctx.dataIndex];
-                            if (ctx.datasetIndex === 0) return `${d.cheap}: ₦${d.cheapPrice.toLocaleString()}`;
-                            return `${d.expensive}: ₦${d.expPrice.toLocaleString()}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { color: COLORS.grid },
-                    ticks: { callback: v => '₦' + v.toLocaleString(), color: COLORS.gridText }
-                },
-                y: {
-                    grid: { display: false },
-                    ticks: { color: COLORS.ink, font: { size: 11, weight: '500' } }
-                }
+    };
+}
+
+const nairaAxis = { callback: v => naira(v), color: COLORS.gridText };
+
+// ── Beat 1 · Inflation ──
+function beatInflation() {
+    const top7 = priceChangeData.slice(0, 7);
+    const options = baseOptions();
+    options.indexAxis = 'y';
+    options.plugins.tooltip = {
+        callbacks: {
+            label: ctx => {
+                const d = top7[ctx.dataIndex];
+                return [`+${d.change}% total increase`, `${d.mom}%/month average`];
             }
         }
-    });
-});
+    };
+    options.plugins.annotation.annotations = {
+        average: {
+            type: 'line', xMin: 430, xMax: 430,
+            borderColor: 'rgba(26, 46, 56, 0.35)', borderWidth: 1, borderDash: [6, 4],
+            label: {
+                display: true, content: '430% average', position: 'start',
+                color: COLORS.gridText, font: { size: 11 }, backgroundColor: 'transparent',
+            }
+        }
+    };
+    options.scales = {
+        x: {
+            grid: { color: COLORS.grid },
+            ticks: { callback: v => v + '%', color: COLORS.gridText },
+            title: { display: true, text: 'Total Price Change (%)', color: COLORS.gridText },
+        },
+        y: { grid: { display: false }, ticks: { color: COLORS.ink, font: { weight: '500' } } },
+    };
 
-// ── 4. Interactive Geo Item Selector ──
-lazyChart('geoItemChart', function() {
-    const select = document.getElementById('geoItemSelect');
-    fullGeoData.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d.item;
-        opt.textContent = `${d.item} (${d.spread}% spread)`;
-        select.appendChild(opt);
-    });
+    return {
+        eyebrow: 'Part 01',
+        title: 'The Fastest-Rising Foods',
+        desc: 'Total percentage price change, 2016–2024. Root crops, grains and legumes lead the surge.',
+        note: 'Not one of the 43 tracked items got cheaper.',
+        type: 'bar',
+        data: {
+            labels: top7.map(d => d.item),
+            datasets: [{
+                label: 'Total change',
+                data: top7.map(d => d.change),
+                backgroundColor: COLORS.orange + 'CC',
+                borderColor: 'transparent',
+                borderRadius: 6,
+                maxBarThickness: 34,
+            }]
+        },
+        options,
+    };
+}
 
-    let chart = null;
-    function renderGeoItem(itemName) {
-        const d = fullGeoData.find(g => g.item === itemName);
-        if (!d) return;
-        const ann = document.getElementById('geoItemAnnotation');
-        ann.innerHTML = `<strong style="color: var(--brown);">₦${(d.expPrice - d.cheapPrice).toLocaleString()}</strong> price difference per unit · ${d.spread}% spread between <strong>${d.cheap}</strong> → <strong>${d.expensive}</strong>`;
-        
-        if (chart) chart.destroy();
-        chart = new Chart(document.getElementById('geoItemChart'), {
-            type: 'bar',
-            data: {
-                labels: [d.cheap, d.expensive],
-                datasets: [{
-                    data: [d.cheapPrice, d.expPrice],
-                    backgroundColor: [COLORS.teal + 'CC', COLORS.orange + 'CC'],
-                    borderRadius: 8,
-                    barThickness: 60,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => `₦${ctx.raw.toLocaleString()}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        grid: { color: COLORS.grid },
-                        ticks: { callback: v => '₦' + v.toLocaleString(), color: COLORS.gridText }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: COLORS.ink, font: { weight: '600', size: 13 } }
-                    }
+// ── Beat 2 · Geography ──
+function beatGeography() {
+    const options = baseOptions();
+
+    if (controls.geoItem === GEO_OVERVIEW) {
+        options.indexAxis = 'y';
+        options.plugins.legend = {
+            display: true, position: 'top',
+            labels: { color: COLORS.ink, usePointStyle: true, pointStyle: 'rectRounded', padding: 14 },
+        };
+        options.plugins.tooltip = {
+            callbacks: {
+                afterTitle: items => `${geoData[items[0].dataIndex].spread}% price spread`,
+                label: ctx => {
+                    const d = geoData[ctx.dataIndex];
+                    return ctx.datasetIndex === 0
+                        ? `${d.cheap}: ${naira(d.cheapPrice)}`
+                        : `${d.expensive}: ${naira(d.expPrice)}`;
                 }
             }
-        });
+        };
+        options.scales = {
+            x: { grid: { color: COLORS.grid }, ticks: nairaAxis },
+            y: { grid: { display: false }, ticks: { color: COLORS.ink, font: { size: 11, weight: '500' } } },
+        };
+
+        return {
+            eyebrow: 'Part 02',
+            title: 'The Ten Widest Price Gaps',
+            desc: 'Each item\'s average price in its cheapest state against its most expensive.',
+            note: 'Irish potato: ₦310 in Borno, ₦2,083 in Anambra.',
+            type: 'bar',
+            data: {
+                labels: geoData.map(d => d.item),
+                datasets: [
+                    {
+                        label: 'Cheapest state',
+                        data: geoData.map(d => d.cheapPrice),
+                        backgroundColor: COLORS.tealLight + 'BB',
+                        borderRadius: 4, barPercentage: 0.72, categoryPercentage: 0.8,
+                    },
+                    {
+                        label: 'Most expensive state',
+                        data: geoData.map(d => d.expPrice),
+                        backgroundColor: COLORS.orange + 'BB',
+                        borderRadius: 4, barPercentage: 0.72, categoryPercentage: 0.8,
+                    }
+                ]
+            },
+            options,
+        };
     }
 
-    select.addEventListener('change', () => renderGeoItem(select.value));
-    renderGeoItem(fullGeoData[0].item);
-});
+    const d = fullGeoData.find(g => g.item === controls.geoItem) || fullGeoData[0];
+    options.indexAxis = 'x';
+    options.plugins.tooltip = { callbacks: { label: ctx => naira(ctx.raw) } };
+    options.scales = {
+        x: { grid: { display: false }, ticks: { color: COLORS.ink, font: { weight: '600', size: 13 } } },
+        y: { grid: { color: COLORS.grid }, ticks: nairaAxis },
+    };
 
-// ── 5. Volatility Bubble Chart ──
-lazyChart('volatilityChart', function() {
-    // Split into high vol and low vol for coloring
-    const data = volatilityData.map(d => ({
-        x: d.mean,
-        y: d.cv,
-        r: Math.max(4, d.cv / 12),
-        item: d.item,
-        state: d.state,
-        stateCV: d.stateCV,
+    return {
+        eyebrow: 'Part 02',
+        title: d.item,
+        desc: `Average price in the cheapest and most expensive state for ${d.item.toLowerCase()}.`,
+        note: `${naira(d.expPrice - d.cheapPrice)} more per unit · ${d.spread}% spread from ${d.cheap} to ${d.expensive}.`,
+        type: 'bar',
+        data: {
+            labels: [d.cheap, d.expensive],
+            datasets: [{
+                label: d.item,
+                data: [d.cheapPrice, d.expPrice],
+                backgroundColor: [COLORS.teal + 'CC', COLORS.orange + 'CC'],
+                borderRadius: 8,
+                maxBarThickness: 96,
+            }]
+        },
+        options,
+    };
+}
+
+// ── Beat 3 · Volatility ──
+function beatVolatility() {
+    const points = volatilityData.map(d => ({
+        x: d.mean, y: d.cv, r: Math.max(4, d.cv / 12),
+        item: d.item, state: d.state, stateCV: d.stateCV,
     }));
+    const tone = y => y > 95 ? COLORS.orange : y > 70 ? COLORS.orangeLight : COLORS.tealLight;
 
-    new Chart(document.getElementById('volatilityChart'), {
+    const options = baseOptions();
+    options.plugins.tooltip = {
+        callbacks: {
+            title: items => items[0].raw.item,
+            label: item => [
+                `CV: ${item.raw.y}%`,
+                `Avg price: ${naira(item.raw.x)}`,
+                `Most volatile in: ${item.raw.state} (${item.raw.stateCV}% CV)`,
+            ]
+        }
+    };
+    options.scales = {
+        x: {
+            grid: { color: COLORS.grid },
+            title: { display: true, text: 'Average Price (₦)', color: COLORS.gridText },
+            ticks: nairaAxis,
+        },
+        y: {
+            grid: { color: COLORS.grid },
+            title: { display: true, text: 'Coefficient of Variation (%)', color: COLORS.gridText },
+            ticks: { callback: v => v + '%', color: COLORS.gridText },
+        },
+    };
+
+    return {
+        eyebrow: 'Part 03',
+        title: 'Volatility vs. Average Price',
+        desc: 'Bigger, oranger bubbles swing harder. Top-left is cheap but unpredictable; top-right is expensive and unpredictable.',
+        note: '13 of 43 items carry a coefficient of variation above 80%.',
         type: 'bubble',
         data: {
             datasets: [{
-                label: 'Food Items',
-                data: data,
-                backgroundColor: data.map(d => d.y > 95 ? COLORS.orange + '88' : d.y > 70 ? COLORS.orangeLight + '77' : COLORS.tealLight + '66'),
-                borderColor: data.map(d => d.y > 95 ? COLORS.orange : d.y > 70 ? COLORS.orangeLight : COLORS.tealLight),
+                label: 'Food items',
+                data: points,
+                backgroundColor: points.map(d => tone(d.y) + '88'),
+                borderColor: points.map(d => tone(d.y)),
                 borderWidth: 1.5,
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        title: items => items[0].raw.item,
-                        label: item => [
-                            `CV: ${item.raw.y}%`,
-                            `Avg Price: ₦${item.raw.x.toLocaleString()}`,
-                            `Most volatile in: ${item.raw.state} (${item.raw.stateCV}% CV)`
-                        ]
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { color: COLORS.grid },
-                    title: { display: true, text: 'Average Price (₦)', color: COLORS.gridText },
-                    ticks: { callback: v => '₦' + v.toLocaleString(), color: COLORS.gridText }
-                },
-                y: {
-                    grid: { color: COLORS.grid },
-                    title: { display: true, text: 'Coefficient of Variation (%)', color: COLORS.gridText },
-                    ticks: { callback: v => v + '%', color: COLORS.gridText }
-                }
+        options,
+    };
+}
+
+// ── Beat 4 · Seasonal ──
+function beatSeasonal() {
+    const options = baseOptions();
+    options.indexAxis = 'y';
+    options.plugins.tooltip = { callbacks: { label: ctx => `₦${ctx.raw.toFixed(2)} increase per month` } };
+    options.plugins.annotation.annotations = {
+        proteinZone: {
+            type: 'box', yMin: -0.5, yMax: 4.5,
+            backgroundColor: COLORS.orange + '0D',
+            borderColor: COLORS.orange + '30',
+            borderWidth: 1,
+            label: {
+                display: true, content: 'Protein items',
+                position: { x: 'end', y: 'start' },
+                color: COLORS.orange, font: { size: 10, weight: '600' },
+                backgroundColor: 'transparent',
             }
         }
-    });
+    };
+    options.scales = {
+        x: {
+            grid: { color: COLORS.grid },
+            ticks: { callback: v => '₦' + v, color: COLORS.gridText },
+            title: { display: true, text: 'Monthly Price Increase (₦)', color: COLORS.gridText },
+        },
+        y: { grid: { display: false }, ticks: { color: COLORS.ink, font: { size: 11 } } },
+    };
 
-    // High vol bars
-    const highVol = volatilityData.filter(d => d.cv >= 95).sort((a,b) => b.cv - a.cv);
-    const highContainer = document.getElementById('highVolBars');
-    highVol.forEach(d => {
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        row.innerHTML = `
-            <div class="bar-label-row"><span class="bar-label">${d.item}</span><span class="bar-value">${d.cv}%</span></div>
-            <div class="bar-track"><div class="bar-fill" data-width="${(d.cv / 182 * 100)}" style="background: linear-gradient(90deg, ${COLORS.orange}, ${COLORS.brown});"></div></div>
-        `;
-        highContainer.appendChild(row);
-    });
-
-    const lowVol = volatilityData.filter(d => d.cv < 65).sort((a,b) => a.cv - b.cv);
-    const lowContainer = document.getElementById('lowVolBars');
-    lowVol.forEach(d => {
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        row.innerHTML = `
-            <div class="bar-label-row"><span class="bar-label">${d.item}</span><span class="bar-value">${d.cv}%</span></div>
-            <div class="bar-track"><div class="bar-fill" data-width="${(d.cv / 65 * 100)}" style="background: linear-gradient(90deg, ${COLORS.teal}, ${COLORS.tealLight});"></div></div>
-        `;
-        lowContainer.appendChild(row);
-    });
-});
-
-// ── 6. Monthly Climb Chart ──
-lazyChart('monthlyClimbChart', function() {
-    new Chart(document.getElementById('monthlyClimbChart'), {
+    return {
+        eyebrow: 'Part 04',
+        title: 'Who\'s Climbing Fastest?',
+        desc: 'Absolute price increase per month (₦). Proteins post the steepest naira climbs.',
+        note: 'Detrended, the whole seasonal swing is 3.6 points — and it peaks in June, not December.',
         type: 'bar',
         data: {
             labels: monthlyClimbData.map(d => d.item),
             datasets: [{
+                label: '₦ per month',
                 data: monthlyClimbData.map(d => d.slope),
-                backgroundColor: monthlyClimbData.map((d, i) => {
-                    const t = i / (monthlyClimbData.length - 1);
-                    return i < 5 ? COLORS.orange + 'CC' : i < 10 ? COLORS.orangeLight + 'AA' : COLORS.tealLight + '77';
-                }),
+                backgroundColor: monthlyClimbData.map((d, i) =>
+                    i < 5 ? COLORS.orange + 'CC' : i < 10 ? COLORS.orangeLight + 'AA' : COLORS.tealLight + '77'),
                 borderRadius: 6,
-                barThickness: 24,
+                maxBarThickness: 24,
             }]
         },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `₦${ctx.raw.toFixed(2)} increase per month`
-                    }
-                },
-                annotation: {
-                    annotations: {
-                        proteinZone: {
-                            type: 'box',
-                            yMin: -0.5,
-                            yMax: 4.5,
-                            backgroundColor: COLORS.orange + '0D',
-                            borderColor: COLORS.orange + '30',
-                            borderWidth: 1,
-                            label: {
-                                display: true,
-                                content: 'Protein items',
-                                position: { x: 'end', y: 'start' },
-                                color: COLORS.orange,
-                                font: { size: 10, weight: '600' },
-                                backgroundColor: 'transparent',
-                            }
-                        }
-                    }
-                }
+        options,
+    };
+}
+
+// ── Beat 5 · Forecast ──
+function beatForecast() {
+    const name = forecastTS[controls.forecastItem] ? controls.forecastItem : Object.keys(forecastTS)[0];
+    const d = forecastTS[name];
+    const showProphet = controls.forecastModels !== 'lgb';
+    const showLgb = controls.forecastModels !== 'prophet';
+
+    const datasets = [];
+    if (showProphet) {
+        // The band is drawn as an upper series filling down to the next dataset,
+        // so these two have to stay adjacent and in this order.
+        datasets.push(
+            {
+                label: 'Prophet 80% Upper', data: d.upper,
+                borderColor: 'transparent', backgroundColor: 'rgba(45, 106, 106, 0.10)',
+                fill: '+1', pointRadius: 0, order: 3,
             },
-            scales: {
-                x: {
-                    grid: { color: COLORS.grid },
-                    ticks: { callback: v => '₦' + v, color: COLORS.gridText },
-                    title: { display: true, text: 'Monthly Price Increase (₦)', color: COLORS.gridText }
-                },
-                y: {
-                    grid: { display: false },
-                    ticks: { color: COLORS.ink, font: { size: 11 } }
-                }
-            }
-        }
-    });
-});
-
-// ── 7. Model Accuracy Comparison ──
-lazyChart('modelAccuracyChart', function() {
-    const sorted = [...forecastEval].sort((a,b) => a.mape_l - b.mape_l);
-    let chart = new Chart(document.getElementById('modelAccuracyChart'), {
-        type: 'bar',
-        data: {
-            labels: sorted.map(d => d.item),
-            datasets: [
-                {
-                    label: 'LightGBM MAPE',
-                    data: sorted.map(d => d.mape_l),
-                    backgroundColor: COLORS.orange + 'CC',
-                    borderRadius: 3,
-                    barPercentage: 0.7,
-                },
-                {
-                    label: 'Prophet MAPE',
-                    data: sorted.map(d => d.mape_p),
-                    backgroundColor: COLORS.teal + 'CC',
-                    borderRadius: 3,
-                    barPercentage: 0.7,
-                }
-            ]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { color: COLORS.ink, usePointStyle: true, pointStyle: 'rectRounded', padding: 16 }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
-                    }
-                },
-                annotation: {
-                    annotations: {
-                        goodLine: {
-                            type: 'line',
-                            xMin: 10,
-                            xMax: 10,
-                            borderColor: COLORS.teal + '77',
-                            borderWidth: 1,
-                            borderDash: [4, 3],
-                            label: {
-                                display: true,
-                                content: '10% MAPE',
-                                position: 'start',
-                                color: COLORS.teal,
-                                font: { size: 10 },
-                                backgroundColor: 'transparent',
-                            }
-                        }
-                    }
-                }
+            {
+                label: 'Prophet 80% Lower', data: d.lower,
+                borderColor: 'transparent', backgroundColor: 'transparent',
+                fill: false, pointRadius: 0, order: 3,
             },
-            scales: {
-                x: {
-                    grid: { color: COLORS.grid },
-                    ticks: { callback: v => v + '%', color: COLORS.gridText },
-                    title: { display: true, text: 'Mean Absolute Percentage Error (%)', color: COLORS.gridText }
-                },
-                y: {
-                    grid: { display: false },
-                    ticks: { color: COLORS.ink, font: { size: 9 } }
-                }
+            {
+                label: 'Prophet Forecast', data: d.prophet,
+                borderColor: COLORS.teal, backgroundColor: 'transparent',
+                borderWidth: 2, borderDash: [6, 3], pointRadius: 2,
+                pointBackgroundColor: COLORS.teal, tension: 0.3, order: 2,
             }
-        }
-    });
-
-    // Controls
-    document.getElementById('forecastModelControls').addEventListener('click', e => {
-        const btn = e.target.closest('button');
-        if (!btn) return;
-        document.querySelectorAll('#forecastModelControls button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const show = btn.dataset.show;
-        chart.data.datasets[0].hidden = show === 'prophet';
-        chart.data.datasets[1].hidden = show === 'lgb';
-        chart.update();
-    });
-});
-
-// ── 8. Interactive Forecast Line Chart ──
-lazyChart('forecastLineChart', function() {
-    const container = document.getElementById('forecastItemBtns');
-    const items = Object.keys(forecastTS);
-    items.forEach((item, i) => {
-        const btn = document.createElement('button');
-        btn.textContent = item;
-        btn.dataset.item = item;
-        if (i === 0) btn.classList.add('active');
-        container.appendChild(btn);
-    });
-
-    let chart = null;
-    function renderForecast(itemName) {
-        const d = forecastTS[itemName];
-        if (!d) return;
-        if (chart) chart.destroy();
-
-        chart = new Chart(document.getElementById('forecastLineChart'), {
-            type: 'line',
-            data: {
-                labels: d.dates,
-                datasets: [
-                    {
-                        label: 'Prophet 80% Upper',
-                        data: d.upper,
-                        borderColor: 'transparent',
-                        backgroundColor: 'rgba(45, 106, 106, 0.10)',
-                        fill: '+1',
-                        pointRadius: 0,
-                        order: 3,
-                    },
-                    {
-                        label: 'Prophet 80% Lower',
-                        data: d.lower,
-                        borderColor: 'transparent',
-                        backgroundColor: 'transparent',
-                        fill: false,
-                        pointRadius: 0,
-                        order: 3,
-                    },
-                    {
-                        label: 'Prophet Forecast',
-                        data: d.prophet,
-                        borderColor: COLORS.teal,
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        borderDash: [6, 3],
-                        pointRadius: 2,
-                        pointBackgroundColor: COLORS.teal,
-                        tension: 0.3,
-                        order: 2,
-                    },
-                    {
-                        label: 'LightGBM Forecast',
-                        data: d.lgb,
-                        borderColor: COLORS.orange,
-                        backgroundColor: 'transparent',
-                        borderWidth: 3,
-                        pointRadius: 3,
-                        pointBackgroundColor: COLORS.orange,
-                        tension: 0.3,
-                        order: 1,
-                    },
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            color: COLORS.ink,
-                            usePointStyle: true,
-                            filter: (item) => !item.text.includes('80%'),
-                            padding: 16,
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => {
-                                if (ctx.dataset.label.includes('80%')) return null;
-                                return `${ctx.dataset.label}: ₦${ctx.raw.toLocaleString()}`;
-                            }
-                        }
-                    },
-                    annotation: {
-                        annotations: {
-                            yearLine: {
-                                type: 'line',
-                                xMin: 11.5,
-                                xMax: 11.5,
-                                borderColor: COLORS.orange + '55',
-                                borderWidth: 1,
-                                borderDash: [5, 3],
-                                label: {
-                                    display: true,
-                                    content: '2026 →',
-                                    position: 'start',
-                                    color: COLORS.orange,
-                                    font: { size: 10, weight: '600' },
-                                    backgroundColor: 'transparent',
-                                }
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: COLORS.grid },
-                        ticks: { color: COLORS.gridText, maxRotation: 45 }
-                    },
-                    y: {
-                        grid: { color: COLORS.grid },
-                        ticks: { callback: v => '₦' + v.toLocaleString(), color: COLORS.gridText }
-                    }
-                }
-            }
+        );
+    }
+    if (showLgb) {
+        datasets.push({
+            label: 'LightGBM Forecast', data: d.lgb,
+            borderColor: COLORS.orange, backgroundColor: 'transparent',
+            borderWidth: 3, pointRadius: 3,
+            pointBackgroundColor: COLORS.orange, tension: 0.3, order: 1,
         });
     }
 
-    container.addEventListener('click', e => {
+    const options = baseOptions();
+    options.indexAxis = 'x';
+    options.interaction = { mode: 'index', intersect: false };
+    options.plugins.legend = {
+        display: true, position: 'top',
+        labels: {
+            color: COLORS.ink, usePointStyle: true, padding: 14,
+            filter: item => !item.text.includes('80%'),
+        }
+    };
+    options.plugins.tooltip = {
+        callbacks: {
+            label: ctx => ctx.dataset.label.includes('80%') ? null : `${ctx.dataset.label}: ${naira(ctx.raw)}`,
+        }
+    };
+    options.plugins.annotation.annotations = {
+        yearLine: {
+            type: 'line', xMin: 11.5, xMax: 11.5,
+            borderColor: COLORS.orange + '55', borderWidth: 1, borderDash: [5, 3],
+            label: {
+                display: true, content: '2026 →', position: 'start',
+                color: COLORS.orange, font: { size: 10, weight: '600' },
+                backgroundColor: 'transparent',
+            }
+        }
+    };
+    options.scales = {
+        x: { grid: { color: COLORS.grid }, ticks: { color: COLORS.gridText, maxRotation: 45, autoSkipPadding: 12 } },
+        y: { grid: { color: COLORS.grid }, ticks: nairaAxis },
+    };
+
+    // Quote whichever model is actually on screen.
+    const lead = showLgb ? { label: 'LightGBM', series: d.lgb } : { label: 'Prophet', series: d.prophet };
+    return {
+        eyebrow: 'Part 05',
+        title: `${name} — Forecast to Dec 2026`,
+        desc: 'LightGBM (solid amber) against Prophet (dashed teal) with its 80% confidence band.',
+        note: `${lead.label}: ${naira(lead.series[0])} in Jan 2025 → ${naira(lead.series[lead.series.length - 1])} by Dec 2026.`,
+        type: 'line',
+        data: { labels: d.dates, datasets },
+        options,
+    };
+}
+
+// ── Beat 6 · Takeaways ──
+function beatMovers() {
+    const sorted = [...forecastMovers].sort((a, b) => b.change - a.change);
+
+    const options = baseOptions();
+    options.indexAxis = 'y';
+    options.plugins.tooltip = {
+        callbacks: {
+            label: ctx => {
+                const d = sorted[ctx.dataIndex];
+                return [`${naira(d.p2024)} → ${naira(d.f2026)}`, `${d.change >= 0 ? '+' : ''}${d.change.toFixed(1)}% by 2026`];
+            }
+        }
+    };
+    options.plugins.annotation.annotations = {
+        zero: {
+            type: 'line', xMin: 0, xMax: 0,
+            borderColor: 'rgba(26, 46, 56, 0.45)', borderWidth: 1,
+        }
+    };
+    options.scales = {
+        x: {
+            grid: { color: COLORS.grid },
+            ticks: { callback: v => v + '%', color: COLORS.gridText },
+            title: { display: true, text: 'Expected change, 2024 → 2026 (%)', color: COLORS.gridText },
+        },
+        y: { grid: { display: false }, ticks: { color: COLORS.ink, font: { size: 10 } } },
+    };
+
+    return {
+        eyebrow: 'Part 06',
+        title: 'What 2026 Costs You',
+        desc: 'LightGBM\'s expected change from 2024 to 2026 for the biggest movers.',
+        note: 'Eggs and cooking oils are becoming luxuries. Tomato is the lone reprieve.',
+        type: 'bar',
+        data: {
+            labels: sorted.map(d => d.item),
+            datasets: [{
+                label: 'Change to 2026',
+                data: sorted.map(d => Number(d.change.toFixed(1))),
+                backgroundColor: sorted.map(d => (d.change >= 0 ? COLORS.orange : COLORS.teal) + 'CC'),
+                borderRadius: 5,
+                maxBarThickness: 26,
+            }]
+        },
+        options,
+    };
+}
+
+const BEATS = [beatInflation, beatGeography, beatVolatility, beatSeasonal, beatForecast, beatMovers];
+
+const figureEls = {
+    eyebrow: document.getElementById('figureEyebrow'),
+    title: document.getElementById('figureTitle'),
+    desc: document.getElementById('figureDesc'),
+    note: document.getElementById('figureNote'),
+};
+
+let storyChart = null;
+let activeBeat = -1;
+
+function drawBeat(index) {
+    const build = BEATS[index];
+    if (!build) return;
+    activeBeat = index;
+
+    const spec = build();
+    figureEls.eyebrow.textContent = spec.eyebrow;
+    figureEls.title.textContent = spec.title;
+    figureEls.desc.textContent = spec.desc;
+    figureEls.note.textContent = spec.note || '';
+
+    if (!storyChart) {
+        storyChart = new Chart(document.getElementById('storyChart'), {
+            type: spec.type,
+            data: spec.data,
+            options: spec.options,
+        });
+        return;
+    }
+
+    // One instance carries all six beats. On update() Chart.js rebuilds any
+    // dataset controller whose type changed and replaces any scale whose type
+    // changed, so a horizontal bar can become a bubble chart in place — no
+    // destroy/recreate, no canvas flash between steps.
+    storyChart.config.type = spec.type;
+    storyChart.data = spec.data;
+    storyChart.options = spec.options;
+    storyChart.update();
+}
+
+// ── In-step controls ──
+// Each writes to `controls` and redraws its own beat, so the pinned chart stays
+// the single place the story is told.
+(function wireGeoSelect() {
+    const select = document.getElementById('geoItemSelect');
+    select.innerHTML = `<option value="${GEO_OVERVIEW}">Top 10 widest gaps (overview)</option>`
+        + fullGeoData.map(d => `<option value="${d.item}">${d.item} (${d.spread}% spread)</option>`).join('');
+    select.addEventListener('change', () => {
+        controls.geoItem = select.value;
+        drawBeat(1);
+    });
+})();
+
+(function wireForecastControls() {
+    const itemBtns = document.getElementById('forecastItemBtns');
+    const items = Object.keys(forecastTS);
+    controls.forecastItem = items.includes(controls.forecastItem) ? controls.forecastItem : items[0];
+    itemBtns.innerHTML = items
+        .map(item => `<button data-item="${item}"${item === controls.forecastItem ? ' class="active"' : ''}>${item}</button>`)
+        .join('');
+
+    itemBtns.addEventListener('click', e => {
         const btn = e.target.closest('button');
         if (!btn) return;
-        container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        itemBtns.querySelectorAll('button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        renderForecast(btn.dataset.item);
+        controls.forecastItem = btn.dataset.item;
+        drawBeat(4);
     });
 
-    renderForecast(items[0]);
-});
+    const modelBtns = document.getElementById('forecastModelControls');
+    modelBtns.addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        modelBtns.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        controls.forecastModels = btn.dataset.show;
+        drawBeat(4);
+    });
+})();
+
+// ── Scroll driver ──
+function initScrolly() {
+    const steps = Array.from(document.querySelectorAll('.scroll-step'));
+
+    drawBeat(0);
+
+    const activate = index => {
+        if (index < 0 || index >= steps.length) return;
+        steps.forEach((step, i) => step.classList.toggle('is-active', i === index));
+        if (index !== activeBeat) drawBeat(index);
+    };
+
+    if (typeof scrollama === 'function') {
+        const scroller = scrollama();
+        scroller.setup({ step: '.scroll-step', offset: 0.55 })
+                .onStepEnter(({ index }) => activate(index));
+        window.addEventListener('resize', () => scroller.resize(), { passive: true });
+    } else if ('IntersectionObserver' in window) {
+        // Scrollama's CDN is blocked or failed; a band across the middle of the
+        // viewport gives the same behaviour with a coarser trigger point.
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) activate(steps.indexOf(entry.target));
+            });
+        }, { rootMargin: '-45% 0px -45% 0px' });
+        steps.forEach(step => io.observe(step));
+    }
+}
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SCROLL ANIMATIONS
@@ -2036,13 +2242,19 @@ document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 // Reading offsetTop inside the scroll handler forced a synchronous layout on
 // every scroll event. Offsets are cached and the work is coalesced into one
 // rAF callback per frame instead.
-const sections = document.querySelectorAll('.section, .hero');
+const sections = document.querySelectorAll('.hero, .scroll-step, .section');
 const navLinks = document.querySelectorAll('.nav-links a');
 let sectionOffsets = [];
 let navTicking = false;
 
+// Only track sections a nav link points at, so scrolling into an untargeted
+// one (the recommendations playbook) doesn't clear the whole nav.
+const navTargets = new Set(Array.from(navLinks).map(a => a.getAttribute('href').slice(1)));
+
 function measureSections() {
-    sectionOffsets = Array.from(sections).map(sec => ({ id: sec.id, top: sec.offsetTop - 100 }));
+    sectionOffsets = Array.from(sections)
+        .filter(sec => navTargets.has(sec.id))
+        .map(sec => ({ id: sec.id, top: sec.offsetTop - 100 }));
 }
 
 const progressBar = document.getElementById('progress-bar');
@@ -2095,12 +2307,328 @@ document.querySelectorAll('[data-count]').forEach(counterEl => {
     }, 25);
 });
 
+// ══ Part 04 · The seasonal spiral ══
+//
+// Built as raw SVG rather than through Chart.js, which has no polar line type,
+// and without pulling in D3 — the whole figure is one polar transform and a
+// log radius, about forty lines, and this page already carries Chart.js, two
+// of its plugins and Scrollama. Swapping in d3-shape later would be a local
+// change to buildSpiral().
+
+const spiralData = {
+    startYear: 2016,
+    // Composite price level: every item rebased to its own 2016 mean = 100,
+    // then averaged. One value per month, Jan 2016 first, 108 in all.
+    composite: [
+        86.6, 88.8, 90.6, 94.4, 97.0, 100.3, 102.3, 102.7, 106.4, 109.4, 110.2, 111.1,
+        114.0, 116.3, 118.8, 120.4, 124.2, 126.6, 126.5, 125.8, 122.5, 120.6, 118.9, 118.3,
+        120.8, 121.2, 120.8, 121.3, 124.2, 125.3, 123.7, 124.4, 124.2, 120.8, 121.3, 117.7,
+        124.6, 123.4, 121.9, 124.0, 123.2, 119.1, 116.7, 118.3, 119.2, 119.9, 124.6, 125.5,
+        123.2, 122.3, 123.3, 128.3, 128.2, 132.0, 134.1, 134.3, 135.7, 138.1, 140.5, 140.4,
+        140.9, 142.1, 143.8, 145.4, 149.9, 159.1, 162.5, 164.0, 164.8, 165.9, 171.2, 173.5,
+        176.3, 180.5, 184.3, 186.9, 189.6, 194.2, 196.9, 197.0, 201.4, 205.2, 210.8, 214.8,
+        215.2, 217.4, 220.5, 224.3, 228.5, 243.4, 260.6, 271.7, 275.7, 299.2, 325.4, 345.4,
+        368.5, 412.3, 440.9, 471.8, 522.3, 585.9, 589.6, 596.2, 618.4, 635.6, 663.5, 670.8,
+    ],
+    // Detrended seasonal index by calendar month (price / 13-term centred
+    // moving average), renormalised so the year averages 100.
+    seasonal: [99.19, 99.40, 99.29, 99.83, 100.61, 102.45, 101.13, 100.40, 99.60, 99.28, 99.93, 98.88],
+};
+
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+const el = (name, attrs = {}) => {
+    const node = document.createElementNS(SVG_NS, name);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+};
+
+/** Polar to cartesian, with January at twelve o'clock and the year running clockwise. */
+function polar(cx, cy, radius, monthIndex) {
+    const angle = (monthIndex / 12) * Math.PI * 2 - Math.PI / 2;
+    return [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
+}
+
+/** Mix two '#rrggbb' colours; t runs 0 to 1. */
+function mixHex(a, b, t) {
+    const parse = (h) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+    const [r1, g1, b1] = parse(a), [r2, g2, b2] = parse(b);
+    const ch = (x, y) => Math.round(x + (y - x) * t);
+    return `rgb(${ch(r1, r2)},${ch(g1, g2)},${ch(b1, b2)})`;
+}
+
+function buildSpiral() {
+    const host = document.getElementById('spiralFigure');
+    if (!host) return;
+
+    const values = spiralData.composite;
+    const SIZE = 560, CX = SIZE / 2, CY = SIZE / 2;
+    const R_MIN = 46, R_MAX = 232;
+
+    // A log radius, because the composite grows roughly exponentially. On a
+    // linear scale the first seven years collapse into a knot at the centre
+    // and only the 2023-24 blow-out is legible; on a log scale each doubling
+    // is the same step outward, so every year gets room and the shape of the
+    // coil — which is the point — stays readable.
+    const lo = Math.log(80), hi = Math.log(760);
+    const radiusFor = (v) => R_MIN + ((Math.log(v) - lo) / (hi - lo)) * (R_MAX - R_MIN);
+
+    const svg = el('svg', {
+        viewBox: `0 0 ${SIZE} ${SIZE}`,
+        role: 'img',
+        'aria-label': 'Spiral chart. Nine loops, one per year from 2016 to 2024, '
+            + 'winding outward as prices rise. Distance from the centre is the composite '
+            + 'price level; angle is the month, January at the top. The coil stays almost '
+            + 'perfectly round, showing that the seasonal variation is very small next to the trend.',
+    });
+
+    // ── Rings, one per doubling of the price level ──
+    for (const level of [100, 200, 400]) {
+        const r = radiusFor(level);
+        svg.appendChild(el('circle', { cx: CX, cy: CY, r, class: 'spiral-axis', 'stroke-dasharray': '2 4' }));
+        // Anchored left of vertical: the January spoke and its label own the
+        // twelve o'clock line, and a ring label centred there collides with both.
+        const label = el('text', {
+            x: CX - 7, y: CY - r - 3, class: 'spiral-ring-label', 'text-anchor': 'end',
+        });
+        label.textContent = String(level);
+        svg.appendChild(label);
+    }
+
+    // ── Month spokes ──
+    for (let m = 0; m < 12; m++) {
+        const [x1, y1] = polar(CX, CY, R_MIN - 8, m);
+        const [x2, y2] = polar(CX, CY, R_MAX + 10, m);
+        const isPeak = m === 5;      // June, the detrended seasonal peak
+        svg.appendChild(el('line', {
+            x1, y1, x2, y2,
+            stroke: isPeak ? 'rgba(242, 140, 0, 0.45)' : 'rgba(189, 205, 210, 0.55)',
+            'stroke-width': isPeak ? 1.5 : 1,
+        }));
+
+        const [lx, ly] = polar(CX, CY, R_MAX + 26, m);
+        const label = el('text', {
+            x: lx, y: ly,
+            class: 'spiral-month-label' + (isPeak ? ' is-peak' : ''),
+            'text-anchor': 'middle',
+            'dominant-baseline': 'middle',
+        });
+        label.textContent = MONTHS_SHORT[m];
+        svg.appendChild(label);
+    }
+
+    // ── The spiral itself ──
+    // One short path per month rather than a single polyline, so the stroke can
+    // carry time as a continuous light-to-dark ramp. 107 nodes is nothing to
+    // the DOM and it means the reader can see which way the coil is winding.
+    const segments = [];
+    const point = (i) => polar(CX, CY, radiusFor(values[i]), i % 12);
+
+    for (let i = 0; i < values.length - 1; i++) {
+        const [x1, y1] = point(i);
+        const [x2, y2] = point(i + 1);
+        const seg = el('path', {
+            d: `M${x1.toFixed(2)} ${y1.toFixed(2)} L${x2.toFixed(2)} ${y2.toFixed(2)}`,
+            class: 'spiral-seg',
+            stroke: mixHex('#5FB0AB', '#0F4341', i / (values.length - 2)),
+            'stroke-width': 2.4,
+        });
+        segments.push(seg);
+        svg.appendChild(seg);
+    }
+
+    // Where the coil begins, so the direction of travel is obvious even before
+    // the draw animation runs.
+    const [sx, sy] = point(0);
+    svg.appendChild(el('circle', { cx: sx, cy: sy, r: 3.5, fill: '#5FB0AB', stroke: '#fff', 'stroke-width': 1.5 }));
+    const startLabel = el('text', {
+        x: sx - 8, y: sy + 2, class: 'spiral-ring-label', 'text-anchor': 'end', 'font-weight': '700',
+    });
+    startLabel.textContent = 'Jan 2016';
+    svg.appendChild(startLabel);
+
+    const head = el('circle', { r: 4.5, fill: '#F28C00', stroke: '#fff', 'stroke-width': 1.5 });
+    svg.appendChild(head);
+
+    // ── The seasonal ring, beside it ──
+    const ringSvg = buildSeasonalRing();
+
+    const figure = document.createElement('div');
+    figure.className = 'spiral-wrap';
+    const left = document.createElement('div');
+    left.appendChild(svg);
+    left.insertAdjacentHTML('beforeend', `
+        <div class="spiral-controls">
+            <button type="button" id="spiralPlay">▶ Draw</button>
+            <label class="sr-only" for="spiralScrub">Month</label>
+            <input type="range" id="spiralScrub" min="1" max="${values.length}" value="${values.length}" step="1">
+            <span class="spiral-readout" id="spiralReadout"></span>
+        </div>
+        <p class="spiral-caption">
+            Radius is on a log scale — each dashed ring is a doubling — so every year gets equal room.
+            A perfectly seasonless economy would trace a smooth widening coil. This one very nearly does.
+        </p>`);
+
+    const right = document.createElement('div');
+    right.className = 'spiral-ring-holder';
+    right.appendChild(ringSvg);
+    right.insertAdjacentHTML('beforeend', `
+        <p class="spiral-caption">
+            The same data with the climb divided out: price against the twelve-month average running
+            through it, averaged by calendar month. The dashed circle is 100 — an ordinary month. The
+            whole ring spans 98.5 to 103, so June's peak is worth about 2.5%, not the 20% the raw
+            calendar suggests.
+        </p>`);
+
+    figure.appendChild(left);
+    figure.appendChild(right);
+    host.appendChild(figure);
+
+    // ── Playback ──
+    const scrub = document.getElementById('spiralScrub');
+    const readout = document.getElementById('spiralReadout');
+    const playBtn = document.getElementById('spiralPlay');
+    let timer = null;
+
+    function show(count) {
+        segments.forEach((seg, i) => { seg.style.opacity = i < count - 1 ? '1' : '0'; });
+        const i = Math.max(0, count - 1);
+        const [hx, hy] = point(i);
+        head.setAttribute('cx', hx);
+        head.setAttribute('cy', hy);
+        const year = spiralData.startYear + Math.floor(i / 12);
+        readout.innerHTML = `${MONTHS_SHORT[i % 12]} ${year} · <b>${values[i].toFixed(0)}</b>`;
+        scrub.value = String(count);
+    }
+
+    function stop() {
+        clearInterval(timer);
+        timer = null;
+        playBtn.textContent = '▶ Draw';
+    }
+
+    playBtn.addEventListener('click', () => {
+        if (timer) { stop(); return; }
+        let n = Number(scrub.value) >= values.length ? 1 : Number(scrub.value);
+        playBtn.textContent = '❚❚ Pause';
+        timer = setInterval(() => {
+            n++;
+            show(n);
+            if (n >= values.length) stop();
+        }, 45);
+    });
+
+    scrub.addEventListener('input', () => { stop(); show(Number(scrub.value)); });
+
+    show(values.length);
+
+    // Draw itself once, the first time the section is scrolled to — the coil
+    // winding outward is the argument, and a static picture of it is not.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (!e.isIntersecting) return;
+                io.disconnect();
+                show(1);
+                playBtn.click();
+            });
+        }, { threshold: 0.35 });
+        io.observe(host);
+    }
+}
+
+/** Small radial chart of the detrended seasonal index, 12 months around a 100 baseline. */
+function buildSeasonalRing() {
+    const values = spiralData.seasonal;
+    const SIZE = 400, CX = SIZE / 2, CY = SIZE / 2;
+    const R_MIN = 58, R_MAX = 150;
+
+    // The band is deliberately narrow and stated on the axis: this is a 4.5
+    // point spread blown up to fill a ring, and a reader who is not told that
+    // would read it as a huge seasonal swing.
+    const lo = 98.5, hi = 103;
+    const radiusFor = (v) => R_MIN + ((v - lo) / (hi - lo)) * (R_MAX - R_MIN);
+
+    const svg = el('svg', {
+        viewBox: `0 0 ${SIZE} ${SIZE}`,
+        role: 'img',
+        'aria-label': 'Radial chart of the detrended seasonal index by calendar month. '
+            + 'June is highest at 102.5 and December lowest at 98.9, against a baseline of 100. '
+            + 'The full range shown is 98.5 to 103.',
+    });
+
+    for (const level of [99, 100, 101, 102, 103]) {
+        const r = radiusFor(level);
+        const isBase = level === 100;
+        svg.appendChild(el('circle', {
+            cx: CX, cy: CY, r,
+            fill: 'none',
+            stroke: isBase ? 'rgba(110, 128, 136, 0.9)' : 'rgba(189, 205, 210, 0.6)',
+            'stroke-width': isBase ? 1.4 : 1,
+            'stroke-dasharray': isBase ? '4 3' : '2 5',
+        }));
+        // Rings sit about 20px apart here, so labelling all five up the twelve
+        // o'clock line stacks them into each other. Only the odd values are
+        // labelled, and left of vertical to clear the January spoke.
+        if (level % 2 !== 0) {
+            const t = el('text', {
+                x: CX - 7, y: CY - r - 2, class: 'spiral-ring-label', 'text-anchor': 'end',
+            });
+            t.textContent = String(level);
+            svg.appendChild(t);
+        }
+    }
+
+    // Closed loop through the twelve months.
+    const pts = values.map((v, m) => polar(CX, CY, radiusFor(v), m));
+    const d = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join(' ') + ' Z';
+    svg.appendChild(el('path', { d, fill: 'rgba(45, 106, 106, 0.13)', stroke: '#2D6A6A', 'stroke-width': 2.2 }));
+
+    values.forEach((v, m) => {
+        const [x, y] = pts[m];
+        const isPeak = v === Math.max(...values);
+        const isTrough = v === Math.min(...values);
+        svg.appendChild(el('circle', {
+            cx: x, cy: y, r: isPeak || isTrough ? 5.5 : 3.5,
+            fill: isPeak ? '#F28C00' : isTrough ? '#2D6A6A' : '#5BAAAA',
+            stroke: '#fff', 'stroke-width': 1.4,
+        }));
+
+        const [lx, ly] = polar(CX, CY, R_MAX + 26, m);
+        const label = el('text', {
+            x: lx, y: ly,
+            class: 'spiral-month-label' + (isPeak ? ' is-peak' : ''),
+            'text-anchor': 'middle', 'dominant-baseline': 'middle',
+        });
+        label.textContent = MONTHS_SHORT[m];
+        svg.appendChild(label);
+
+        if (isPeak || isTrough) {
+            const [vx, vy] = polar(CX, CY, radiusFor(v) + (isPeak ? 20 : -20), m);
+            const val = el('text', {
+                x: vx, y: vy,
+                class: 'spiral-ring-label',
+                'text-anchor': 'middle', 'dominant-baseline': 'middle',
+                fill: isPeak ? '#F28C00' : '#2D6A6A',
+                'font-weight': '700',
+            });
+            val.textContent = v.toFixed(1);
+            svg.appendChild(val);
+        }
+    });
+
+    return svg;
+}
+
 // ── Bootstrap ──
-// Chart.js and its plugins are deferred, so they are only guaranteed present
-// once DOMContentLoaded fires.
+// Chart.js, its plugins and Scrollama are all deferred, so they are only
+// guaranteed present once DOMContentLoaded fires.
 document.addEventListener('DOMContentLoaded', () => {
     applyChartDefaults();
-    startLazyCharts();
+    initScrolly();
+    buildSpiral();
     measureSections();
 });
 </script>
